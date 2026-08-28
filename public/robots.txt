@@ -1,0 +1,11 @@
+# Toplantı Merkezi (www.toplantimerkezi.com.tr)
+# Türkiye Geneli Kurumsal Organizasyon & Toplantı Yönetim Platformu
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+
+# Host & Sitemap
+Host: https://www.toplantimerkezi.com.tr
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap.xml

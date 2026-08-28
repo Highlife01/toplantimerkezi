@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-pages.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-services.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-cities.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-locations.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-venues.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-projects.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.toplantimerkezi.com.tr/sitemap-blog.xml</loc>
+    <lastmod>2026-08-29</lastmod>
+  </sitemap>
+</sitemapindex>
