@@ -6,13 +6,15 @@ Bu belge, **Toplantı Merkezi** ([www.toplantimerkezi.com.tr](https://www.toplan
 
 ## 📌 1. Proje Özeti & Temel Kurallar
 
-- **Marka**: Toplantı Merkezi
+- **Marka**: Toplantı Merkezi (KESİNLİKLE başka proje veya marka isimleriyle karıştırılamaz)
 - **Domain**: [https://www.toplantimerkezi.com.tr](https://www.toplantimerkezi.com.tr)
+- **Firebase Hosting**: [https://toplantimerkezi.web.app](https://toplantimerkezi.web.app) (Site / Target: `toplantimerkezi`)
+- **GitHub Repository**: [https://github.com/Highlife01/toplantimerkezi](https://github.com/Highlife01/toplantimerkezi)
 - **Slogan**: *Türkiye'nin Her Yerinde, Tek Merkezden Organizasyon.*
 - **Alt Slogan**: *Toplantıdan organizasyona, tüm süreç tek merkezden.*
 - **Faaliyet Alanı**: Yalnızca **B2B ve kurumsal organizasyonlar** (Holdingler, büyük/orta ölçekli şirketler, kamu kurumları, belediyeler, odalar, bankalar, otomotiv, sanayi vb.). Bireysel tüketici etkinlikleri (düğün, kına vb.) kesinlikle yapılmaz.
 - **Kısıtlama / Kalite Kuralı**: Asla sahte referans, sahte müşteri yorumu, sahte ödül veya thin content üretilmez. Bütün veriler gerçek kurumsal operasyon mantığına uygun olmalıdır.
-- **Çalışma Dizini**: Yalnızca `d:\web_siteleri\toplantimerkezi` klasörü içerisinde çalışılır.
+- **Çalışma Dizini & İzolasyon**: Yalnızca `d:\web_siteleri\toplantimerkezi` klasörü içerisinde çalışılır. Başka projelerin isimleri, hosting hedefleri veya bağlantıları bu depoya asla dahil edilemez.
 
 ---
 
