@@ -9,6 +9,8 @@ import WhyUsSection from '../components/home/WhyUsSection';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import ProjectsShowcase from '../components/home/ProjectsShowcase';
 import BlogPreview from '../components/home/BlogPreview';
+import DestinationCompareSection from '../components/home/DestinationCompareSection';
+import BudgetCalculatorSection from '../components/home/BudgetCalculatorSection';
 import { updatePageSeo } from '../services/seoService';
 
 export default function HomePage({ onOpenQuoteModal }) {
@@ -38,7 +40,9 @@ export default function HomePage({ onOpenQuoteModal }) {
       <ProcessSteps onOpenQuoteModal={onOpenQuoteModal} />
       <OrganizationGrid onOpenQuoteModal={onOpenQuoteModal} />
       <ServicesSlider />
+      <BudgetCalculatorSection onOpenQuoteModal={onOpenQuoteModal} />
       <TurkeyMapSection onOpenQuoteModal={onOpenQuoteModal} />
+      <DestinationCompareSection onOpenQuoteModal={onOpenQuoteModal} />
       <FeaturedVenues onOpenQuoteModal={onOpenQuoteModal} />
       <WhyUsSection onOpenQuoteModal={onOpenQuoteModal} />
       <UrgentEventBanner onOpenQuoteModal={onOpenQuoteModal} />

@@ -680,13 +680,31 @@ export default function AdminPage() {
                           </button>
 
                           <a
-                            href={`https://wa.me/${selectedLead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Sayın ${selectedLead.contactName}, ${selectedLead.company} adına talep ettiğiniz ${selectedLead.organizationType} organizasyonu fiyat teklifimiz hazırlanmıştır. Toplantı Merkezi`)}`}
+                            href={`https://wa.me/${selectedLead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Sayın ${selectedLead.contactName}, ${selectedLead.company} adına talep ettiğiniz ${selectedLead.organizationType} organizasyonu fiyat teklifimiz hazırlanmıştır. Toplantı Merkezi teklif takip kodunuz: ${selectedLead.id}. https://toplantimerkezi.web.app/teklif-takip?kod=${selectedLead.id}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2"
                           >
-                            <span>WhatsApp ile Müşteriye Bildir</span>
+                            <span>WhatsApp ile Müşteriye Takip Linki Gönder</span>
                           </a>
+
+                          <div className="pt-2">
+                            <span className="text-[11px] font-bold text-slate-700 block mb-1.5">Yerel Tedarikçi Satın Alma (RFQ):</span>
+                            <div className="space-y-1.5">
+                              {suppliers.slice(0, 3).map(sup => (
+                                <a
+                                  key={sup.id}
+                                  href={`https://wa.me/${sup.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Sayın ${sup.company}, Toplantı Merkezi adına ${selectedLead.city}'de ${selectedLead.targetDate || 'yakın tarihte'} planlanan ${selectedLead.attendees} kişilik ${selectedLead.organizationType} organizasyonu için ${sup.category} kapsamındaki fiyat ve müsaitlik teklifinizi rica ederiz.`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full p-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-[11px] font-semibold flex items-center justify-between border border-slate-300 transition"
+                                >
+                                  <span>{sup.company} ({sup.category})</span>
+                                  <span className="text-emerald-700 font-bold">RFQ Gönder →</span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
                         </div>
 
                       </div>

@@ -117,6 +117,7 @@ export default function Footer({ onOpenQuoteModal }) {
             </h4>
             <ul className="space-y-2">
               <li><Link to="/kurumsal" className="hover:text-amber-400 transition">Hakkımızda</Link></li>
+              <li><Link to="/teklif-takip" className="text-amber-300 font-bold hover:text-amber-200 transition">Teklif Durumu Sorgula</Link></li>
               <li><Link to="/mekanlar" className="hover:text-amber-400 transition">Toplantı Mekânları</Link></li>
               <li><Link to="/projeler" className="hover:text-amber-400 transition">Projelerimiz & Referanslar</Link></li>
               <li><Link to="/blog" className="hover:text-amber-400 transition">Rehber & Bilgi Merkezi</Link></li>

@@ -65,6 +65,13 @@ export default function Navbar({ onOpenQuoteModal }) {
               <MessageSquare size={13} />
               <span>WhatsApp Teklif</span>
             </a>
+            <Link 
+              to="/teklif-takip" 
+              className="flex items-center gap-1.5 text-amber-300 hover:text-amber-200 transition font-bold"
+            >
+              <CalendarCheck size={13} />
+              <span>Teklif Takip</span>
+            </Link>
             <span className="text-slate-700">|</span>
             <Link 
               to="/admin" 
@@ -267,7 +274,11 @@ export default function Navbar({ onOpenQuoteModal }) {
               <Link to="/iletisim" className="p-3 rounded-xl hover:bg-slate-50">
                 İletişim
               </Link>
-              <Link to="/admin" className="p-3 rounded-xl bg-slate-100 text-amber-700 flex items-center justify-between">
+              <Link to="/teklif-takip" className="p-3 rounded-xl bg-amber-50 text-amber-900 font-bold flex items-center justify-between border border-amber-200">
+                <span>Teklif & Talep Durumu Sorgula</span>
+                <CalendarCheck size={14} />
+              </Link>
+              <Link to="/admin" className="p-3 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-between">
                 <span>Yönetim / CRM Paneli</span>
                 <Lock size={14} />
               </Link>
