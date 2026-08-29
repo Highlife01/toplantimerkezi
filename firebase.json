@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "yonetimmerkezi",
+    "target": "toplantimerkezi",
     "public": "dist",
     "ignore": [
       "firebase.json",

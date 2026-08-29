@@ -5,8 +5,8 @@
   "targets": {
     "adanahizlisatis": {
       "hosting": {
-        "yonetimmerkezi": [
-          "yonetimmerkezi"
+        "toplantimerkezi": [
+          "toplantimerkezi"
         ]
       }
     }

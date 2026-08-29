@@ -106,7 +106,7 @@ npm run dev
 npm run build
 
 # Firebase Hosting Dağıtımı
-npx firebase deploy --only hosting:yonetimmerkezi
+npx firebase deploy --only hosting:toplantimerkezi
 
 # GitHub Güncelleme
 git add .
@@ -114,5 +114,5 @@ git commit -m "feat: updates"
 git push origin main
 ```
 
-- **Canlı Yayın**: [https://yonetimmerkezi.web.app](https://yonetimmerkezi.web.app)
+- **Canlı Yayın**: [https://toplantimerkezi.web.app](https://toplantimerkezi.web.app)
 - **GitHub Deposu**: [https://github.com/Highlife01/toplantimerkezi](https://github.com/Highlife01/toplantimerkezi)

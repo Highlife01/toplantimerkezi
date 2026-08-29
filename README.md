@@ -1,6 +1,6 @@
 # 🏛️ Toplantı Merkezi – Türkiye Geneli Kurumsal Organizasyon Platformu & CRM
 
-[![Live Demo](https://img.shields.io/badge/Canl%C4%B1%20Yay%C4%B1n-yonetimmerkezi.web.app-amber?style=for-the-badge&logo=firebase)](https://yonetimmerkezi.web.app)
+[![Live Demo](https://img.shields.io/badge/Canl%C4%B1%20Yay%C4%B1n-toplantimerkezi.web.app-amber?style=for-the-badge&logo=firebase)](https://toplantimerkezi.web.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Highlife01%2Ftoplantimerkezi-blue?style=for-the-badge&logo=github)](https://github.com/Highlife01/toplantimerkezi)
 [![React](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
@@ -158,7 +158,7 @@ npm run build
 
 5. **Firebase Hosting'e Canlıya Alın**:
 ```bash
-npx firebase deploy --only hosting:yonetimmerkezi
+npx firebase deploy --only hosting:toplantimerkezi
 ```
 
 ---
@@ -173,7 +173,7 @@ npx firebase deploy --only hosting:yonetimmerkezi
 
 - **Marka**: Toplantı Merkezi
 - **Web**: [www.toplantimerkezi.com.tr](https://www.toplantimerkezi.com.tr)
-- **Canlı Yayın**: [https://yonetimmerkezi.web.app](https://yonetimmerkezi.web.app)
+- **Canlı Yayın**: [https://toplantimerkezi.web.app](https://toplantimerkezi.web.app)
 - **Çağrı Merkezi**: 0850 308 74 20
 - **E-posta**: kurumsal@toplantimerkezi.com.tr
 
