@@ -241,7 +241,7 @@ export default function QuoteTrackingPage({ onOpenQuoteModal }) {
                       </button>
 
                       <a
-                        href="https://wa.me/908503087420"
+                        href="https://wa.me/905320550945?text=Merhaba%20Toplant%C4%B1%20Merkezi%2C%20teklif%20talebim%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum."
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5"
