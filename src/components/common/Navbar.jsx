@@ -208,20 +208,6 @@ export default function Navbar({ onOpenQuoteModal }) {
             >
               Kurumsal
             </Link>
-
-            <Link 
-              to="/blog" 
-              className={`px-3 py-2 rounded-lg hover:text-amber-600 transition ${location.pathname.startsWith('/blog') ? 'text-amber-600 font-bold' : ''}`}
-            >
-              Rehber & Blog
-            </Link>
-
-            <Link 
-              to="/iletisim" 
-              className={`px-3 py-2 rounded-lg hover:text-amber-600 transition ${location.pathname === '/iletisim' ? 'text-amber-600 font-bold' : ''}`}
-            >
-              İletişim
-            </Link>
           </div>
 
           {/* Right Action CTA */}
@@ -267,12 +253,6 @@ export default function Navbar({ onOpenQuoteModal }) {
               </Link>
               <Link to="/kurumsal" className="p-3 rounded-xl hover:bg-slate-50">
                 Kurumsal
-              </Link>
-              <Link to="/blog" className="p-3 rounded-xl hover:bg-slate-50">
-                Rehber & Blog
-              </Link>
-              <Link to="/iletisim" className="p-3 rounded-xl hover:bg-slate-50">
-                İletişim
               </Link>
               <Link to="/teklif-takip" className="p-3 rounded-xl bg-amber-50 text-amber-900 font-bold flex items-center justify-between border border-amber-200">
                 <span>Teklif & Talep Durumu Sorgula</span>
