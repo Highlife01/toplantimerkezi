@@ -19,6 +19,7 @@ export default function QuoteTrackingPage({ onOpenQuoteModal }) {
   const [searchCode, setSearchCode] = useState(initialCode);
   const [matchedLead, setMatchedLead] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     updatePageSeo({
@@ -33,21 +34,29 @@ export default function QuoteTrackingPage({ onOpenQuoteModal }) {
     }
   }, [initialCode]);
 
-  const handleSearch = (codeToSearch) => {
+  const handleSearch = async (codeToSearch) => {
     const term = (codeToSearch || searchCode).trim().toUpperCase();
     if (!term) return;
 
+    setIsLoading(true);
     setHasSearched(true);
-    const leads = storageService.getLeads();
-    
-    // Match by exact ID or phone number
-    const found = leads.find(l => 
-      l.id.toUpperCase() === term || 
-      l.id.replace(/[^0-9]/g, '') === term.replace(/[^0-9]/g, '') ||
-      l.phone.replace(/[^0-9]/g, '').includes(term.replace(/[^0-9]/g, ''))
-    );
 
-    setMatchedLead(found || null);
+    try {
+      const found = await storageService.findLeadByIdOrPhone(term);
+      setMatchedLead(found || null);
+    } catch (err) {
+      console.warn('Talep sorgulama hatası:', err);
+      // Fallback
+      const leads = storageService.getLeads();
+      const localMatch = leads.find(l => 
+        l.id.toUpperCase() === term || 
+        l.id.replace(/[^0-9]/g, '') === term.replace(/[^0-9]/g, '') ||
+        l.phone.replace(/[^0-9]/g, '').includes(term.replace(/[^0-9]/g, ''))
+      );
+      setMatchedLead(localMatch || null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Helper to determine stage index in the 11 stages

@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { storageService, PIPELINE_STAGES } from '../services/storageService';
 import { generateProposalPdf } from '../services/pdfService';
+import { notificationService } from '../services/notificationService';
 import { 
   Building2, Users, DollarSign, TrendingUp, Calendar, 
   MapPin, Phone, Mail, FileText, CheckCircle2, Clock, 
   Search, Plus, Edit2, Trash2, Shield, Lock, Download, 
   Settings, Layers, Tv, Volume2, Utensils, Star, ArrowRight,
   Filter, ChevronRight, X, AlertCircle, Sparkles, RefreshCw,
-  Globe, Link as LinkIcon, Compass, Activity
+  Globe, Link as LinkIcon, Compass, Activity, Bell, Send, Database, MessageSquare
 } from 'lucide-react';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard | pipeline | costCalc | suppliers | venues | seoManager | redirects | settings
+  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard | pipeline | costCalc | suppliers | venues | seoManager | redirects | notifications | settings
   
   // Data state
   const [leads, setLeads] = useState([]);
@@ -22,6 +23,10 @@ export default function AdminPage() {
   const [seoPages, setSeoPages] = useState([]);
   const [redirects, setRedirects] = useState([]);
   const [settings, setSettings] = useState(storageService.getSettings());
+  const [isCloudConnected, setIsCloudConnected] = useState(storageService.isCloudConnected());
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [isSendingTestNotif, setIsSendingTestNotif] = useState(false);
+  const [testNotifResult, setTestNotifResult] = useState(null);
   
   // Modals & Selection
   const [selectedLead, setSelectedLead] = useState(null);
@@ -38,9 +43,17 @@ export default function AdminPage() {
     }
     loadData();
 
+    // Gerçek Zamanlı Firestore Dinleyicisi
+    const unsubscribeLeads = storageService.subscribeToLeads((cloudLeads) => {
+      setLeads(cloudLeads);
+    });
+
     const handleStorageUpdate = () => loadData();
     window.addEventListener('tm_storage_updated', handleStorageUpdate);
-    return () => window.removeEventListener('tm_storage_updated', handleStorageUpdate);
+    return () => {
+      unsubscribeLeads();
+      window.removeEventListener('tm_storage_updated', handleStorageUpdate);
+    };
   }, []);
 
   const loadData = () => {
@@ -50,6 +63,7 @@ export default function AdminPage() {
     setSeoPages(storageService.getSeoPages());
     setRedirects(storageService.getRedirects());
     setSettings(storageService.getSettings());
+    setIsCloudConnected(storageService.isCloudConnected());
   };
 
   const handleLogin = (e) => {
@@ -67,13 +81,13 @@ export default function AdminPage() {
     sessionStorage.removeItem('tm_admin_auth');
   };
 
-  const handleStageChange = (leadId, newStage) => {
-    storageService.updateLead(leadId, { stage: newStage });
+  const handleStageChange = async (leadId, newStage) => {
+    await storageService.updateLead(leadId, { stage: newStage });
     loadData();
   };
 
-  const handleUpdateFinancials = (leadId, costBreakdown, quotedPrice, vatRate) => {
-    storageService.updateLead(leadId, { 
+  const handleUpdateFinancials = async (leadId, costBreakdown, quotedPrice, vatRate) => {
+    await storageService.updateLead(leadId, { 
       costBreakdown, 
       quotedPrice: Number(quotedPrice) || 0,
       vatRate: Number(vatRate) || 20 
@@ -86,6 +100,33 @@ export default function AdminPage() {
         quotedPrice: Number(quotedPrice) || 0,
         vatRate: Number(vatRate) || 20
       }));
+    }
+  };
+
+  const handleSeedFirestore = async () => {
+    if (!window.confirm('Mevcut tüm demo teklifleri, tedarikçileri ve ayarları Firebase Firestore bulut veritabanına aktarmak istiyor musunuz?')) return;
+    setIsSeeding(true);
+    try {
+      const res = await storageService.seedFirestoreData();
+      alert(`Buluta başarıyla aktarıldı: ${res.insertedLeads} Teklif Talebi, ${res.insertedSuppliers} Tedarikçi.`);
+      loadData();
+    } catch (err) {
+      alert(`Bulut aktarım hatası: ${err.message}`);
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    setIsSendingTestNotif(true);
+    setTestNotifResult(null);
+    try {
+      const res = await notificationService.sendTestNotification(settings);
+      setTestNotifResult(res);
+    } catch (err) {
+      setTestNotifResult({ error: err.message });
+    } finally {
+      setIsSendingTestNotif(false);
     }
   };
 
@@ -176,9 +217,9 @@ export default function AdminPage() {
               <span className="font-bold text-white text-sm font-display block leading-none">
                 Yönetim & CRM Masası
               </span>
-              <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Canlı Operasyon Durumu: Aktif (81 İl)
+              <span className={`text-[10px] font-semibold flex items-center gap-1 mt-0.5 ${isCloudConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isCloudConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+                {isCloudConnected ? 'Firebase Firestore Canlı Senkronizasyon (81 İl)' : 'Çevrimdışı / Hibrit Önbellek Modu'}
               </span>
             </div>
           </div>
@@ -192,6 +233,7 @@ export default function AdminPage() {
               { id: 'redirects', label: '301 Yönlendirmeler', icon: LinkIcon },
               { id: 'suppliers', label: 'Tedarikçi Ağı', icon: Users },
               { id: 'venues', label: 'Mekânlar (CMS)', icon: Building2 },
+              { id: 'notifications', label: 'Bildirimler & Entegrasyon', icon: Bell },
               { id: 'settings', label: 'Site Ayarları', icon: Settings }
             ].map(tab => {
               const Icon = tab.icon;
@@ -995,7 +1037,7 @@ export default function AdminPage() {
                   <div className="p-4 space-y-2">
                     <h4 className="font-bold text-sm text-slate-950">{v.name}</h4>
                     <p className="text-xs text-slate-600 font-semibold">{v.venueType} • Kapasite: {v.capacity} Kişi</p>
-                    <div className="text-[11px] text-slate-500 truncate">Teknik: {v.technicalGear.join(', ')}</div>
+                    <div className="text-[11px] text-slate-500 truncate">Teknik: {v.technicalGear?.join(', ')}</div>
                   </div>
                 </div>
               ))}
@@ -1003,12 +1045,176 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 8: SETTINGS */}
+        {/* TAB 8: BİLDİRİMLER & ÇOK KANALLI ENTEGRASYON */}
+        {activeTab === 'notifications' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 font-display flex items-center gap-2">
+                    <Bell className="text-amber-600" size={22} />
+                    <span>Çok Kanallı Bildirim & Webhook Merkezi</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Teklif talebi geldiğinde müşteriye ve operasyon ekibine anlık otomatik bildirim gönderimi.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSendTestNotification}
+                  disabled={isSendingTestNotif}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl gold-gradient-bg text-slate-950 font-bold text-xs shadow-md hover:scale-102 transition disabled:opacity-50"
+                >
+                  <Send size={15} />
+                  <span>{isSendingTestNotif ? 'Gönderiliyor...' : 'Simüle Test Bildirimi Gönder'}</span>
+                </button>
+              </div>
+
+              {testNotifResult && (
+                <div className="mt-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                  <span className="font-bold block mb-1">Test Bildirimi Çıktısı:</span>
+                  <pre className="overflow-x-auto text-[11px] font-mono bg-white p-3 rounded-xl border border-amber-200">
+                    {JSON.stringify(testNotifResult, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* 1. E-Posta Entegrasyonu */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                      <Mail size={18} className="text-amber-600" />
+                      <span>E-Posta Bildirimleri</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.emailNotificationsEnabled !== false}
+                        onChange={(e) => setSettings({ ...settings, emailNotificationsEnabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                    </label>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Yeni teklif talebi geldiğinde hem operasyon ekibine hem müşteriye takip linkiyle e-posta gönderir.
+                  </p>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">E-Posta Webhook URL (Zapier / Make / Resend)</label>
+                    <input
+                      type="url"
+                      placeholder="https://hook.eu1.make.com/... veya Cloud Function"
+                      value={settings.webhookUrl || ''}
+                      onChange={(e) => setSettings({ ...settings, webhookUrl: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. SMS Entegrasyonu */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                      <MessageSquare size={18} className="text-emerald-600" />
+                      <span>SMS Bildirimleri</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.smsNotificationsEnabled !== false}
+                        onChange={(e) => setSettings({ ...settings, smsNotificationsEnabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Müşteriye teklif alındığında takip kodu ve linkini içeren anlık SMS iletir (Netgsm, Twilio uyumlu).
+                  </p>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">SMS Gateway Webhook URL</label>
+                    <input
+                      type="url"
+                      placeholder="https://api.netgsm.com.tr/... veya Webhook"
+                      value={settings.smsWebhookUrl || ''}
+                      onChange={(e) => setSettings({ ...settings, smsWebhookUrl: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. WhatsApp Entegrasyonu */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                      <Phone size={18} className="text-green-600" />
+                      <span>WhatsApp Operasyon Hattı</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">Aktif</span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Müşterinin tek tıkla başvuru özetiyle koordinatöre bağlanmasını sağlayan kurumsal WhatsApp deep-link.
+                  </p>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">WhatsApp Operasyon Numarası</label>
+                    <input
+                      type="text"
+                      value={settings.whatsappPhone || ''}
+                      onChange={(e) => setSettings({ ...settings, whatsappPhone: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-200 flex justify-end">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await storageService.saveSettings(settings);
+                    alert('Bildirim ayarları başarıyla kaydedildi!');
+                  }}
+                  className="px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-bold text-xs shadow-md"
+                >
+                  Bildirim Ayarlarını Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 9: SETTINGS */}
         {activeTab === 'settings' && (
           <div className="max-w-3xl bg-white p-8 rounded-3xl border border-slate-300 shadow-md space-y-6 animate-in fade-in duration-300">
             <div>
               <h3 className="text-xl font-bold text-slate-950 font-display">Platform & İletişim Ayarları</h3>
               <p className="text-xs text-slate-600">Web sitesi üzerindeki WhatsApp numarası, analitik kodları ve kurumsal iletişim bilgileri.</p>
+            </div>
+
+            {/* Bulut Veri Tabanı Senkronizasyon Kutusu */}
+            <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <span className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                  <Database size={16} className="text-amber-700" />
+                  <span>Firebase Firestore Bulut Veritabanı</span>
+                </span>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Statik demo verilerini ve teklif havuzunu tek tıkla Firestore bulut koleksiyonlarına aktarır.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSeedFirestore}
+                disabled={isSeeding}
+                className="px-4 py-2.5 rounded-xl bg-slate-950 text-amber-400 font-bold text-xs shadow-sm hover:bg-slate-900 transition flex items-center gap-2 whitespace-nowrap disabled:opacity-50"
+              >
+                <RefreshCw size={14} className={isSeeding ? 'animate-spin' : ''} />
+                <span>{isSeeding ? 'Aktarılıyor...' : 'Buluta Aktar (Seed & Sync)'}</span>
+              </button>
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm">
@@ -1023,7 +1229,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 uppercase mb-1.5">WhatsApp Teklif Hattı (Numara)</label>
+                  <label className="block text-xs font-bold text-slate-800 uppercase mb-1.5">WhatsApp İletişim Hattı</label>
                   <input
                     type="text"
                     value={settings.whatsappPhone}
@@ -1035,9 +1241,9 @@ export default function AdminPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 uppercase mb-1.5">Kurumsal E-posta</label>
+                  <label className="block text-xs font-bold text-slate-800 uppercase mb-1.5">Kurumsal E-Posta</label>
                   <input
-                    type="text"
+                    type="email"
                     value={settings.email}
                     onChange={(e) => setSettings({ ...settings, email: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-950 focus:outline-none focus:border-amber-600 font-semibold"
@@ -1097,8 +1303,8 @@ export default function AdminPage() {
               <div className="pt-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    storageService.saveSettings(settings);
+                  onClick={async () => {
+                    await storageService.saveSettings(settings);
                     alert('Ayarlar başarıyla kaydedildi!');
                   }}
                   className="px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-bold text-xs shadow-md"

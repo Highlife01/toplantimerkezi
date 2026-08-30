@@ -114,11 +114,11 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
     setStep(s => Math.max(s - 1, 1));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const newLead = storageService.addLead({
+    try {
+      const newLead = await storageService.addLead({
         company: formData.company,
         contactName: formData.contactName,
         title: formData.title || 'Yetkili',
@@ -152,9 +152,12 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
       }
 
       setSubmittedLead(newLead);
-      setIsSubmitting(false);
       if (onSuccess) onSuccess(newLead);
-    }, 600);
+    } catch (err) {
+      console.error('Teklif oluşturma hatası:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const settings = storageService.getSettings();

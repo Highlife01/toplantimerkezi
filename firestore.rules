@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Yardımcı fonksiyonlar
+    function isAdmin() {
+      return request.auth != null;
+    }
+    
+    // Teklif Talepleri (leads)
+    // Ziyaretçiler talep oluşturabilir ve kendi takip koduyla okuyabilir
+    // Yöneticiler tüm talepleri okuyabilir, güncelleyebilir ve silebilir
+    match /leads/{leadId} {
+      allow create: if request.resource.data.company != null 
+                    && request.resource.data.phone != null;
+      allow read: if true; // Ziyaretçiler /teklif-takip üzerinden kendi kodunu arayabilir
+      allow update, delete: if isAdmin();
+    }
+    
+    // Sistem Ayarları (settings)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Tedarikçiler (suppliers)
+    match /suppliers/{supplierId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Mekânlar (venues)
+    match /venues/{venueId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // SEO Sayfaları (seo_pages)
+    match /seo_pages/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Yönlendirmeler (redirects)
+    match /redirects/{redirectId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Bildirim Günlükleri (notification_logs)
+    match /notification_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

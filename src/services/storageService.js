@@ -1,3 +1,21 @@
+import { 
+  db, 
+  collection, 
+  doc, 
+  getDocs, 
+  getDoc, 
+  setDoc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  serverTimestamp,
+  isFirebaseInitialized 
+} from './firebase';
+import { notificationService } from './notificationService';
 import { INITIAL_SUPPLIERS } from '../data/suppliersData';
 import { VENUES } from '../data/venuesData';
 import { PROJECTS } from '../data/projectsData';
@@ -18,7 +36,7 @@ export const PIPELINE_STAGES = [
   'Tamamlandı'
 ];
 
-const INITIAL_LEADS = [
+export const INITIAL_LEADS = [
   {
     id: 'TLP-2026-0891',
     createdAt: '2026-08-28T14:30:00Z',
@@ -157,7 +175,7 @@ const INITIAL_LEADS = [
   }
 ];
 
-const INITIAL_SETTINGS = {
+export const INITIAL_SETTINGS = {
   companyName: 'Toplantı Merkezi Kurumsal Organizasyon A.Ş.',
   brandTitle: 'Toplantı Merkezi',
   domain: 'www.toplantimerkezi.com.tr',
@@ -171,10 +189,17 @@ const INITIAL_SETTINGS = {
   googleAnalyticsId: 'G-TOPLANTIMERKEZI',
   gtmId: 'GTM-TM81TR',
   metaPixelId: 'PIXEL-78901234',
-  adminPin: '1234'
+  adminPin: '1234',
+  // Çok Kanallı Bildirim Entegrasyonları
+  emailNotificationsEnabled: true,
+  webhookUrl: '',
+  emailApiKey: '',
+  smsNotificationsEnabled: true,
+  smsWebhookUrl: '',
+  whatsappWebhookUrl: ''
 };
 
-// Safe storage access
+// Safe storage access (Client Cache for zero flicker & offline resilience)
 const getItem = (key, defaultVal) => {
   try {
     const val = localStorage.getItem(key);
@@ -195,10 +220,71 @@ const setItem = (key, val) => {
 };
 
 export const storageService = {
-  // Leads & Pipeline
+  // Bağlantı durumu
+  isCloudConnected: () => isFirebaseInitialized && !!db,
+
+  // ==========================================
+  // 1. LEADS (TEKLİF TALEPLERİ)
+  // ==========================================
   getLeads: () => getItem('tm_leads', INITIAL_LEADS),
   saveLeads: (leads) => setItem('tm_leads', leads),
-  addLead: (leadData) => {
+
+  /**
+   * Firestore'dan tüm talepleri asenkron çeker ve yerel önbelleği günceller
+   */
+  fetchLeadsFromCloud: async () => {
+    if (!db) return storageService.getLeads();
+    try {
+      const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const cloudLeads = snapshot.docs.map(docSnap => ({
+          ...docSnap.data(),
+          firebaseDocId: docSnap.id
+        }));
+        storageService.saveLeads(cloudLeads);
+        return cloudLeads;
+      }
+    } catch (err) {
+      console.warn('[Firestore] fetchLeadsFromCloud uyarısı:', err);
+    }
+    return storageService.getLeads();
+  },
+
+  /**
+   * Gerçek Zamanlı Talepler Aboneliği (Realtime Firestore Listener)
+   */
+  subscribeToLeads: (callback) => {
+    // İlk render için önbellekteki veriyi hemen ver
+    callback(storageService.getLeads());
+
+    if (!db) return () => {};
+
+    try {
+      const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+          const cloudLeads = snapshot.docs.map(docSnap => ({
+            ...docSnap.data(),
+            firebaseDocId: docSnap.id
+          }));
+          storageService.saveLeads(cloudLeads);
+          callback(cloudLeads);
+        }
+      }, (err) => {
+        console.warn('[Firestore Realtime] Leads subscription error:', err);
+      });
+      return unsubscribe;
+    } catch (e) {
+      console.warn('[Firestore Realtime] Subscription error:', e);
+      return () => {};
+    }
+  },
+
+  /**
+   * Yeni teklif talebi ekler (Firestore + LocalStorage + Çok Kanallı Bildirim)
+   */
+  addLead: async (leadData) => {
     const leads = storageService.getLeads();
     const newId = `TLP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const newLead = {
@@ -219,26 +305,121 @@ export const storageService = {
       validityDays: 15,
       ...leadData
     };
+
+    // 1. Önbelleğe anında yaz (Anlık UI tepkisi)
     leads.unshift(newLead);
     storageService.saveLeads(leads);
+
+    // 2. Firestore'a asenkron yaz
+    if (db) {
+      try {
+        await setDoc(doc(db, 'leads', newId), {
+          ...newLead,
+          serverTimestamp: serverTimestamp()
+        });
+        console.log(`[Firestore] Lead "${newId}" buluta kaydedildi.`);
+      } catch (err) {
+        console.warn('[Firestore] Lead kaydetme uyarısı:', err);
+      }
+    }
+
+    // 3. Çok Kanallı Bildirim Tetikle (E-Posta, SMS, WhatsApp)
+    try {
+      const settings = storageService.getSettings();
+      notificationService.dispatchNewQuoteNotifications(newLead, settings);
+    } catch (notifErr) {
+      console.warn('[Notification Error]:', notifErr);
+    }
+
     return newLead;
   },
-  updateLead: (id, updates) => {
+
+  /**
+   * Teklif talebini günceller (Aşama, Maliyet, PDF Verileri)
+   */
+  updateLead: async (id, updates) => {
     const leads = storageService.getLeads();
     const index = leads.findIndex(l => l.id === id);
+    let updatedLead = null;
+
     if (index !== -1) {
       leads[index] = { ...leads[index], ...updates, updatedAt: new Date().toISOString() };
       storageService.saveLeads(leads);
-      return leads[index];
+      updatedLead = leads[index];
     }
-    return null;
-  },
-  deleteLead: (id) => {
-    const leads = storageService.getLeads().filter(l => l.id !== id);
-    storageService.saveLeads(leads);
+
+    // Firestore'da güncelle
+    if (db) {
+      try {
+        await updateDoc(doc(db, 'leads', id), {
+          ...updates,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        // Doküman yoksa setDoc ile oluştur
+        try {
+          if (updatedLead) {
+            await setDoc(doc(db, 'leads', id), updatedLead);
+          }
+        } catch (e) {
+          console.warn('[Firestore] Lead update error:', e);
+        }
+      }
+    }
+
+    return updatedLead;
   },
 
-  // Calculate Costs & Margin
+  /**
+   * Talebi siler
+   */
+  deleteLead: async (id) => {
+    const leads = storageService.getLeads().filter(l => l.id !== id);
+    storageService.saveLeads(leads);
+
+    if (db) {
+      try {
+        await deleteDoc(doc(db, 'leads', id));
+      } catch (err) {
+        console.warn('[Firestore] Lead silme uyarısı:', err);
+      }
+    }
+  },
+
+  /**
+   * Teklif Kodu veya Telefon ile canlı talep arama
+   */
+  findLeadByIdOrPhone: async (codeOrPhone) => {
+    const term = (codeOrPhone || '').trim().toUpperCase();
+    if (!term) return null;
+
+    // Önce yerel önbellekte ara
+    const leads = storageService.getLeads();
+    const localMatch = leads.find(l => 
+      l.id.toUpperCase() === term || 
+      l.id.replace(/[^0-9]/g, '') === term.replace(/[^0-9]/g, '') ||
+      l.phone.replace(/[^0-9]/g, '').includes(term.replace(/[^0-9]/g, ''))
+    );
+
+    if (localMatch) return localMatch;
+
+    // Firestore'da ara
+    if (db) {
+      try {
+        const qById = query(collection(db, 'leads'), where('id', '==', term));
+        const snapshot = await getDocs(qById);
+        if (!snapshot.empty) {
+          return snapshot.docs[0].data();
+        }
+      } catch (err) {
+        console.warn('[Firestore] findLead query error:', err);
+      }
+    }
+
+    return null;
+  },
+
+  // Maliyet & Kârlılık Hesabı
   calculateLeadFinancials: (lead) => {
     const cb = lead.costBreakdown || {};
     const totalCost = (Number(cb.venue) || 0) +
@@ -265,48 +446,90 @@ export const storageService = {
     };
   },
 
-  // Suppliers
+  // ==========================================
+  // 2. TEDARİKÇİLER (SUPPLIERS)
+  // ==========================================
   getSuppliers: () => getItem('tm_suppliers', INITIAL_SUPPLIERS),
   saveSuppliers: (suppliers) => setItem('tm_suppliers', suppliers),
-  addSupplier: (supplier) => {
+  
+  addSupplier: async (supplier) => {
     const list = storageService.getSuppliers();
-    const newSup = { id: `sup-${Date.now()}`, completedJobs: 0, ...supplier };
+    const newId = `sup-${Date.now()}`;
+    const newSup = { id: newId, completedJobs: 0, ...supplier };
     list.unshift(newSup);
     storageService.saveSuppliers(list);
+
+    if (db) {
+      try {
+        await setDoc(doc(db, 'suppliers', newId), newSup);
+      } catch (e) {
+        console.warn('[Firestore] Supplier add error:', e);
+      }
+    }
     return newSup;
   },
-  updateSupplier: (id, updates) => {
+
+  updateSupplier: async (id, updates) => {
     const list = storageService.getSuppliers();
     const idx = list.findIndex(s => s.id === id);
     if (idx !== -1) {
       list[idx] = { ...list[idx], ...updates };
       storageService.saveSuppliers(list);
+
+      if (db) {
+        try {
+          await updateDoc(doc(db, 'suppliers', id), updates);
+        } catch (e) {
+          console.warn('[Firestore] Supplier update error:', e);
+        }
+      }
       return list[idx];
     }
     return null;
   },
-  deleteSupplier: (id) => {
+
+  deleteSupplier: async (id) => {
     const list = storageService.getSuppliers().filter(s => s.id !== id);
     storageService.saveSuppliers(list);
+    if (db) {
+      try {
+        await deleteDoc(doc(db, 'suppliers', id));
+      } catch (e) {
+        console.warn('[Firestore] Supplier delete error:', e);
+      }
+    }
   },
 
-  // Venues CMS
+  // ==========================================
+  // 3. STATİK & CMS VERİLERİ (MEKÂNLAR, PROJELER, BLOG)
+  // ==========================================
   getVenues: () => getItem('tm_venues', VENUES),
   saveVenues: (venues) => setItem('tm_venues', venues),
 
-  // Projects CMS
   getProjects: () => getItem('tm_projects', PROJECTS),
   saveProjects: (projects) => setItem('tm_projects', projects),
 
-  // Blog CMS
   getBlogPosts: () => getItem('tm_blogs', BLOG_POSTS),
   saveBlogPosts: (posts) => setItem('tm_blogs', posts),
 
-  // Settings
+  // ==========================================
+  // 4. SİSTEM VE ENTEGRASYON AYARLARI (SETTINGS)
+  // ==========================================
   getSettings: () => getItem('tm_settings', INITIAL_SETTINGS),
-  saveSettings: (settings) => setItem('tm_settings', settings),
+  saveSettings: async (settings) => {
+    setItem('tm_settings', settings);
+    if (db) {
+      try {
+        await setDoc(doc(db, 'settings', 'general_config'), settings);
+      } catch (e) {
+        console.warn('[Firestore] Settings save error:', e);
+      }
+    }
+  },
 
-  // SEO Page Management & Programmatic Quality Checks
+  // ==========================================
+  // 5. PROGRAMMATIC SEO SAYFALARI
+  // ==========================================
   getSeoPages: () => getItem('tm_seo_pages', [
     { slug: 'bayi-toplantisi-organizasyonu', title: 'Bayi Toplantısı Organizasyonu | Türkiye Geneli', h1: 'Profesyonel Bayi Toplantısı Organizasyonu', metaDesc: 'Bayi toplantısı organizasyonu: Mekân seçimi, dev LED ekran, sahne tasarımı, gala gecesi, sanatçı ve ödül töreni.', isIndexed: true, focusTopic: 'Bayi Toplantısı', searchIntent: 'Transactional', author: 'Toplantı Merkezi Kurumsal Masası', lastUpdated: '2026-08-29' },
     { slug: 'sirket-toplantisi-organizasyonu', title: 'Şirket Toplantısı Organizasyonu | Toplantı Merkezi', h1: 'Şirket Toplantısı Organizasyonu', metaDesc: 'Kurumsal şirket toplantısı organizasyonları için 5 yıldızlı otel salonları, teknik reji ve simultane tercüme.', isIndexed: true, focusTopic: 'Şirket Toplantısı', searchIntent: 'Transactional', author: 'Toplantı Merkezi Kurumsal Masası', lastUpdated: '2026-08-29' },
@@ -315,33 +538,96 @@ export const storageService = {
     { slug: 'kamu-organizasyonu', title: 'Kamu Organizasyonu & Resmî Protokol Yönetimi | Toplantı Merkezi', h1: 'Kamu ve Resmî Protokol Organizasyonları', metaDesc: 'Kamu kurumları ve belediyeler için devlet protokol kurallarına tam uyumlu organizasyon yönetimi.', isIndexed: true, focusTopic: 'Kamu & Protokol', searchIntent: 'Transactional', author: 'Toplantı Merkezi Kurumsal Masası', lastUpdated: '2026-08-29' }
   ]),
   saveSeoPages: (pages) => setItem('tm_seo_pages', pages),
-  updateSeoPage: (slug, updates) => {
+  updateSeoPage: async (slug, updates) => {
     const pages = storageService.getSeoPages();
     const idx = pages.findIndex(p => p.slug === slug);
+    let updatedPage = null;
     if (idx !== -1) {
       pages[idx] = { ...pages[idx], ...updates, lastUpdated: new Date().toISOString().split('T')[0] };
+      updatedPage = pages[idx];
     } else {
-      pages.push({ slug, lastUpdated: new Date().toISOString().split('T')[0], ...updates });
+      updatedPage = { slug, lastUpdated: new Date().toISOString().split('T')[0], ...updates };
+      pages.push(updatedPage);
     }
     storageService.saveSeoPages(pages);
+
+    if (db) {
+      try {
+        await setDoc(doc(db, 'seo_pages', slug), updatedPage);
+      } catch (e) {
+        console.warn('[Firestore] SEO page save error:', e);
+      }
+    }
   },
 
-  // 301 / 302 Redirect Manager
+  // ==========================================
+  // 6. 301 / 302 YÖNLENDİRMELER (REDIRECTS)
+  // ==========================================
   getRedirects: () => getItem('tm_redirects', [
     { id: 'red-1', oldUrl: '/bayi-toplantilari', newUrl: '/bayi-toplantisi-organizasyonu', type: 301, active: true },
     { id: 'red-2', oldUrl: '/sirket-etkinligi', newUrl: '/sirket-toplantisi-organizasyonu', type: 301, active: true },
     { id: 'red-3', oldUrl: '/piknik-organizasyonu', newUrl: '/kurumsal-piknik-organizasyonu', type: 301, active: true }
   ]),
   saveRedirects: (redirects) => setItem('tm_redirects', redirects),
-  addRedirect: (oldUrl, newUrl, type = 301) => {
+  addRedirect: async (oldUrl, newUrl, type = 301) => {
     const list = storageService.getRedirects();
-    const newRed = { id: `red-${Date.now()}`, oldUrl, newUrl, type: Number(type), active: true, createdAt: new Date().toISOString() };
+    const newId = `red-${Date.now()}`;
+    const newRed = { id: newId, oldUrl, newUrl, type: Number(type), active: true, createdAt: new Date().toISOString() };
     list.unshift(newRed);
     storageService.saveRedirects(list);
+
+    if (db) {
+      try {
+        await setDoc(doc(db, 'redirects', newId), newRed);
+      } catch (e) {
+        console.warn('[Firestore] Redirect add error:', e);
+      }
+    }
     return newRed;
   },
-  deleteRedirect: (id) => {
+  deleteRedirect: async (id) => {
     const list = storageService.getRedirects().filter(r => r.id !== id);
     storageService.saveRedirects(list);
+
+    if (db) {
+      try {
+        await deleteDoc(doc(db, 'redirects', id));
+      } catch (e) {
+        console.warn('[Firestore] Redirect delete error:', e);
+      }
+    }
+  },
+
+  // ==========================================
+  // 7. TEK TIKLA FIRESTORE VERİ AKTARIMI (BULUT SEED & SYNC)
+  // ==========================================
+  seedFirestoreData: async () => {
+    if (!db) {
+      throw new Error('Firebase Firestore bağlantısı aktif değil.');
+    }
+
+    let insertedLeads = 0;
+    let insertedSuppliers = 0;
+
+    // 1. Leads aktar
+    const leads = storageService.getLeads();
+    for (const lead of leads) {
+      await setDoc(doc(db, 'leads', lead.id), lead);
+      insertedLeads++;
+    }
+
+    // 2. Suppliers aktar
+    const suppliers = storageService.getSuppliers();
+    for (const sup of suppliers) {
+      await setDoc(doc(db, 'suppliers', sup.id), sup);
+      insertedSuppliers++;
+    }
+
+    // 3. Settings aktar
+    const settings = storageService.getSettings();
+    await setDoc(doc(db, 'settings', 'general_config'), settings);
+
+    console.log(`[Firestore Seed] Başarıyla aktarıldı: ${insertedLeads} Lead, ${insertedSuppliers} Tedarikçi, Ayarlar.`);
+    return { insertedLeads, insertedSuppliers };
   }
 };
