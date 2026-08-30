@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+  </defs>
+  <!-- Background with subtle border -->
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad)" />
+  <rect x="2" y="2" width="188" height="188" rx="40" fill="none" stroke="#D97706" stroke-width="2" stroke-opacity="0.3" />
+  
+  <!-- Modern Geometric Meeting / Center Emblem -->
+  <g transform="translate(40, 40) scale(1.16)">
+    <!-- Layered Diamonds/Roof of Architecture -->
+    <path d="M48 8 L88 28 L48 48 L8 28 Z" fill="url(#goldGrad)" />
+    <path d="M8 48 L48 68 L88 48" fill="none" stroke="#F59E0B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M8 68 L48 88 L88 68" fill="none" stroke="#D97706" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Center Core Point -->
+    <circle cx="48" cy="28" r="5" fill="#FFFFFF" />
+  </g>
+</svg>

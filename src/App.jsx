@@ -5,6 +5,7 @@ import Footer from './components/common/Footer';
 import WhatsAppButton from './components/common/WhatsAppButton';
 import MobileActionBar from './components/common/MobileActionBar';
 import CookieConsent from './components/common/CookieConsent';
+import PwaInstallPrompt from './components/common/PwaInstallPrompt';
 import QuoteWizardModal from './components/quote/QuoteWizardModal';
 import ScrollToTop from './components/common/ScrollToTop';
 
@@ -193,6 +194,7 @@ export default function App() {
         <WhatsAppButton />
         <MobileActionBar onOpenQuoteModal={() => handleOpenQuoteModal()} />
         <CookieConsent />
+        <PwaInstallPrompt />
 
         {/* 7-Step Quick Quote Modal */}
         <QuoteWizardModal
