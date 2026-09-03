@@ -174,8 +174,8 @@ npx firebase deploy --only hosting:toplantimerkezi
 - **Marka**: Toplantı Merkezi
 - **Web**: [www.toplantimerkezi.com.tr](https://www.toplantimerkezi.com.tr)
 - **Canlı Yayın**: [https://toplantimerkezi.web.app](https://toplantimerkezi.web.app)
-- **Çağrı Merkezi**: 0850 308 74 20
-- **E-posta**: kurumsal@toplantimerkezi.com.tr
+- **Çağrı Merkezi**: +90 850 308 00 00
+- **E-posta**: info@toplantimerkezi.com.tr
 
 ---
 *© 2026 Toplantı Merkezi. Tüm hakları saklıdır. Türkiye'nin Her Yerinde, Tek Merkezden Organizasyon.*

@@ -184,8 +184,8 @@ export const INITIAL_SETTINGS = {
   phone: '+90 850 308 00 00',
   whatsappPhone: '+90 532 055 09 45',
   whatsappDisplay: '0532 055 09 45',
-  email: 'teklif@toplantimerkezi.com.tr',
-  address: 'Büyükdere Cad. No:199 Levent / Maslak Plaza, İstanbul (81 İlde Operasyon Gücü)',
+  email: 'info@toplantimerkezi.com.tr',
+  address: 'Büyükdere Cad. No:199 Levent / Maslak Plaza, Levent, Beşiktaş, İstanbul (81 İlde Operasyon Gücü)',
   googleAnalyticsId: 'G-TOPLANTIMERKEZI',
   gtmId: 'GTM-TM81TR',
   metaPixelId: 'PIXEL-78901234',
@@ -515,7 +515,14 @@ export const storageService = {
   // ==========================================
   // 4. SİSTEM VE ENTEGRASYON AYARLARI (SETTINGS)
   // ==========================================
-  getSettings: () => getItem('tm_settings', INITIAL_SETTINGS),
+  getSettings: () => {
+    const saved = getItem('tm_settings', INITIAL_SETTINGS);
+    if (saved && (saved.email === 'teklif@toplantimerkezi.com.tr' || saved.email === 'kurumsal@toplantimerkezi.com.tr')) {
+      saved.email = 'info@toplantimerkezi.com.tr';
+      setItem('tm_settings', saved);
+    }
+    return saved;
+  },
   saveSettings: async (settings) => {
     setItem('tm_settings', settings);
     if (db) {
