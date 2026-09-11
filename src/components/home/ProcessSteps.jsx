@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import SectionTitle from '../common/SectionTitle';
 import { ClipboardList, Compass, FileCheck, Layers, Award, ArrowRight } from 'lucide-react';
 
@@ -89,7 +90,7 @@ export default function ProcessSteps({ onOpenQuoteModal }) {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-12 text-center">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
           <button
             onClick={onOpenQuoteModal}
             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-bold text-sm shadow-md hover:scale-105 transition"
@@ -97,6 +98,14 @@ export default function ProcessSteps({ onOpenQuoteModal }) {
             <span>Hemen İlk Adımı Atın & Teklif Alın</span>
             <ArrowRight size={16} />
           </button>
+
+          <Link
+            to="/kurumsal"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border border-slate-300 shadow-xs hover:border-amber-400 transition"
+          >
+            <span>Kurumsal Standartlarımız</span>
+            <ArrowRight size={16} className="text-amber-600" />
+          </Link>
         </div>
 
       </div>

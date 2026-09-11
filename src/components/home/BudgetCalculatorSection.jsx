@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Calculator, Sparkles, ArrowRight, CheckCircle2, 
   Building2, Users, Calendar, MapPin, Layers, Tv, 
@@ -304,6 +305,16 @@ export default function BudgetCalculatorSection({ onOpenQuoteModal }) {
               <span>Bu Bütçe İçin Resmi Teklif İste</span>
               <ArrowRight size={16} />
             </button>
+
+            <div className="pt-2 text-center">
+              <Link
+                to="/teklif-al"
+                className="text-xs text-amber-400 hover:text-amber-300 font-bold hover:underline inline-flex items-center gap-1"
+              >
+                <span>7 Adımlı Ayrıntılı Teklif Portalına Git</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
           </div>
 
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Compass, MapPin, CheckCircle2, Star, ArrowRight, 
   Sparkles, Hotel, Plane, Calendar, DollarSign, Award
@@ -159,12 +160,22 @@ export default function DestinationCompareSection({ onOpenQuoteModal }) {
 
             <button
               onClick={() => onOpenQuoteModal({ initialCity: selectedDest.name.split(' ')[0] })}
-              className="w-full py-4 rounded-2xl gold-gradient-bg text-slate-950 font-extrabold text-xs sm:text-sm shadow-md hover:scale-102 transition flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-slate-950 font-extrabold text-xs sm:text-sm shadow-md hover:scale-102 transition flex items-center justify-center gap-2"
             >
               <Sparkles size={16} />
               <span>{selectedDest.name.split(' ')[0]} İçin Teklif Al</span>
               <ArrowRight size={16} />
             </button>
+
+            <div className="pt-2 border-t border-slate-100 text-center">
+              <Link
+                to={selectedDest.id === 'kibris' ? '/sehirler' : `/sehirler/${selectedDest.id}`}
+                className="inline-flex items-center gap-1.5 text-xs text-amber-800 font-bold hover:underline"
+              >
+                <span>{selectedDest.name.split(' ')[0]} Şehir & Mekân Sayfasını İncele</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
           </div>
 
         </div>

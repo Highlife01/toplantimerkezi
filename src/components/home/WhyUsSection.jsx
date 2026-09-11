@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import SectionTitle from '../common/SectionTitle';
 import { 
   Globe, Workflow, ShieldCheck, UserCheck, Network, 
@@ -101,12 +102,22 @@ export default function WhyUsSection({ onOpenQuoteModal }) {
             </p>
           </div>
 
-          <button
-            onClick={onOpenQuoteModal}
-            className="shrink-0 px-8 py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-sm shadow-md hover:scale-105 transition"
-          >
-            Kurumsal Teklif Al
-          </button>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              to="/kurumsal"
+              className="px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 transition flex items-center gap-2"
+            >
+              <span>Kurumsal Vizyon & Standartlar</span>
+              <ArrowRight size={14} className="text-amber-400" />
+            </Link>
+
+            <button
+              onClick={onOpenQuoteModal}
+              className="px-8 py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-sm shadow-md hover:scale-105 transition"
+            >
+              Kurumsal Teklif Al
+            </button>
+          </div>
         </div>
 
       </div>
