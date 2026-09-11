@@ -16,16 +16,32 @@ export default function BlogDetailPage({ onOpenQuoteModal }) {
         title: `${post.title} | Toplantı Merkezi Rehber`,
         description: post.summary,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/blog/${post.slug}`,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Rehber & Blog', url: '/blog' },
+          { name: post.title, url: `/blog/${post.slug}` }
+        ],
         schemaType: 'BlogPosting',
         schemaData: {
           headline: post.title,
           description: post.summary,
           image: post.image,
           datePublished: '2026-08-20',
+          dateModified: '2026-09-11',
           author: {
             '@type': 'Organization',
-            name: 'Toplantı Merkezi Kurumsal Masası'
-          }
+            name: 'Toplantı Merkezi Kurumsal Masası',
+            url: 'https://www.toplantimerkezi.com.tr'
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Toplantı Merkezi',
+            logo: {
+              '@type': 'ImageObject',
+              url: 'https://www.toplantimerkezi.com.tr/pwa-192x192.svg'
+            }
+          },
+          mainEntityOfPage: `https://www.toplantimerkezi.com.tr/blog/${post.slug}`
         }
       });
       window.scrollTo(0, 0);

@@ -19,14 +19,26 @@ export default function IndustryDetailPage({ onOpenQuoteModal }) {
       title: industry.seoTitle,
       description: industry.metaDesc,
       canonicalUrl: `https://www.toplantimerkezi.com.tr/sektorler/${industry.slug}`,
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Sektörler', url: '/sektorler/otomotiv-ve-mobilite' },
+        { name: industry.title, url: `/sektorler/${industry.slug}` }
+      ],
       schemaType: 'Service',
       schemaData: {
         serviceType: `${industry.title} Organizasyon Çözümleri`,
+        name: `${industry.title} - Toplantı Merkezi`,
         provider: {
           '@type': 'Organization',
-          name: 'Toplantı Merkezi'
+          name: 'Toplantı Merkezi',
+          url: 'https://www.toplantimerkezi.com.tr',
+          telephone: '+90 850 308 00 00'
         },
-        description: industry.metaDesc
+        description: industry.metaDesc,
+        areaServed: {
+          '@type': 'Country',
+          name: 'Turkey'
+        }
       }
     });
     window.scrollTo(0, 0);

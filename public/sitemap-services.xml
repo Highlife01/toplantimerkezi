@@ -1,187 +1,404 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Cluster 1: Toplantı -->
   <url>
     <loc>https://www.toplantimerkezi.com.tr/toplanti-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/sirket-toplantisi-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://www.toplantimerkezi.com.tr/sirket-toplantisi</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://www.toplantimerkezi.com.tr/kurumsal-toplanti</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/yonetim-toplantisi</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/satis-toplantisi</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/yil-sonu-toplantisi</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
-
-  <!-- Cluster 2: Bayi -->
   <url>
     <loc>https://www.toplantimerkezi.com.tr/bayi-toplantisi-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.toplantimerkezi.com.tr/bayi-toplantisi</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
     <loc>https://www.toplantimerkezi.com.tr/bayi-toplantisi-otelleri</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/bayi-lansmani</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
-  <url>
-    <loc>https://www.toplantimerkezi.com.tr/bayi-bulusmasi</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Cluster 3: Kongre & Konferans -->
   <url>
     <loc>https://www.toplantimerkezi.com.tr/kongre-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/konferans-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/calistay-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
-
-  <!-- Cluster 4: Kurumsal Etkinlik & Piknik -->
   <url>
     <loc>https://www.toplantimerkezi.com.tr/kurumsal-piknik-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://www.toplantimerkezi.com.tr/kurumsal-organizasyon</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://www.toplantimerkezi.com.tr/kurumsal-etkinlik</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/gala-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/lansman-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
-
-  <!-- Cluster 5: Kamu & Protokol -->
   <url>
     <loc>https://www.toplantimerkezi.com.tr/kamu-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/protokol-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
+    <loc>https://www.toplantimerkezi.com.tr/sirket-toplantisi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/motivasyon-toplantisi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/strateji-toplantisi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/donem-toplantisi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/bayi-bulusmasi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/bayi-egitimi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/bayi-motivasyon-toplantisi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/sempozyum-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/zirve-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/panel-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/seminer-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/egitim-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/kurumsal-organizasyon</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/kurumsal-etkinlik</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/kurumsal-piknik</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/sirket-piknigi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/personel-etkinligi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/aile-gunu-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/team-building</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/odul-toreni</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/acilis-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/roadshow-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.toplantimerkezi.com.tr/resmi-toren-organizasyonu</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/kamu-toplantisi</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-
-  <!-- Sektörel Çözüm Merkezleri -->
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/acilis-toreni</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/temel-atma-toreni</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/bayi-toplantisi</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/sirket-toplantilari</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/kamu-protokol-organizasyonlari</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/kongre-konferans</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/egitim-seminer</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/kurumsal-piknik</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/lansman-organizasyonu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/gala-odul-geceleri</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/organizasyonlar/personel-motivasyon</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/mekan-planlama</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/sahne-dekor</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/ses-isik</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/led-ekran-goruntu</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/catering</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/kayit-karsilama</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/host-hostes</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/fotograf-video</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/simultane-tercume</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.toplantimerkezi.com.tr/hizmetler/guvenlik-saglik</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/sektorler/otomotiv-ve-mobilite</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/sektorler/ilac-ve-saglik</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/sektorler/sanayi-ve-uretim</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/sektorler/bankacilik-ve-finans</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.toplantimerkezi.com.tr/sektorler/teknoloji-ve-yazilim</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>

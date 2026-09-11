@@ -16,14 +16,29 @@ export default function TopicHubPage({ onOpenQuoteModal }) {
       title: `${hub.title} | Toplantı Merkezi Rehber`,
       description: hub.metaDesc,
       canonicalUrl: `https://www.toplantimerkezi.com.tr/rehber/${hub.slug}`,
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Rehberler', url: '/rehber/bayi-toplantisi-rehberi' },
+        { name: hub.title, url: `/rehber/${hub.slug}` }
+      ],
       schemaType: 'Article',
       schemaData: {
         headline: hub.title,
         description: hub.metaDesc,
         author: {
           '@type': 'Organization',
-          name: 'Toplantı Merkezi Kurumsal Masası'
-        }
+          name: 'Toplantı Merkezi Kurumsal Masası',
+          url: 'https://www.toplantimerkezi.com.tr'
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Toplantı Merkezi',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://www.toplantimerkezi.com.tr/pwa-192x192.svg'
+          }
+        },
+        mainEntityOfPage: `https://www.toplantimerkezi.com.tr/rehber/${hub.slug}`
       }
     });
     window.scrollTo(0, 0);

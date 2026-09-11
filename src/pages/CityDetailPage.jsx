@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ALL_81_CITIES, PROMINENT_CITIES } from '../data/citiesData';
+import { ALL_81_CITIES, PROMINENT_CITIES, getCityGeo } from '../data/citiesData';
 import { ORGANIZATIONS } from '../data/organizationsData';
 import { VENUES } from '../data/venuesData';
 import SectionTitle from '../components/common/SectionTitle';
@@ -18,6 +18,8 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
   const city = PROMINENT_CITIES.find(c => c.slug === sehirSlug) || 
                ALL_81_CITIES.find(c => c.slug === sehirSlug);
 
+  const cityGeo = city ? getCityGeo(city.slug) : null;
+
   const cityVenues = VENUES.filter(v => 
     city && v.city.toLowerCase() === city.name.toLowerCase()
   );
@@ -25,25 +27,43 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
   useEffect(() => {
     if (city) {
       updatePageSeo({
-        title: `${city.name} Toplantı ve Organizasyon Şirketi | Toplantı Merkezi`,
-        description: `${city.name} genelinde bayi toplantısı, kongre, seminer, kurumsal piknik ve şirket etkinlikleri için profesyonel sahne, teknik ekipman ve mekân yönetimi.`,
+        title: `${city.name} Toplantı ve Organizasyon Şirketi`,
+        description: `${city.name} genelinde bayi toplantısı, kongre, seminer, kurumsal piknik ve şirket etkinlikleri için profesyonel sahne, teknik ekipman ve mekân yönetimi. 81 ilde tek merkezden hizmet.`,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/sehirler/${city.slug}`,
+        geo: cityGeo,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Şehirler', url: '/sehirler' },
+          { name: city.name, url: `/sehirler/${city.slug}` }
+        ],
         schemaType: 'LocalBusiness',
         schemaData: {
           name: `Toplantı Merkezi ${city.name} Kurumsal Organizasyon`,
           telephone: '+90 850 308 00 00',
+          email: 'info@toplantimerkezi.com.tr',
+          url: `https://www.toplantimerkezi.com.tr/sehirler/${city.slug}`,
+          priceRange: '₺₺₺₺',
           address: {
             '@type': 'PostalAddress',
             addressLocality: city.name,
+            addressRegion: city.region || 'Türkiye',
             addressCountry: 'TR'
           },
-          areaServed: city.name,
-          description: `${city.name} kurumsal toplantı ve etkinlik yönetimi.`
+          geo: cityGeo ? {
+            '@type': 'GeoCoordinates',
+            latitude: cityGeo.lat,
+            longitude: cityGeo.lng
+          } : undefined,
+          areaServed: {
+            '@type': 'AdministrativeArea',
+            name: city.name
+          },
+          description: `${city.name} ilinde kurumsal toplantı, bayi toplantısı, kongre ve etkinlik yönetimi.`
         }
       });
       window.scrollTo(0, 0);
     }
-  }, [city, sehirSlug]);
+  }, [city, sehirSlug, cityGeo]);
 
   if (!city) {
     return (

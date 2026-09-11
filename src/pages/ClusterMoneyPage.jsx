@@ -37,24 +37,45 @@ export default function ClusterMoneyPage({ onOpenQuoteModal }) {
   }
 
   useEffect(() => {
+    const defaultFaqs = [
+      { q: `${matchedPage.title} organizasyonunda süreç nasıl işler?`, a: `${matchedPage.title} sürecinde talebiniz alındıktan sonra 2 saat içinde ihtiyaç analizi yapılır, 3D salon ve teknik yerleşim planı hazırlanır ve anahtar teslim resmi teklif sunulur.` },
+      { q: `${matchedPage.title} için nasıl teklif alabilirim?`, a: 'Sayfamızdaki hızlı teklif formunu doldurarak veya 850’li çağrı merkezimiz üzerinden 2 saat içinde detaylı maliyet tablosu alabilirsiniz.' },
+      { q: 'Türkiye genelinde hangi illerde hizmet veriyorsunuz?', a: 'İstanbul, Ankara, İzmir, Antalya, Adana, Bursa dahil 81 ilin tamamında yerel teknik ortaklarımızla anahtar teslim hizmet sunuyoruz.' },
+      { q: 'Teklif sürecinde sahne ve 3D tasarım desteği veriliyor mu?', a: 'Evet, kurumsal etkinlikleriniz için 3D salon ve sahne görselleştirmesi teklif dosyanıza dahil olarak hazırlanır.' }
+    ];
+
+    const pageFaqs = matchedPage.faqs || defaultFaqs;
+
     updatePageSeo({
       title: matchedPage.seoTitle,
       description: matchedPage.metaDesc,
       canonicalUrl: `https://www.toplantimerkezi.com.tr/${matchedPage.slug}`,
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: matchedCluster.name, url: `/${matchedCluster.primarySlug}` },
+        { name: matchedPage.title, url: `/${matchedPage.slug}` }
+      ],
+      faqs: pageFaqs,
       schemaType: 'Service',
       schemaData: {
         serviceType: matchedPage.title,
+        name: `${matchedPage.title} - Toplantı Merkezi`,
         provider: {
           '@type': 'Organization',
-          name: 'Toplantı Merkezi'
+          name: 'Toplantı Merkezi',
+          url: 'https://www.toplantimerkezi.com.tr',
+          telephone: '+90 850 308 00 00'
         },
         description: matchedPage.aiDirectAnswer,
-        areaServed: 'Turkey'
+        areaServed: {
+          '@type': 'Country',
+          name: 'Turkey'
+        }
       }
     });
     analytics.serviceView(matchedPage.slug, matchedPage.title);
     window.scrollTo(0, 0);
-  }, [matchedPage]);
+  }, [matchedPage, matchedCluster]);
 
   // Is this the primary Bayi Toplantısı Money Page?
   const isBayiPage = matchedPage.slug.includes('bayi-toplantisi');

@@ -17,18 +17,30 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
   useEffect(() => {
     if (org) {
       updatePageSeo({
-        title: `${org.title} Organizasyonu | Toplantı Merkezi`,
+        title: `${org.title} Organizasyonu`,
         description: `${org.shortDesc} 81 ilde profesyonel planlama, sahne, teknik ekipman ve mekân yönetimiyle tek merkezden kurumsal hizmet.`,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/organizasyonlar/${org.slug}`,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Organizasyonlar', url: '/organizasyonlar' },
+          { name: org.title, url: `/organizasyonlar/${org.slug}` }
+        ],
+        faqs: org.faqs || undefined,
         schemaType: 'Service',
         schemaData: {
           serviceType: org.title,
+          name: `${org.title} - Toplantı Merkezi`,
           provider: {
             '@type': 'Organization',
-            name: 'Toplantı Merkezi'
+            name: 'Toplantı Merkezi',
+            url: 'https://www.toplantimerkezi.com.tr',
+            telephone: '+90 850 308 00 00'
           },
-          areaServed: 'Turkey',
-          description: org.longDesc
+          areaServed: {
+            '@type': 'Country',
+            name: 'Turkey'
+          },
+          description: org.overview || org.shortDesc
         }
       });
       window.scrollTo(0, 0);

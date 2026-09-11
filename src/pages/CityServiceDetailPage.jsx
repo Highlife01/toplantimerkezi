@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ALL_81_CITIES, PROMINENT_CITIES } from '../data/citiesData';
+import { ALL_81_CITIES, PROMINENT_CITIES, getCityGeo } from '../data/citiesData';
 import { ORGANIZATIONS } from '../data/organizationsData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
@@ -14,27 +14,46 @@ export default function CityServiceDetailPage({ onOpenQuoteModal }) {
                ALL_81_CITIES.find(c => c.slug === sehirSlug);
 
   const org = ORGANIZATIONS.find(o => o.slug === hizmetSlug);
+  const cityGeo = city ? getCityGeo(city.slug) : null;
 
   useEffect(() => {
     if (city && org) {
       updatePageSeo({
-        title: `${city.name} ${org.title} Organizasyonu | Toplantı Merkezi`,
-        description: `${city.name} ilinde profesyonel ${org.title.toLowerCase()} organizasyonu. Mekân seçimi, sahne, LED ekran, ses-ışık ve catering hizmetleri tek merkezden yönetilir.`,
+        title: `${city.name} ${org.title}`,
+        description: `${city.name} ilinde profesyonel ${org.title.toLowerCase()}. Mekân seçimi, sahne, LED ekran, ses-ışık ve catering hizmetleri tek merkezden yönetilir. 81 ilde kurumsal operasyon güvencesi.`,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/sehirler/${city.slug}/${org.slug}`,
+        geo: cityGeo,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Şehirler', url: '/sehirler' },
+          { name: city.name, url: `/sehirler/${city.slug}` },
+          { name: org.title, url: `/sehirler/${city.slug}/${org.slug}` }
+        ],
         schemaType: 'Service',
         schemaData: {
           serviceType: `${city.name} ${org.title}`,
+          name: `${city.name} ${org.title} - Toplantı Merkezi`,
           provider: {
             '@type': 'Organization',
-            name: 'Toplantı Merkezi'
+            name: 'Toplantı Merkezi',
+            url: 'https://www.toplantimerkezi.com.tr',
+            telephone: '+90 850 308 00 00'
           },
-          areaServed: city.name,
+          areaServed: {
+            '@type': 'AdministrativeArea',
+            name: city.name,
+            geo: cityGeo ? {
+              '@type': 'GeoCoordinates',
+              latitude: cityGeo.lat,
+              longitude: cityGeo.lng
+            } : undefined
+          },
           description: `${city.name} bölgesinde ${org.title} kurumsal organizasyon ve toplantı yönetimi.`
         }
       });
       window.scrollTo(0, 0);
     }
-  }, [city, org, sehirSlug, hizmetSlug]);
+  }, [city, org, sehirSlug, hizmetSlug, cityGeo]);
 
   if (!city || !org) {
     return (

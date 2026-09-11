@@ -12,9 +12,25 @@ export default function ProjectDetailPage({ onOpenQuoteModal }) {
   useEffect(() => {
     if (project) {
       updatePageSeo({
-        title: `${project.title} | Case Study | Toplantı Merkezi`,
+        title: `${project.title} | Case Study`,
         description: `${project.title} projesinin detayları, ${project.city} lokasyonunda ${project.attendees} kişilik kurumsal organizasyon başarı kriterleri ve sahne/teknik yönetimi.`,
-        canonicalUrl: `https://www.toplantimerkezi.com.tr/projeler/${project.slug}`
+        canonicalUrl: `https://www.toplantimerkezi.com.tr/projeler/${project.slug}`,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Projelerimiz', url: '/projeler' },
+          { name: project.title, url: `/projeler/${project.slug}` }
+        ],
+        schemaType: 'Article',
+        schemaData: {
+          headline: project.title,
+          description: `${project.city} lokasyonunda ${project.attendees} kişilik ${project.title} organizasyonu.`,
+          image: project.image,
+          author: {
+            '@type': 'Organization',
+            name: 'Toplantı Merkezi',
+            url: 'https://www.toplantimerkezi.com.tr'
+          }
+        }
       });
       window.scrollTo(0, 0);
     }

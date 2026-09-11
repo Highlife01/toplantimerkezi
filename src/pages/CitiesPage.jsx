@@ -14,9 +14,19 @@ export default function CitiesPage({ onOpenQuoteModal }) {
 
   useEffect(() => {
     updatePageSeo({
-      title: '81 İlde Organizasyon ve Toplantı Çözümleri | Toplantı Merkezi',
-      description: 'İstanbul, Ankara, İzmir, Antalya, Adana ve Türkiye\'nin 81 ilinde profesyonel kongre, toplantı ve etkinlik yönetimi tek merkezden sağlanır.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/sehirler'
+      title: '81 İlde Organizasyon ve Toplantı Çözümleri',
+      description: 'İstanbul, Ankara, İzmir, Antalya, Adana ve Türkiye\'nin 81 ilinde profesyonel kongre, toplantı ve etkinlik yönetimi tek merkezden sağlanır. 81 il yerel koordinasyon masası.',
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/sehirler',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Şehirler', url: '/sehirler' }
+      ],
+      schemaType: 'CollectionPage',
+      schemaData: {
+        name: 'Toplantı Merkezi 81 İl Şehir Rehberi',
+        description: 'Türkiye genelinde 81 ilde kurumsal toplantı, bayi toplantısı ve etkinlik lokasyonları.',
+        url: 'https://www.toplantimerkezi.com.tr/sehirler'
+      }
     });
     window.scrollTo(0, 0);
   }, []);

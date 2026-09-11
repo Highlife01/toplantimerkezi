@@ -11,9 +11,33 @@ export default function ContactPage({ onOpenQuoteModal }) {
 
   useEffect(() => {
     updatePageSeo({
-      title: 'İletişim & Kurumsal Merkez | Toplantı Merkezi',
-      description: 'Toplantı Merkezi genel merkez iletişim bilgileri, 81 il kurumsal operasyon masası telefon ve WhatsApp hatları.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/iletisim'
+      title: 'İletişim & Kurumsal Merkez',
+      description: 'Toplantı Merkezi genel merkez iletişim bilgileri, 81 il kurumsal operasyon masası telefon ve WhatsApp hatları. 7/24 kurumsal destek.',
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/iletisim',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'İletişim', url: '/iletisim' }
+      ],
+      schemaType: 'ContactPage',
+      schemaData: {
+        name: 'Toplantı Merkezi İletişim',
+        description: 'Kurumsal toplantı ve etkinlik yönetimi iletişim masası.',
+        url: 'https://www.toplantimerkezi.com.tr/iletisim',
+        mainEntity: {
+          '@type': 'Organization',
+          name: 'Toplantı Merkezi',
+          telephone: '+90 850 308 00 00',
+          email: 'info@toplantimerkezi.com.tr',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Büyükdere Cad. No:199 Levent / Maslak Plaza',
+            addressLocality: 'Levent, Beşiktaş',
+            addressRegion: 'İstanbul',
+            postalCode: '34394',
+            addressCountry: 'TR'
+          }
+        }
+      }
     });
     window.scrollTo(0, 0);
   }, []);

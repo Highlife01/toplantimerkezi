@@ -30,17 +30,29 @@ export default function ServiceDetailPage({ onOpenQuoteModal }) {
   useEffect(() => {
     if (service) {
       updatePageSeo({
-        title: `${service.title} | Toplantı Merkezi`,
+        title: `${service.title}`,
         description: `${service.shortDesc} 81 ilde profesyonel teknik ekipman, uzman operatör ve anahtar teslim kurumsal hizmet.`,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/hizmetler/${service.slug}`,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Hizmetler', url: '/hizmetler' },
+          { name: service.title, url: `/hizmetler/${service.slug}` }
+        ],
         schemaType: 'Service',
         schemaData: {
           serviceType: service.title,
+          name: `${service.title} - Toplantı Merkezi`,
           provider: {
             '@type': 'Organization',
-            name: 'Toplantı Merkezi'
+            name: 'Toplantı Merkezi',
+            url: 'https://www.toplantimerkezi.com.tr',
+            telephone: '+90 850 308 00 00'
           },
-          description: service.longDesc
+          areaServed: {
+            '@type': 'Country',
+            name: 'Turkey'
+          },
+          description: service.longDesc || service.shortDesc
         }
       });
       window.scrollTo(0, 0);
