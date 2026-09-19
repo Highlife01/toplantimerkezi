@@ -119,7 +119,7 @@ const generateServicesSitemap = () => {
 // 3. sitemap-cities.xml (81 İlin Tamamı)
 const generateCitiesSitemap = () => {
   const entries = [];
-  
+
   // 81 İlin tamamı /sehirler/{slug}
   ALL_81_CITIES.forEach(city => {
     const priority = ['istanbul', 'ankara', 'antalya', 'izmir'].includes(city.slug) ? '0.95' : '0.85';
@@ -133,8 +133,8 @@ const generateCitiesSitemap = () => {
 const generateLocationsSitemap = () => {
   const entries = [];
   const focusCities = [
-    'istanbul', 'ankara', 'antalya', 'izmir', 'adana', 
-    'mersin', 'bursa', 'kocaeli', 'gaziantep', 'konya', 
+    'istanbul', 'ankara', 'antalya', 'izmir', 'adana',
+    'mersin', 'bursa', 'kocaeli', 'gaziantep', 'konya',
     'kayseri', 'mugla', 'eskisehir', 'samsun', 'trabzon'
   ];
 
@@ -195,7 +195,9 @@ const generateBlogSitemap = () => {
   ];
 
   BLOG_POSTS.forEach(post => {
-    entries.push(formatUrlEntry(`/blog/${post.slug}`, '0.8', 'monthly'));
+    // Gerçek yayın/güncelleme tarihine göre lastmod
+    const lastmod = post.dateModifiedIso || post.dateIso || TODAY;
+    entries.push(formatUrlEntry(`/blog/${post.slug}`, '0.8', 'monthly', lastmod));
   });
 
   return wrapUrlSet(entries);

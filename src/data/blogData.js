@@ -6,6 +6,8 @@ export const BLOG_POSTS = [
     category: 'Bayi Toplantısı',
     readTime: '6 dk okuma',
     date: '15 Mart 2026',
+    dateIso: '2026-03-15',
+    dateModifiedIso: '2026-09-01',
     image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
     summary: 'Yıllık satış hedeflerini duyurmak ve bayi motivasyonunu zirveye taşımak için kusursuz bir bayi toplantısı planlamanın 7 altın kuralı.',
     content: `
@@ -34,6 +36,8 @@ Gündüz oturumlarının yorgunluğunu unutturan, başarılı bayilerin plaket v
     category: 'Maliyet & Bütçe',
     readTime: '5 dk okuma',
     date: '10 Mart 2026',
+    dateIso: '2026-03-10',
+    dateModifiedIso: '2026-08-28',
     image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80',
     summary: 'Mekân kiralamasından catering ve sahne teknolojilerine kadar kurumsal bir toplantının gerçek maliyet kalemlerini hesaplama rehberi.',
     content: `
@@ -65,6 +69,8 @@ Toplantı Merkezi olarak tüm bu kalemleri şeffaf bir maliyetlendirme modülü 
     category: 'Mekân Rehberi',
     readTime: '4 dk okuma',
     date: '02 Mart 2026',
+    dateIso: '2026-03-02',
+    dateModifiedIso: '2026-08-20',
     image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
     summary: 'Tavan yüksekliğinden akustik yalıtıma, kolonsuz yapıdan otopark kapasitesine toplantı mekânı seçiminde dikkat edilecek unsurlar.',
     content: `
@@ -86,6 +92,8 @@ Toplantı mekânı yalnızca bir salon değildir; katılımcıların odaklanmas�
     category: 'Planlama & Süreç',
     readTime: '7 dk okuma',
     date: '22 Şubat 2026',
+    dateIso: '2026-02-22',
+    dateModifiedIso: '2026-08-15',
     image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
     summary: 'Büyük ölçekli 500+ kişilik etkinliklerde kayıt kuyruklarını önleme, kusursuz ikram akışı ve sahne zamanlaması rehberi.',
     content: `
@@ -109,6 +117,8 @@ QR kodlu online akreditasyon ile kapıda yığılma olmadan saniyeler içinde gi
     category: 'Kurumsal Piknik',
     readTime: '5 dk okuma',
     date: '15 Şubat 2026',
+    dateIso: '2026-02-15',
+    dateModifiedIso: '2026-08-10',
     image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1200&q=80',
     summary: 'Çalışanlarınız ve aileleri için açık havada eğlenceli, güvenli ve unutulmaz bir şirket pikniği organize etmenin püf noktaları.',
     content: `
@@ -130,6 +140,8 @@ QR kodlu online akreditasyon ile kapıda yığılma olmadan saniyeler içinde gi
     category: 'Şehir Rehberi',
     readTime: '5 dk okuma',
     date: '05 Şubat 2026',
+    dateIso: '2026-02-05',
+    dateModifiedIso: '2026-08-05',
     image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
     summary: 'Belek, Kundu ve Kemer bölgesindeki kongre resort otellerinin olanakları ve kış/bahar dönemi maliyet avantajları.',
     content: `

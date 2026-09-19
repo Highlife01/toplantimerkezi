@@ -23,6 +23,10 @@ export const updatePageSeo = ({
   description,
   canonicalUrl,
   ogImage,
+  ogImageAlt,
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
   keywords,
   schemaJson,
   schemaType,
@@ -41,8 +45,8 @@ export const updatePageSeo = ({
       : DEFAULT_SEO_CONFIG.domain
   );
 
-  const finalTitle = title 
-    ? (title.includes('Toplantı Merkezi') ? title : `${title} | Toplantı Merkezi`) 
+  const finalTitle = title
+    ? (title.includes('Toplantı Merkezi') ? title : `${title} | Toplantı Merkezi`)
     : DEFAULT_SEO_CONFIG.defaultTitle;
   const finalDesc = description || DEFAULT_SEO_CONFIG.defaultDesc;
   const finalOgImage = ogImage || DEFAULT_SEO_CONFIG.defaultOgImage;
@@ -87,19 +91,29 @@ export const updatePageSeo = ({
   canonicalEl.setAttribute('href', resolvedCanonical);
 
   // 4. OpenGraph & Social Tags
-  setMeta('property', 'og:type', 'website');
+  setMeta('property', 'og:type', ogType);
   setMeta('property', 'og:locale', 'tr_TR');
   setMeta('property', 'og:site_name', DEFAULT_SEO_CONFIG.siteName);
   setMeta('property', 'og:url', resolvedCanonical);
   setMeta('property', 'og:title', finalTitle);
   setMeta('property', 'og:description', finalDesc);
   setMeta('property', 'og:image', finalOgImage);
+  setMeta('property', 'og:image:width', '1200');
+  setMeta('property', 'og:image:height', '630');
+  setMeta('property', 'og:image:alt', ogImageAlt || DEFAULT_SEO_CONFIG.siteName);
+
+  if (ogType === 'article') {
+    if (publishedTime) setMeta('property', 'article:published_time', publishedTime);
+    if (modifiedTime) setMeta('property', 'article:modified_time', modifiedTime);
+    setMeta('property', 'article:publisher', DEFAULT_SEO_CONFIG.domain);
+  }
 
   // 5. Twitter Card Tags
   setMeta('name', 'twitter:card', 'summary_large_image');
   setMeta('name', 'twitter:title', finalTitle);
   setMeta('name', 'twitter:description', finalDesc);
   setMeta('name', 'twitter:image', finalOgImage);
+  setMeta('name', 'twitter:image:alt', ogImageAlt || DEFAULT_SEO_CONFIG.siteName);
   setMeta('name', 'twitter:url', resolvedCanonical);
 
   // 6. GEO & Coğrafi Konum Metadata
@@ -147,8 +161,8 @@ export const updatePageSeo = ({
             closes: '19:30'
           }
         ],
-        hasMap: currentGeo.lat && currentGeo.lng 
-          ? `https://maps.google.com/?q=${currentGeo.lat},${currentGeo.lng}` 
+        hasMap: currentGeo.lat && currentGeo.lng
+          ? `https://maps.google.com/?q=${currentGeo.lat},${currentGeo.lng}`
           : 'https://maps.google.com/?q=41.0778,29.0125',
         parentOrganization: {
           '@type': 'Organization',

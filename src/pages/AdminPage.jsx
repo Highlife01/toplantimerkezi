@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { storageService, PIPELINE_STAGES } from '../services/storageService';
 import { generateProposalPdf } from '../services/pdfService';
 import { notificationService } from '../services/notificationService';
-import { 
-  Building2, Users, DollarSign, TrendingUp, Calendar, 
-  MapPin, Phone, Mail, FileText, CheckCircle2, Clock, 
-  Search, Plus, Edit2, Trash2, Shield, Lock, Download, 
+import {
+  Building2, Users, DollarSign, TrendingUp, Calendar,
+  MapPin, Phone, Mail, FileText, CheckCircle2, Clock,
+  Search, Plus, Edit2, Trash2, Shield, Lock, Download,
   Settings, Layers, Tv, Volume2, Utensils, Star, ArrowRight,
   Filter, ChevronRight, X, AlertCircle, Sparkles, RefreshCw,
   Globe, Link as LinkIcon, Compass, Activity, Bell, Send, Database, MessageSquare
@@ -15,7 +15,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard'); // dashboard | pipeline | costCalc | suppliers | venues | seoManager | redirects | notifications | settings
-  
+
   // Data state
   const [leads, setLeads] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -27,7 +27,7 @@ export default function AdminPage() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [isSendingTestNotif, setIsSendingTestNotif] = useState(false);
   const [testNotifResult, setTestNotifResult] = useState(null);
-  
+
   // Modals & Selection
   const [selectedLead, setSelectedLead] = useState(null);
   const [editingSupplier, setEditingSupplier] = useState(null);
@@ -87,10 +87,10 @@ export default function AdminPage() {
   };
 
   const handleUpdateFinancials = async (leadId, costBreakdown, quotedPrice, vatRate) => {
-    await storageService.updateLead(leadId, { 
-      costBreakdown, 
+    await storageService.updateLead(leadId, {
+      costBreakdown,
       quotedPrice: Number(quotedPrice) || 0,
-      vatRate: Number(vatRate) || 20 
+      vatRate: Number(vatRate) || 20
     });
     loadData();
     if (selectedLead && selectedLead.id === leadId) {
@@ -204,11 +204,11 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-slate-50 text-slate-900">
-      
+
       {/* Admin Topbar */}
       <div className="bg-slate-900 border-b border-slate-800 sticky top-16 z-30 px-4 sm:px-6 lg:px-8 py-3.5 shadow-md">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
+
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl gold-gradient-bg flex items-center justify-center text-slate-950 font-bold shadow-md">
               <Building2 size={18} />
@@ -242,11 +242,10 @@ export default function AdminPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
-                    active 
-                      ? 'gold-gradient-bg text-slate-950 font-bold shadow-md' 
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition whitespace-nowrap ${active
+                      ? 'gold-gradient-bg text-slate-950 font-bold shadow-md'
                       : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
+                    }`}
                 >
                   <Icon size={14} />
                   <span>{tab.label}</span>
@@ -268,11 +267,11 @@ export default function AdminPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        
+
         {/* TAB 1: DASHBOARD */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8 animate-in fade-in duration-300">
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border border-slate-300 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
@@ -336,7 +335,7 @@ export default function AdminPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              
+
               <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-slate-300 shadow-md">
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -377,12 +376,11 @@ export default function AdminPage() {
                           <td className="py-3.5 text-slate-700">{lead.city}</td>
                           <td className="py-3.5 text-slate-950 font-bold">{lead.attendees} Kişi</td>
                           <td className="py-3.5">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              lead.stage === 'Yeni Talep' ? 'bg-red-50 text-red-800 border border-red-200' :
-                              lead.stage === 'Teklif Gönderildi' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
-                              lead.stage === 'Onaylandı' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
-                              'bg-amber-50 text-amber-900 border border-amber-200'
-                            }`}>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${lead.stage === 'Yeni Talep' ? 'bg-red-50 text-red-800 border border-red-200' :
+                                lead.stage === 'Teklif Gönderildi' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                                  lead.stage === 'Onaylandı' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                                    'bg-amber-50 text-amber-900 border border-amber-200'
+                              }`}>
                               {lead.stage}
                             </span>
                           </td>
@@ -443,7 +441,7 @@ export default function AdminPage() {
         {/* TAB 2: PIPELINE */}
         {activeTab === 'pipeline' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            
+
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full md:w-80">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
@@ -476,7 +474,7 @@ export default function AdminPage() {
                 {PIPELINE_STAGES.map(stageName => {
                   const stageLeads = leads.filter(l => {
                     const matchStage = l.stage === stageName;
-                    const matchSearch = pipelineSearch === '' || 
+                    const matchSearch = pipelineSearch === '' ||
                       l.company.toLowerCase().includes(pipelineSearch.toLowerCase()) ||
                       l.contactName.toLowerCase().includes(pipelineSearch.toLowerCase()) ||
                       l.city.toLowerCase().includes(pipelineSearch.toLowerCase());
@@ -567,7 +565,7 @@ export default function AdminPage() {
         {/* TAB 3: COST & PROPOSAL CALCULATOR */}
         {activeTab === 'costCalc' && (
           <div className="space-y-8 animate-in fade-in duration-300">
-            
+
             <div className="bg-white p-6 rounded-2xl border border-slate-300 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-950 font-display">Organizasyon Maliyet & Kâr Hesaplama Modülü</h3>
@@ -593,7 +591,7 @@ export default function AdminPage() {
 
             {selectedLead ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
+
                 <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-300 shadow-md space-y-6">
                   <div className="flex items-center justify-between pb-4 border-b border-slate-200">
                     <div>
@@ -722,7 +720,7 @@ export default function AdminPage() {
                           </button>
 
                           <a
-                            href={`https://wa.me/${selectedLead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Sayın ${selectedLead.contactName}, ${selectedLead.company} adına talep ettiğiniz ${selectedLead.organizationType} organizasyonu fiyat teklifimiz hazırlanmıştır. Toplantı Merkezi teklif takip kodunuz: ${selectedLead.id}. https://toplantimerkezi.web.app/teklif-takip?kod=${selectedLead.id}`)}`}
+                            href={`https://wa.me/${selectedLead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Sayın ${selectedLead.contactName}, ${selectedLead.company} adına talep ettiğiniz ${selectedLead.organizationType} organizasyonu fiyat teklifimiz hazırlanmıştır. Toplantı Merkezi teklif takip kodunuz: ${selectedLead.id}. https://www.toplantimerkezi.com.tr/teklif-takip?kod=${selectedLead.id}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2"
@@ -940,7 +938,7 @@ export default function AdminPage() {
         {/* TAB 6: SUPPLIERS */}
         {activeTab === 'suppliers' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            
+
             <div className="bg-white p-6 rounded-2xl border border-slate-300 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-950 font-display">Tedarikçi Ağı & Satın Alma Veritabanı</h3>
@@ -1081,7 +1079,7 @@ export default function AdminPage() {
               )}
 
               <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 {/* 1. E-Posta Entegrasyonu */}
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
                   <div className="flex items-center justify-between">
@@ -1218,6 +1216,17 @@ export default function AdminPage() {
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm">
+              <div>
+                <label className="block text-xs font-bold text-slate-800 uppercase mb-1.5">Resmi Web Sitesi Domaini</label>
+                <input
+                  type="text"
+                  value={settings.domain || 'www.toplantimerkezi.com.tr'}
+                  onChange={(e) => setSettings({ ...settings, domain: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-950 focus:outline-none focus:border-amber-600 font-semibold"
+                  placeholder="www.toplantimerkezi.com.tr"
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-800 uppercase mb-1.5">Çağrı Merkezi Telefonu</label>
@@ -1349,8 +1358,8 @@ export default function AdminPage() {
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-950 font-semibold"
                   >
                     {[
-                      'Oteller', 'Toplantı salonları', 'Catering firmaları', 'Ses/ışık firmaları', 
-                      'LED ekran firmaları', 'Sahne firmaları', 'Dekorasyon', 'Fotoğraf/video', 
+                      'Oteller', 'Toplantı salonları', 'Catering firmaları', 'Ses/ışık firmaları',
+                      'LED ekran firmaları', 'Sahne firmaları', 'Dekorasyon', 'Fotoğraf/video',
                       'Host/hostes', 'Güvenlik', 'Sağlık', 'Sanatçı', 'Sunucu', 'Tercüman'
                     ].map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>

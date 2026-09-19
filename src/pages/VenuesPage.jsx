@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { VENUES } from '../data/venuesData';
 import { ALL_81_CITIES } from '../data/citiesData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { 
-  Building, MapPin, Users, Filter, Search, 
-  Sparkles, ArrowRight, Star, CheckCircle2, ChevronDown 
+import {
+  Building, MapPin, Users, Filter, Search,
+  Sparkles, ArrowRight, Star, CheckCircle2, ChevronDown
 } from 'lucide-react';
 
 export default function VenuesPage({ onOpenQuoteModal }) {
+  // SearchAction uyumu: /mekanlar?q=... sorgusunu arama alanına aktar
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+
   const [selectedCity, setSelectedCity] = useState('Tümü');
   const [selectedType, setSelectedType] = useState('Tümü');
   const [capacityFilter, setCapacityFilter] = useState('Tümü');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
 
   useEffect(() => {
     updatePageSeo({
@@ -31,7 +35,7 @@ export default function VenuesPage({ onOpenQuoteModal }) {
   const filteredVenues = VENUES.filter(venue => {
     const matchCity = selectedCity === 'Tümü' || venue.city.toLowerCase() === selectedCity.toLowerCase();
     const matchType = selectedType === 'Tümü' || venue.venueType === selectedType;
-    const matchSearch = searchQuery === '' || 
+    const matchSearch = searchQuery === '' ||
       venue.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       venue.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
       venue.district.toLowerCase().includes(searchQuery.toLowerCase());
@@ -47,7 +51,7 @@ export default function VenuesPage({ onOpenQuoteModal }) {
   return (
     <div className="pt-28 pb-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500 mb-8">
           <Link to="/" className="hover:text-amber-700">Ana Sayfa</Link>
@@ -64,7 +68,7 @@ export default function VenuesPage({ onOpenQuoteModal }) {
         {/* Filter Bar */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-md mb-10 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
+
             {/* Search Input */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mekân / Bölge Ara</label>
@@ -154,7 +158,7 @@ export default function VenuesPage({ onOpenQuoteModal }) {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent"></div>
-                
+
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-amber-400 text-xs font-bold flex items-center gap-1.5 shadow-md">
                   <MapPin size={12} />
                   <span>{venue.city} / {venue.district}</span>

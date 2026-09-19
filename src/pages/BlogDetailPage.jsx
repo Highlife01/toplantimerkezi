@@ -16,6 +16,11 @@ export default function BlogDetailPage({ onOpenQuoteModal }) {
         title: `${post.title} | Toplantı Merkezi Rehber`,
         description: post.summary,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/blog/${post.slug}`,
+        ogType: 'article',
+        ogImage: post.image,
+        ogImageAlt: post.title,
+        publishedTime: post.dateIso,
+        modifiedTime: post.dateModifiedIso,
         breadcrumbs: [
           { name: 'Ana Sayfa', url: '/' },
           { name: 'Rehber & Blog', url: '/blog' },
@@ -26,8 +31,9 @@ export default function BlogDetailPage({ onOpenQuoteModal }) {
           headline: post.title,
           description: post.summary,
           image: post.image,
-          datePublished: '2026-08-20',
-          dateModified: '2026-09-11',
+          articleSection: post.category,
+          datePublished: post.dateIso,
+          dateModified: post.dateModifiedIso,
           author: {
             '@type': 'Organization',
             name: 'Toplantı Merkezi Kurumsal Masası',
@@ -63,7 +69,7 @@ export default function BlogDetailPage({ onOpenQuoteModal }) {
   return (
     <div className="pt-28 pb-20 bg-slate-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500 mb-8 overflow-x-auto whitespace-nowrap">
           <Link to="/" className="hover:text-amber-700">Ana Sayfa</Link>

@@ -517,8 +517,16 @@ export const storageService = {
   // ==========================================
   getSettings: () => {
     const saved = getItem('tm_settings', INITIAL_SETTINGS);
+    let needsUpdate = false;
     if (saved && (saved.email === 'teklif@toplantimerkezi.com.tr' || saved.email === 'kurumsal@toplantimerkezi.com.tr')) {
       saved.email = 'info@toplantimerkezi.com.tr';
+      needsUpdate = true;
+    }
+    if (saved && (!saved.domain || saved.domain !== 'www.toplantimerkezi.com.tr')) {
+      saved.domain = 'www.toplantimerkezi.com.tr';
+      needsUpdate = true;
+    }
+    if (needsUpdate) {
       setItem('tm_settings', saved);
     }
     return saved;
