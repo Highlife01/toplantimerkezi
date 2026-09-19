@@ -4,13 +4,38 @@ import { ALL_81_CITIES, PROMINENT_CITIES } from '../data/citiesData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { MapPin, Search, Plane, Users, Building, ArrowRight, Sparkles } from 'lucide-react';
+import { 
+  MapPin, Search, Plane, Users, Building, ArrowRight, 
+  Sparkles, Bot, HelpCircle, ChevronDown, ChevronUp, CheckCircle2 
+} from 'lucide-react';
 
 const REGIONS = ['Tümü', 'Marmara', 'İç Anadolu', 'Ege', 'Akdeniz', 'Güneydoğu Anadolu', 'Karadeniz', 'Doğu Anadolu'];
 
 export default function CitiesPage({ onOpenQuoteModal }) {
   const [selectedRegion, setSelectedRegion] = useState('Tümü');
   const [searchQuery, setSearchQuery] = useState('');
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+
+  const citiesFaqs = [
+    {
+      q: 'Toplantı Merkezi Türkiye genelinde 81 ilde nasıl organizasyon yönetiyor?',
+      a: 'Toplantı Merkezi; 81 ildeki yerel teknik depoları, bölge koordinatörleri ve anlaşmalı kongre otelleri sayesinde şirket toplantıları, bayi buluşmaları ve kurumsal etkinlikleri tek merkezden, tek sözleşmeyle sıfır lojistik hatasıyla yönetir.'
+    },
+    {
+      q: 'Küçük veya orta ölçekli illerde 5 yıldızlı teknik standart sağlanabiliyor mu?',
+      a: 'Evet. İstanbul, Ankara, İzmir, Antalya ve Adana gibi ana merkezlerimizdeki dev reji, LED ekran ve sahne parkurlarımız bölgesel mobil filolarla desteklenerek 81 ilin tamamında büyükşehir kalitesinde anahtar teslim kurulum yapılır.'
+    },
+    {
+      q: 'Şehir dışı kurumsal organizasyonlarda ek bütçe sapması riski var mıdır?',
+      a: 'Hayır. Tüm tekliflerimiz net kalem maliyetlendirme ve sabit fiyat garantisiyle verilir. Salon tahsisi, konaklama, transfer, sahne ve catering maliyetleri sözleşmeyle güvence altına alınır.'
+    },
+    {
+      q: 'Aynı anda birden fazla ilde eşzamanlı roadshow veya eğitim toplantısı yapılabilir mi?',
+      a: 'Evet. Modüler operasyon ağımız sayesinde Türkiye genelinde eşzamanlı olarak birden fazla şehirde bayi toplantısı, ürün lansmanı veya personel eğitimi organizasyonları başarıyla yürütülmektedir.'
+    }
+  ];
+
+  const aiDirectAnswer = 'Toplantı Merkezi 81 İl Sistemi; Türkiye genelindeki tüm kurumsal şirketler, holdingler ve kamu kurumları için İstanbul, Ankara, İzmir, Antalya ve Adana başta olmak üzere 81 ilin tamamında toplantı salonu tahsisi, 3D sahne tasarımı, profesyonel ses-ışık sistemleri, LED ekran prodüksiyonu, simultane tercüme ve VIP transfer hizmetlerini tek merkezden yöneten ulusal MICE operasyon ağıdır.';
 
   useEffect(() => {
     updatePageSeo({
@@ -21,6 +46,7 @@ export default function CitiesPage({ onOpenQuoteModal }) {
         { name: 'Ana Sayfa', url: '/' },
         { name: 'Şehirler', url: '/sehirler' }
       ],
+      faqs: citiesFaqs,
       schemaType: 'CollectionPage',
       schemaData: {
         name: 'Toplantı Merkezi 81 İl Şehir Rehberi',
@@ -54,6 +80,32 @@ export default function CitiesPage({ onOpenQuoteModal }) {
           title="81 İlde Kusursuz Etkinlik ve Toplantı Yönetimi"
           subtitle="Hangi şehirde olursanız olun; yerel tedarikçilerimiz, kongre otellerimiz ve saha direktörlerimizle tek merkezden hizmet veriyoruz."
         />
+
+        {/* Generative Engine Optimization (GEO) AI Direct Answer Card */}
+        <div 
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 relative overflow-hidden"
+        >
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-100/60 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+              <Bot size={20} />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                  Yapay Zekâ ve Arama Motoru Doğrudan Yanıtı (AI Summary)
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
+                  81 İl Ulusal Operasyon
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {aiDirectAnswer}
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Prominent Hubs Showcase Cards */}
         <div className="mb-14">
@@ -117,7 +169,7 @@ export default function CitiesPage({ onOpenQuoteModal }) {
         </div>
 
         {/* 81 Provinces Complete Explorer with Filter */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md">
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md mb-14">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-xl font-bold text-slate-900 font-display">
@@ -179,6 +231,46 @@ export default function CitiesPage({ onOpenQuoteModal }) {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+
+        {/* Localized FAQ Accordion (GEO / Generative Engine Rich Snippet) */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
+          <div className="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wider">
+            <HelpCircle size={16} />
+            <span>Türkiye Geneli 81 İl Sıkça Sorulan Sorular</span>
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 font-display">
+            81 İlde Organizasyon Yönetimi Hakkında Merak Edilenler
+          </h2>
+
+          <div className="space-y-3 pt-2">
+            {citiesFaqs.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <div 
+                  key={index}
+                  className="border border-slate-200 rounded-2xl overflow-hidden transition-all bg-slate-50"
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                    className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-900 hover:text-amber-800 transition"
+                  >
+                    <span>{faq.q}</span>
+                    {isOpen ? (
+                      <ChevronUp size={18} className="text-amber-700 shrink-0" />
+                    ) : (
+                      <ChevronDown size={18} className="text-slate-400 shrink-0" />
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="p-4 sm:p-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

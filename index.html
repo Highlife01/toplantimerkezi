@@ -49,6 +49,12 @@
     <meta property="twitter:description" content="Türkiye'nin 81 ilinde profesyonel kurumsal toplantı ve etkinlik yönetimi." />
     <meta property="twitter:image" content="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80" />
 
+    <!-- LLM Context Link for AI Engines -->
+    <link rel="alternate" type="text/plain" href="https://www.toplantimerkezi.com.tr/llms.txt" title="LLM Context" />
+    <meta name="dc.language" content="tr" />
+    <meta name="dc.coverage" content="Turkey" />
+    <meta name="dc.publisher" content="Toplantı Merkezi Kurumsal Organizasyon A.Ş." />
+
     <!-- Google Fonts Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -58,14 +64,20 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
+      "@type": ["Organization", "ProfessionalService"],
+      "@id": "https://www.toplantimerkezi.com.tr/#organization",
       "name": "Toplantı Merkezi",
       "legalName": "Toplantı Merkezi Kurumsal Organizasyon A.Ş.",
       "url": "https://www.toplantimerkezi.com.tr",
-      "logo": "https://www.toplantimerkezi.com.tr/logo.png",
-      "description": "Türkiye genelinde 81 ilde B2B kurumsal organizasyon, bayi toplantısı, kongre ve etkinlik yönetimi platformu.",
+      "logo": "https://www.toplantimerkezi.com.tr/pwa-192x192.svg",
+      "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+      "description": "Türkiye genelinde 81 ilde B2B kurumsal organizasyon, bayi toplantısı, kongre, seminer, şirket etkinlikleri ve protokol yönetimi platformu.",
       "telephone": "+90 850 308 00 00",
       "email": "info@toplantimerkezi.com.tr",
+      "priceRange": "₺₺₺₺",
+      "currenciesAccepted": "TRY",
+      "paymentAccepted": "Corporate Bank Transfer, Invoice",
+      "openingHours": "Mo-Sa 08:30-19:30",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Büyükdere Cad. No:199 Levent / Maslak Plaza",
@@ -89,6 +101,55 @@
           "name": "81 İl (İstanbul, Ankara, İzmir, Antalya, Adana, Bursa, Gaziantep, Konya, Kayseri, Samsun, Trabzon, Diyarbakır, Eskişehir, Kocaeli...)"
         }
       ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+90 850 308 00 00",
+          "contactType": "customer service",
+          "areaServed": "TR",
+          "availableLanguage": ["Turkish", "English"]
+        }
+      ],
+      "knowsAbout": [
+        "Bayi Toplantısı Organizasyonu",
+        "Şirket Toplantısı Yönetimi",
+        "Kongre ve Konferans Yönetimi",
+        "Kurumsal Piknik Organizasyonu",
+        "Kamu ve Protokol Törenleri",
+        "Sahne ve LED Ekran Prodüksiyonu",
+        "MICE ve Etkinlik Turizmi"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "B2B Kurumsal Etkinlik Hizmetleri",
+        "itemListElement": [
+          {
+            "@type": "OfferCatalog",
+            "name": "Bayi Toplantıları",
+            "url": "https://www.toplantimerkezi.com.tr/bayi-toplantisi-organizasyonu"
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Şirket Toplantıları",
+            "url": "https://www.toplantimerkezi.com.tr/sirket-toplantisi-organizasyonu"
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Kongre Organizasyonu",
+            "url": "https://www.toplantimerkezi.com.tr/kongre-organizasyonu"
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Kurumsal Piknik",
+            "url": "https://www.toplantimerkezi.com.tr/kurumsal-piknik-organizasyonu"
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Kamu Protokol Organizasyonu",
+            "url": "https://www.toplantimerkezi.com.tr/kamu-organizasyonu"
+          }
+        ]
+      },
       "sameAs": [
         "https://www.linkedin.com/company/toplantimerkezi",
         "https://www.instagram.com/toplantimerkezi"

@@ -4,17 +4,19 @@ export const DEFAULT_SEO_CONFIG = {
   defaultTitle: "Toplantı Merkezi | Türkiye'nin Her Yerinde Kurumsal Organizasyon Çözümleri",
   defaultDesc: "Bayi toplantılarından şirket organizasyonlarına, kamu toplantılarından kurumsal pikniklere kadar tüm süreci profesyonel ekibimizle planlıyor, koordine ediyor ve yönetiyoruz. 81 ilde tek merkezden hizmet.",
   defaultOgImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
-  defaultKeywords: "toplantı organizasyonu, bayi toplantısı, şirket toplantısı, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, lansman organizasyonu, 81 il organizasyon",
+  defaultKeywords: "toplantı organizasyonu, bayi toplantısı, şirket toplantısı, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, lansman organizasyonu, 81 il organizasyon, MICE Türkiye",
   geo: {
     region: 'TR-34',
     placename: 'Levent, Beşiktaş, İstanbul, Türkiye',
     position: '41.0778;29.0125',
-    icbm: '41.0778, 29.0125'
+    icbm: '41.0778, 29.0125',
+    lat: 41.0778,
+    lng: 29.0125
   }
 };
 
 /**
- * Sayfa SEO, GEO ve Yapılandırılmış Veri (JSON-LD) Yöneticisi
+ * Sayfa SEO, GEO (Generative Engine Optimization) ve Yapılandırılmış Veri (JSON-LD) Yöneticisi
  */
 export const updatePageSeo = ({
   title,
@@ -28,6 +30,7 @@ export const updatePageSeo = ({
   breadcrumbs,
   faqs,
   geo,
+  speakableSelectors = ['h1', '[data-geo-answer="true"]', 'p.overview-text'],
   robots = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
 }) => {
   if (typeof document === 'undefined') return;
@@ -50,6 +53,7 @@ export const updatePageSeo = ({
 
   // 2. Meta Tag Helper
   const setMeta = (nameAttr, nameVal, content) => {
+    if (!content) return;
     let el = document.querySelector(`meta[${nameAttr}="${nameVal}"]`);
     if (!el) {
       el = document.createElement('meta');
@@ -64,6 +68,14 @@ export const updatePageSeo = ({
   setMeta('name', 'keywords', finalKeywords);
   setMeta('name', 'robots', robots);
   setMeta('name', 'author', 'Toplantı Merkezi Kurumsal Organizasyon A.Ş.');
+  setMeta('name', 'rating', 'General');
+  setMeta('name', 'revisit-after', '7 days');
+
+  // Dublin Core Semantic Tags
+  setMeta('name', 'dc.title', finalTitle);
+  setMeta('name', 'dc.description', finalDesc);
+  setMeta('name', 'dc.publisher', 'Toplantı Merkezi Kurumsal Organizasyon A.Ş.');
+  setMeta('name', 'dc.language', 'tr');
 
   // 3. Canonical Link
   let canonicalEl = document.querySelector('link[rel="canonical"]');
@@ -92,12 +104,18 @@ export const updatePageSeo = ({
 
   // 6. GEO & Coğrafi Konum Metadata
   const currentGeo = geo || DEFAULT_SEO_CONFIG.geo;
-  setMeta('name', 'geo.region', currentGeo.region || DEFAULT_SEO_CONFIG.geo.region);
-  setMeta('name', 'geo.placename', currentGeo.placename || DEFAULT_SEO_CONFIG.geo.placename);
-  setMeta('name', 'geo.position', currentGeo.position || DEFAULT_SEO_CONFIG.geo.position);
-  setMeta('name', 'ICBM', currentGeo.icbm || DEFAULT_SEO_CONFIG.geo.icbm);
+  const geoRegion = currentGeo.region || DEFAULT_SEO_CONFIG.geo.region;
+  const geoPlacename = currentGeo.placename || DEFAULT_SEO_CONFIG.geo.placename;
+  const geoPosition = currentGeo.position || DEFAULT_SEO_CONFIG.geo.position;
+  const geoIcbm = currentGeo.icbm || DEFAULT_SEO_CONFIG.geo.icbm;
+
+  setMeta('name', 'geo.region', geoRegion);
+  setMeta('name', 'geo.placename', geoPlacename);
+  setMeta('name', 'geo.position', geoPosition);
+  setMeta('name', 'ICBM', geoIcbm);
   setMeta('name', 'target_country', 'tr');
-  setMeta('name', 'coverage', currentGeo.placename || 'Turkey');
+  setMeta('name', 'coverage', geoPlacename || 'Turkey');
+  setMeta('name', 'dc.coverage', geoPlacename || 'Turkey');
 
   // 7. Dynamic JSON-LD Structured Data
   // Remove existing dynamic schemas
@@ -105,15 +123,81 @@ export const updatePageSeo = ({
 
   const schemasToInject = [];
 
-  // A) Main Page Schema (Service, LocalBusiness, Organization vb.)
+  // A) Main Page Schema (Service, LocalBusiness, Organization, etc.)
   if (schemaJson) {
     schemasToInject.push(schemaJson);
   } else if (schemaType && schemaData) {
-    schemasToInject.push({
-      '@context': 'https://schema.org',
-      '@type': schemaType,
-      ...schemaData
-    });
+    let enrichedSchemaData = { ...schemaData };
+
+    // Auto-enrich LocalBusiness / ProfessionalService
+    if (schemaType === 'LocalBusiness' || schemaType === 'ProfessionalService') {
+      enrichedSchemaData = {
+        '@context': 'https://schema.org',
+        '@type': ['LocalBusiness', 'ProfessionalService'],
+        '@id': `${resolvedCanonical}#localbusiness`,
+        image: finalOgImage,
+        priceRange: '₺₺₺₺',
+        currenciesAccepted: 'TRY',
+        paymentAccepted: 'Corporate Bank Transfer, Invoice',
+        openingHoursSpecification: [
+          {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            opens: '08:30',
+            closes: '19:30'
+          }
+        ],
+        hasMap: currentGeo.lat && currentGeo.lng 
+          ? `https://maps.google.com/?q=${currentGeo.lat},${currentGeo.lng}` 
+          : 'https://maps.google.com/?q=41.0778,29.0125',
+        parentOrganization: {
+          '@type': 'Organization',
+          name: 'Toplantı Merkezi',
+          url: DEFAULT_SEO_CONFIG.domain
+        },
+        ...schemaData
+      };
+    } else if (schemaType === 'Service') {
+      enrichedSchemaData = {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        provider: {
+          '@type': 'Organization',
+          '@id': `${DEFAULT_SEO_CONFIG.domain}/#organization`,
+          name: 'Toplantı Merkezi',
+          url: DEFAULT_SEO_CONFIG.domain,
+          telephone: '+90 850 308 00 00'
+        },
+        offers: {
+          '@type': 'AggregateOffer',
+          priceCurrency: 'TRY',
+          price: '0',
+          priceSpecification: {
+            '@type': 'UnitPriceSpecification',
+            priceCurrency: 'TRY',
+            name: 'Kurumsal Özel Teklif'
+          }
+        },
+        termsOfService: `${DEFAULT_SEO_CONFIG.domain}/yasal/kullanim`,
+        ...schemaData
+      };
+    } else {
+      enrichedSchemaData = {
+        '@context': 'https://schema.org',
+        '@type': schemaType,
+        ...schemaData
+      };
+    }
+
+    // Add speakable specification for AI voice / search if available
+    if (speakableSelectors && speakableSelectors.length > 0 && !enrichedSchemaData.speakable) {
+      enrichedSchemaData.speakable = {
+        '@type': 'SpeakableSpecification',
+        cssSelector: speakableSelectors
+      };
+    }
+
+    schemasToInject.push(enrichedSchemaData);
   }
 
   // B) Breadcrumbs Schema
@@ -132,18 +216,21 @@ export const updatePageSeo = ({
 
   // C) FAQPage Schema
   if (Array.isArray(faqs) && faqs.length > 0) {
-    schemasToInject.push({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: faqs.map(f => ({
-        '@type': 'Question',
-        name: f.q || f.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: f.a || f.answer
-        }
-      }))
-    });
+    const validFaqs = faqs.filter(f => (f.q || f.question) && (f.a || f.answer));
+    if (validFaqs.length > 0) {
+      schemasToInject.push({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: validFaqs.map(f => ({
+          '@type': 'Question',
+          name: f.q || f.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: f.a || f.answer
+          }
+        }))
+      });
+    }
   }
 
   // Inject each schema

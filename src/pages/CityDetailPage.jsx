@@ -1,18 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ALL_81_CITIES, PROMINENT_CITIES, getCityGeo } from '../data/citiesData';
 import { ORGANIZATIONS } from '../data/organizationsData';
+import { SERVICES } from '../data/servicesData';
 import { VENUES } from '../data/venuesData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
 import { 
   MapPin, Building, Plane, Users, CheckCircle2, 
-  ArrowRight, Sparkles, Phone, MessageSquare, Star, ShieldCheck
+  ArrowRight, Sparkles, Phone, MessageSquare, Star, ShieldCheck,
+  Bot, HelpCircle, ChevronDown, ChevronUp, Layers, Calendar
 } from 'lucide-react';
 
 export default function CityDetailPage({ onOpenQuoteModal }) {
   const { sehirSlug } = useParams();
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
   
   // Find in prominent or all cities
   const city = PROMINENT_CITIES.find(c => c.slug === sehirSlug) || 
@@ -23,6 +26,27 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
   const cityVenues = VENUES.filter(v => 
     city && v.city.toLowerCase() === city.name.toLowerCase()
   );
+
+  const cityFaqs = city ? [
+    {
+      q: `${city.name} genelinde bayi ve şirket toplantısı için en uygun salon nasıl seçilir?`,
+      a: `${city.name} ilinde toplantı salonu belirlenirken katılımcı sayısı, tavan yüksekliği (en az 4.5m), kolonsuz salon mimarisi, havalimanı ve otoyol transfer süreleri analiz edilir. Toplantı Merkezi, ${city.name} bölgesindeki 5 yıldızlı oteller ve kongre merkezleri arasından bütçenize en uygun 3 alternatif salonu 2 saat içinde detaylı olarak sunar.`
+    },
+    {
+      q: `${city.name} organizasyonlarında sahne, LED ekran ve ses-ışık tedariki nasıl yapılır?`,
+      a: `Toplantı Merkezi'nin ${city.name} ve çevre illerdeki yerleşik teknik depoları ve reji ekipleri sayesinde, şehirlerarası ekstra nakliye maliyeti oluşmadan yüksek çözünürlüklü LED ekranlar, line-array ses sistemleri ve özel 3D sahne tasarımları anahtar teslim kurulur.`
+    },
+    {
+      q: `${city.name} dışından gelecek misafirlerin havalimanı ve VIP transferi yönetiliyor mu?`,
+      a: `Evet. ${city.transport ? city.transport.split('.')[0] : city.name + ' havalimanı ve istasyon'} karşılama noktalarında görevli profesyonel hostes kadromuz ve VIP transfer filomuz ile konuklarınız karşılanır ve doğrudan otel/kongre merkezine ulaştırılır.`
+    },
+    {
+      q: `${city.name} kurumsal organizasyonu için resmi teklif süreci ne kadar sürer?`,
+      a: `Web sitemizdeki hızlı teklif formundan veya 0850 308 00 00 çağrı merkezimizden talebinizi iletmenizin ardından, ${city.name} operasyon masamız 2 saat içinde detaylı kalem maliyet tablosu ve 3D yerleşim planını içeren resmi kurumsal teklif dosyasını iletir.`
+    }
+  ] : [];
+
+  const aiDirectAnswer = city ? `${city.name} kurumsal organizasyon ve toplantı yönetimi; bölgedeki 5 yıldızlı kongre otelleri, balo salonları ve etkinlik alanlarında bayi toplantısı, şirket vizyon oturumları, kongre, seminer ve kurumsal pikniklerin uçtan uca koordine edilmesidir. Toplantı Merkezi; salon tahsisinden 3D sahne tasarımına, dev LED ekranlardan ses-ışık sistemlerine, simultane tercümeden havalimanı VIP transferine kadar tüm süreci ${city.name} ilinde tek sözleşme ve yerel operasyon gücüyle anahtar teslim yönetir.` : '';
 
   useEffect(() => {
     if (city) {
@@ -36,13 +60,16 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
           { name: 'Şehirler', url: '/sehirler' },
           { name: city.name, url: `/sehirler/${city.slug}` }
         ],
+        faqs: cityFaqs,
         schemaType: 'LocalBusiness',
         schemaData: {
-          name: `Toplantı Merkezi ${city.name} Kurumsal Organizasyon`,
+          name: `Toplantı Merkezi ${city.name} Kurumsal Organizasyon Masası`,
           telephone: '+90 850 308 00 00',
           email: 'info@toplantimerkezi.com.tr',
           url: `https://www.toplantimerkezi.com.tr/sehirler/${city.slug}`,
           priceRange: '₺₺₺₺',
+          currenciesAccepted: 'TRY',
+          paymentAccepted: 'Corporate Bank Transfer, Invoice',
           address: {
             '@type': 'PostalAddress',
             addressLocality: city.name,
@@ -56,9 +83,9 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
           } : undefined,
           areaServed: {
             '@type': 'AdministrativeArea',
-            name: city.name
+            name: `${city.name}, Türkiye`
           },
-          description: `${city.name} ilinde kurumsal toplantı, bayi toplantısı, kongre ve etkinlik yönetimi.`
+          description: aiDirectAnswer
         }
       });
       window.scrollTo(0, 0);
@@ -91,17 +118,18 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
         </div>
 
         {/* Hero Section */}
-        <div className="relative rounded-3xl overflow-hidden min-h-[400px] flex items-end p-6 sm:p-10 md:p-12 mb-12 shadow-xl border border-slate-200">
+        <div className="relative rounded-3xl overflow-hidden min-h-[400px] flex items-end p-6 sm:p-10 md:p-12 mb-8 shadow-xl border border-slate-200">
           <img
             src={city.image || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80'}
-            alt={city.name}
+            alt={`${city.name} Kurumsal Toplantı ve Organizasyon`}
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
 
           <div className="relative z-10 max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-amber-400/40 text-amber-400 text-xs font-bold shadow-md">
-              <span>Plaka: {city.plate} • {city.region} Bölgesi</span>
+              <MapPin size={13} />
+              <span>Plaka: {city.plate} • {city.region} Bölgesi MICE Hattı</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-display">
@@ -118,8 +146,34 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
                 className="px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-xs sm:text-sm shadow-md hover:scale-105 transition flex items-center gap-2"
               >
                 <Sparkles size={16} />
-                <span>{city.name} İçin Teklif Al</span>
+                <span>{city.name} İçin 2 Saatte Teklif Al</span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Generative Engine Optimization (GEO) AI Direct Answer Card */}
+        <div 
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 relative overflow-hidden"
+        >
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-100/60 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+              <Bot size={20} />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                  Yapay Zekâ ve Arama Motoru Doğrudan Yanıtı (AI Summary)
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
+                  {city.name} MICE Özeti
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {aiDirectAnswer}
+              </p>
             </div>
           </div>
         </div>
@@ -143,7 +197,7 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
                     <span>Ulaşım & Havalimanı</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    {city.transport || 'Havalimanı ve şehirlerarası transfer bağlantıları.'}
+                    {city.transport || 'Havalimanı, YHT ve otoyol transfer bağlantıları.'}
                   </p>
                 </div>
 
@@ -153,7 +207,7 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
                     <span>Konaklama & Kapasite</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    {city.capacityOverview || '5 yıldızlı oteller ve kurumsal toplantı salonları.'}
+                    {city.capacityOverview || '5 yıldızlı zincir oteller ve kurumsal kongre salonları.'}
                   </p>
                 </div>
               </div>
@@ -177,12 +231,16 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
 
             {/* City + Organization Dynamic SEO Matrix Links */}
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 font-display">
-                {city.name} İçin Kurumsal Organizasyon Sayfaları
-              </h2>
-              <p className="text-xs text-slate-600">
-                {city.name} ilinde gerçekleştireceğiniz organizasyon türüne özel detaylı planlama rehberi ve teklif modülleri:
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 font-display">
+                    {city.name} İçin Kurumsal Organizasyon Sayfaları
+                  </h2>
+                  <p className="text-xs text-slate-600 mt-1">
+                    {city.name} ilinde gerçekleştireceğiniz kurumsal etkinlik türüne özel planlama ve teklif modülleri:
+                  </p>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                 {ORGANIZATIONS.map(org => (
@@ -196,6 +254,38 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
                     </div>
                     <div className="text-[11px] text-slate-500 mt-2 flex items-center justify-between group-hover:text-amber-700 font-semibold">
                       <span>Detayları Gör</span>
+                      <ArrowRight size={12} className="group-hover:translate-x-1 transition" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* City Technical Modules Matrix Links */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 font-display">
+                    {city.name} Teknik Prodüksiyon & Ekipman Hizmetleri
+                  </h2>
+                  <p className="text-xs text-slate-600 mt-1">
+                    {city.name} ilinde yerleşik reji, sahne ve ses-ışık sistemleri:
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
+                {SERVICES.slice(0, 6).map(srv => (
+                  <Link
+                    key={srv.slug}
+                    to={`/sehirler/${city.slug}/${srv.slug}`}
+                    className="p-3.5 rounded-2xl bg-slate-50 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300 transition flex flex-col justify-between group"
+                  >
+                    <div className="font-bold text-xs text-slate-900 group-hover:text-amber-800 transition">
+                      {city.name} {srv.title}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-2 flex items-center justify-between group-hover:text-amber-700 font-semibold">
+                      <span>Modülü İncele</span>
                       <ArrowRight size={12} className="group-hover:translate-x-1 transition" />
                     </div>
                   </Link>
@@ -223,6 +313,46 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
               </div>
             )}
 
+            {/* Localized FAQ Accordion (GEO / Generative Engine Rich Snippet) */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
+              <div className="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wider">
+                <HelpCircle size={16} />
+                <span>{city.name} Kurumsal Sıkça Sorulan Sorular</span>
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 font-display">
+                {city.name} Organizasyon Süreci Hakkında Merak Edilenler
+              </h2>
+
+              <div className="space-y-3 pt-2">
+                {cityFaqs.map((faq, index) => {
+                  const isOpen = openFaqIndex === index;
+                  return (
+                    <div 
+                      key={index}
+                      className="border border-slate-200 rounded-2xl overflow-hidden transition-all bg-slate-50"
+                    >
+                      <button
+                        onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                        className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-900 hover:text-amber-800 transition"
+                      >
+                        <span>{faq.q}</span>
+                        {isOpen ? (
+                          <ChevronUp size={18} className="text-amber-700 shrink-0" />
+                        ) : (
+                          <ChevronDown size={18} className="text-slate-400 shrink-0" />
+                        )}
+                      </button>
+                      {isOpen && (
+                        <div className="p-4 sm:p-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
           </div>
 
           {/* Right Sticky Sidebar */}
@@ -234,8 +364,23 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
                   {city.name} İçin Hemen Teklif Alın
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  {city.name} genelindeki salon, otel, ses, LED ve personel gereksinimleriniz için anahtar teslim bütçe çalışması sunalım.
+                  {city.name} genelindeki salon, otel, ses, LED ve personel gereksinimleriniz için 2 saat içinde anahtar teslim bütçe çalışması sunalım.
                 </p>
+              </div>
+
+              <div className="space-y-2.5 p-4 rounded-2xl bg-amber-50/60 border border-amber-200/60 text-xs text-slate-700">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                  <span>Tek Sözleşme, Tek Muhatap Güvencesi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                  <span>3D Salon Simülasyonu & Sahne Tasarımı</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                  <span>Yerleşik Depo ile Sıfır Ekstra Nakliye</span>
+                </div>
               </div>
 
               <button

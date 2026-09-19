@@ -129,7 +129,7 @@ const generateCitiesSitemap = () => {
   return wrapUrlSet(entries);
 };
 
-// 4. sitemap-locations.xml (Öncelikli Şehirler x Money Page / Organizasyon Kombinasyonları)
+// 4. sitemap-locations.xml (Öncelikli Şehirler x Organizasyon ve Teknik Hizmet Kombinasyonları)
 const generateLocationsSitemap = () => {
   const entries = [];
   const focusCities = [
@@ -148,10 +148,27 @@ const generateLocationsSitemap = () => {
     'gala-odul-geceleri'
   ];
 
+  const topServices = [
+    'ses-isik',
+    'sahne-dekor',
+    'led-ekran-goruntu',
+    'mekan-planlama',
+    'catering'
+  ];
+
+  // A) Focus Cities x Popular Organizations
   focusCities.forEach(citySlug => {
     popularOrgs.forEach(orgSlug => {
       const priority = ['istanbul', 'ankara', 'antalya'].includes(citySlug) ? '0.9' : '0.85';
       entries.push(formatUrlEntry(`/sehirler/${citySlug}/${orgSlug}`, priority, 'weekly'));
+    });
+  });
+
+  // B) Top MICE Hubs x High-Intent Technical Services
+  const topHubs = ['istanbul', 'ankara', 'antalya', 'izmir', 'adana', 'bursa'];
+  topHubs.forEach(citySlug => {
+    topServices.forEach(srvSlug => {
+      entries.push(formatUrlEntry(`/sehirler/${citySlug}/${srvSlug}`, '0.85', 'weekly'));
     });
   });
 

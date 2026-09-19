@@ -6,6 +6,47 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/*
 
-# Host & Sitemap
+# AI Search & Retrieval Bots (GEO - Generative Engine Optimization)
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+
+# Host, Sitemaps & LLM Context Standards
 Host: https://www.toplantimerkezi.com.tr
 Sitemap: https://www.toplantimerkezi.com.tr/sitemap.xml
+
+# LLM Direct Knowledge Context
+# https://www.toplantimerkezi.com.tr/llms.txt
+# https://www.toplantimerkezi.com.tr/llms-full.txt
