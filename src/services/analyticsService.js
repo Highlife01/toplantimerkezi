@@ -3,6 +3,27 @@
  * Provides standard B2B event dispatching for Google Analytics 4 and Google Tag Manager
  */
 
+// Initialize dataLayer & gtag queue safely if in browser
+if (typeof window !== 'undefined') {
+  window.dataLayer = window.dataLayer || [];
+  if (typeof window.gtag !== 'function') {
+    window.gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+  }
+
+  // Inject GA4 script dynamically if GA ID is configured in env
+  const gaId = import.meta.env.VITE_GA_ID;
+  if (gaId && gaId !== 'G-TOPLANTIMERKEZI' && !document.querySelector(`script[src*="${gaId}"]`)) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+    document.head.appendChild(script);
+    window.gtag('js', new Date());
+    window.gtag('config', gaId, { send_page_view: true });
+  }
+}
+
 export const trackEvent = (eventName, params = {}) => {
   try {
     // 1. Google Tag Manager (dataLayer)
@@ -14,7 +35,7 @@ export const trackEvent = (eventName, params = {}) => {
       });
     }
 
-    // 2. Google Analytics 4 (gtag)
+    // 2. Google Analytics 4 (gtag queue or live function)
     if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
       window.gtag('event', eventName, params);
     }
@@ -29,7 +50,7 @@ export const trackEvent = (eventName, params = {}) => {
     }
 
     // Development logging
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(`[TM Analytics Event] ${eventName}:`, params);
     }
   } catch (err) {

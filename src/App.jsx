@@ -36,6 +36,7 @@ const ClusterMoneyPage = lazy(() => import('./pages/ClusterMoneyPage'));
 const TopicHubPage = lazy(() => import('./pages/TopicHubPage'));
 const QuoteTrackingPage = lazy(() => import('./pages/QuoteTrackingPage'));
 const IndustryDetailPage = lazy(() => import('./pages/IndustryDetailPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Elegant Loading Fallback
 function PageLoadingFallback() {
@@ -183,6 +184,9 @@ export default function App() {
 
               {/* Admin Management & CRM */}
               <Route path="/admin" element={<AdminPage />} />
+
+              {/* 404 Wildcard Fallback */}
+              <Route path="*" element={<NotFoundPage onOpenQuoteModal={handleOpenQuoteModal} />} />
             </Routes>
           </Suspense>
         </main>

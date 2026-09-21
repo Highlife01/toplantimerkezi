@@ -1,7 +1,7 @@
 export const DEFAULT_SEO_CONFIG = {
   domain: 'https://www.toplantimerkezi.com.tr',
   siteName: 'Toplantı Merkezi',
-  defaultTitle: "Toplantı Merkezi | Türkiye'nin Her Yerinde Kurumsal Organizasyon Çözümleri",
+  defaultTitle: "Toplantı Merkezi | Kurumsal Organizasyon & Toplantı Çözümleri",
   defaultDesc: "Bayi toplantılarından şirket organizasyonlarına, kamu toplantılarından kurumsal pikniklere kadar tüm süreci profesyonel ekibimizle planlıyor, koordine ediyor ve yönetiyoruz. 81 ilde tek merkezden hizmet.",
   defaultOgImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
   defaultKeywords: "toplantı organizasyonu, bayi toplantısı, şirket toplantısı, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, lansman organizasyonu, 81 il organizasyon, MICE Türkiye",

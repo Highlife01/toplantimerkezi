@@ -7,6 +7,7 @@ import { VENUES } from '../data/venuesData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
+import NotFoundPage from './NotFoundPage';
 import { 
   MapPin, Building, Plane, Users, CheckCircle2, 
   ArrowRight, Sparkles, Phone, MessageSquare, Star, ShieldCheck,
@@ -93,15 +94,7 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
   }, [city, sehirSlug, cityGeo]);
 
   if (!city) {
-    return (
-      <div className="min-h-screen pt-36 pb-20 text-center px-4 bg-slate-50">
-        <h2 className="text-2xl font-bold text-slate-900 font-display">Şehir Bulunamadı</h2>
-        <p className="text-sm text-slate-600 mt-2">Aradığınız şehir sayfası mevcut değil.</p>
-        <Link to="/sehirler" className="mt-6 inline-block px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-bold text-xs">
-          Tüm Şehirleri Gör
-        </Link>
-      </div>
-    );
+    return <NotFoundPage onOpenQuoteModal={onOpenQuoteModal} />;
   }
 
   return (

@@ -31,8 +31,8 @@ import {
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDummyKeyForInitialBuildCheckToplantiMerkezi",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "toplantimerkezi.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "adanahizlisatis",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "adanahizlisatis.firebasestorage.app",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "toplantimerkezi",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "toplantimerkezi.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1029384756",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1029384756:web:abcdef123456"
 };

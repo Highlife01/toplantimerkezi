@@ -74,7 +74,7 @@ Uygulama `react-router-dom` ile tam çoklu sayfa mimarisi ve sayfa değişimleri
 ## 🔍 4. SEO, GEO & AI Search Sistemi
 
 1. **AI Search & Semantic Entity**: ChatGPT, Gemini, Copilot ve Perplexity gibi yapay zekâ cevap sistemleri için her money page'de 40–80 kelimelik `aiDirectAnswer` bloğu bulunur.
-2. **Coğrafi Konum (GEO)**: `index.html` ve `seoService.js` üzerinde `geo.region (TR)`, `geo.placename`, `geo.position (39.9334;32.8597)` ve `ICBM` etiketleri tanımlıdır.
+2. **Coğrafi Konum (GEO)**: `index.html` ve `seoService.js` üzerinde `geo.region (TR-34)`, `geo.placename (Levent, Beşiktaş, İstanbul, Türkiye)`, `geo.position (41.0778;29.0125)` ve `ICBM (41.0778, 29.0125)` etiketleri tanımlıdır.
 3. **Yapılandırılmış Veri (JSON-LD)**: `Organization`, `LocalBusiness`, `Service`, `Article`, `BreadcrumbList`, `GeoCoordinates` şemaları dinamik olarak enjekte edilir.
 4. **Sitemap İndeksi**: `public/sitemap.xml` master indeksi altında 7 alt sitemap (`sitemap-pages.xml`, `sitemap-services.xml`, `sitemap-cities.xml`, `sitemap-locations.xml`, `sitemap-venues.xml`, `sitemap-projects.xml`, `sitemap-blog.xml`) yer alır.
 5. **GA4 / GTM Event Takip Motoru (`src/services/analyticsService.js`)**: `generate_lead`, `quote_form_start`, `quote_form_complete`, `phone_click`, `whatsapp_click`, `venue_view`, `service_view`, `city_page_view` eventlerini tetikler.

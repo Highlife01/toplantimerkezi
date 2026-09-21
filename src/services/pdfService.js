@@ -1,6 +1,23 @@
 import jsPDF from 'jspdf';
 import { storageService } from './storageService';
 
+/**
+ * jsPDF standard helvetica fontu icin Turkce karakter sanitizasyon yardimcisi
+ * Karakterlerin bozulmasini veya soru isareti cikmasini onler
+ */
+export const trToAscii = (str) => {
+  if (!str) return '';
+  return String(str)
+    .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
+    .replace(/ü/g, 'u').replace(/Ü/g, 'U')
+    .replace(/ş/g, 's').replace(/Ş/g, 'S')
+    .replace(/ı/g, 'i').replace(/İ/g, 'I')
+    .replace(/ö/g, 'o').replace(/Ö/g, 'O')
+    .replace(/ç/g, 'c').replace(/Ç/g, 'C')
+    .replace(/[“”]/g, '"').replace(/[‘’]/g, "'")
+    .replace(/–/g, '-').replace(/—/g, '-');
+};
+
 export const generateProposalPdf = (lead) => {
   const settings = storageService.getSettings();
   const financials = storageService.calculateLeadFinancials(lead);
@@ -67,8 +84,8 @@ export const generateProposalPdf = (lead) => {
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
-  doc.text(`Firma: ${lead.company || '-'}`, margin + 5, y + 15);
-  doc.text(`Yetkili: ${lead.contactName || '-'} (${lead.title || 'Yetkili'})`, margin + 5, y + 21);
+  doc.text(`Firma: ${trToAscii(lead.company) || '-'}`, margin + 5, y + 15);
+  doc.text(`Yetkili: ${trToAscii(lead.contactName) || '-'} (${trToAscii(lead.title) || 'Yetkili'})`, margin + 5, y + 21);
   doc.text(`Telefon: ${lead.phone || '-'}`, margin + 5, y + 27);
   doc.text(`E-posta: ${lead.email || '-'}`, margin + 5, y + 33);
 
@@ -78,8 +95,8 @@ export const generateProposalPdf = (lead) => {
   doc.text('ORGANIZASYON DETAYLARI', rightColX, y + 8);
 
   doc.setFont('helvetica', 'normal');
-  doc.text(`Organizasyon Turu: ${lead.organizationType || '-'}`, rightColX, y + 15);
-  doc.text(`Lokasyon: ${lead.city || '-'} ${lead.district ? '/ ' + lead.district : ''}`, rightColX, y + 21);
+  doc.text(`Organizasyon Turu: ${trToAscii(lead.organizationType) || '-'}`, rightColX, y + 15);
+  doc.text(`Lokasyon: ${trToAscii(lead.city) || '-'} ${lead.district ? '/ ' + trToAscii(lead.district) : ''}`, rightColX, y + 21);
   doc.text(`Tarih: ${lead.targetDate || '-'} ${lead.isMultiDay ? ' - ' + (lead.endDate || '') : ''}`, rightColX, y + 27);
   doc.text(`Katilimci Sayisi: Yaklasik ${lead.attendees || 0} Kisi`, rightColX, y + 33);
 
@@ -215,6 +232,7 @@ export const generateProposalPdf = (lead) => {
   doc.text('Bu belge Toplanti Merkezi CRM sistemi tarafindan resmi kurumsal teklif olarak uretilmistir. www.toplantimerkezi.com.tr', pageWidth / 2, 288, { align: 'center' });
 
   // Save / Download
-  const fileName = `Toplanti_Merkezi_Teklif_${lead.company?.replace(/[^a-zA-Z0-9]/g, '_') || lead.id}.pdf`;
+  const sanitizedCompany = trToAscii(lead.company)?.replace(/[^a-zA-Z0-9]/g, '_') || lead.id;
+  const fileName = `Toplanti_Merkezi_Teklif_${sanitizedCompany}.pdf`;
   doc.save(fileName);
 };

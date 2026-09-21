@@ -2,34 +2,38 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Yardımcı fonksiyonlar
+    // Yardımcı fonksiyonlar: Admin kontrolü
     function isAdmin() {
       return request.auth != null;
     }
     
     // Teklif Talepleri (leads)
-    // Ziyaretçiler talep oluşturabilir ve kendi takip koduyla okuyabilir
-    // Yöneticiler tüm talepleri okuyabilir, güncelleyebilir ve silebilir
+    // Ziyaretçiler sadece geçerli şirket ve telefon bilgisiyle talep oluşturabilir (create).
+    // Tüm müşteri veritabanını toplu çekmek (list) kesinlikle kamuya KAPALIDIR (KVKK koruması).
+    // Ziyaretçi yalnızca elindeki benzersiz takip koduyla doğrudan tekil dokümanı okuyabilir (get).
+    // Güncelleme ve silme yalnızca yetkili yöneticilere aittir.
     match /leads/{leadId} {
       allow create: if request.resource.data.company != null 
                     && request.resource.data.phone != null;
-      allow read: if true; // Ziyaretçiler /teklif-takip üzerinden kendi kodunu arayabilir
+      allow get: if true;
+      allow list: if isAdmin();
       allow update, delete: if isAdmin();
     }
     
     // Sistem Ayarları (settings)
+    // Hassas admin PIN, CRM ayarları ve API bilgileri kamuya kapalıdır.
     match /settings/{settingId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
     
     // Tedarikçiler (suppliers)
+    // Tedarikçi listesi, özel fiyat seviyeleri ve iletişimler iç CRM verisidir.
     match /suppliers/{supplierId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
     
     // Mekânlar (venues)
+    // Ziyaretçiler salon ve otel kataloğunu görüntüleyebilir.
     match /venues/{venueId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -49,8 +53,7 @@ service cloud.firestore {
     
     // Bildirim Günlükleri (notification_logs)
     match /notification_logs/{logId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow create, read, update, delete: if isAdmin();
     }
   }
 }

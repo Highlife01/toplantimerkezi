@@ -7,6 +7,7 @@ import { SEO_CLUSTERS } from '../data/seoClustersData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
+import NotFoundPage from './NotFoundPage';
 import { 
   MapPin, Building, Users, CheckCircle2, ArrowRight, 
   Sparkles, Phone, ShieldCheck, Bot, HelpCircle, ChevronDown, ChevronUp, Layers
@@ -134,15 +135,7 @@ export default function CityServiceDetailPage({ onOpenQuoteModal }) {
   }, [city, entity, sehirSlug, hizmetSlug, cityGeo]);
 
   if (!city || !entity) {
-    return (
-      <div className="min-h-screen pt-36 pb-20 text-center px-4 bg-slate-50">
-        <h2 className="text-2xl font-bold text-slate-900 font-display">Sayfa Bulunamadı</h2>
-        <p className="text-sm text-slate-600 mt-2">Aradığınız şehir ve organizasyon kombinasyonu bulunamadı.</p>
-        <Link to="/sehirler" className="mt-6 inline-block px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-bold text-xs">
-          Şehirlere Dön
-        </Link>
-      </div>
-    );
+    return <NotFoundPage onOpenQuoteModal={onOpenQuoteModal} />;
   }
 
   return (

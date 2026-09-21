@@ -1,19 +1,19 @@
-import { 
-  db, 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  setDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  onSnapshot, 
+import {
+  db,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
   serverTimestamp,
-  isFirebaseInitialized 
+  isFirebaseInitialized
 } from './firebase';
 import { notificationService } from './notificationService';
 import { INITIAL_SUPPLIERS } from '../data/suppliersData';
@@ -226,8 +226,9 @@ export const storageService = {
   // ==========================================
   // 1. LEADS (TEKLİF TALEPLERİ)
   // ==========================================
-  getLeads: () => getItem('tm_leads', INITIAL_LEADS),
+  getLeads: () => getItem('tm_leads', []),
   saveLeads: (leads) => setItem('tm_leads', leads),
+  seedDemoLeads: () => setItem('tm_leads', INITIAL_LEADS),
 
   /**
    * Firestore'dan tüm talepleri asenkron çeker ve yerel önbelleği günceller
@@ -258,7 +259,7 @@ export const storageService = {
     // İlk render için önbellekteki veriyi hemen ver
     callback(storageService.getLeads());
 
-    if (!db) return () => {};
+    if (!db) return () => { };
 
     try {
       const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
@@ -277,7 +278,47 @@ export const storageService = {
       return unsubscribe;
     } catch (e) {
       console.warn('[Firestore Realtime] Subscription error:', e);
-      return () => {};
+      return () => { };
+    }
+  },
+
+  /**
+   * Güvenli, tahmin edilemez benzersiz Takip Kodu üretir (M5 düzeltmesi).
+   * Format: TLP-2026-XXXXXX (karışan karakterler hariç, ~1 milyar kombinasyon)
+   */
+  generateLeadId: () => {
+    const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 0/O ve 1/I/L karakterleri hariç
+    let suffix = '';
+    const randomArr = new Uint32Array(6);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(randomArr);
+    } else {
+      for (let i = 0; i < 6; i++) randomArr[i] = Math.floor(Math.random() * 4294967295);
+    }
+    randomArr.forEach(n => { suffix += alphabet[n % alphabet.length]; });
+    return `TLP-${new Date().getFullYear()}-${suffix}`;
+  },
+
+  /**
+   * İstemci tarafı spam/flood koruması (H5 düzeltmesi).
+   * Kurallar: ardışık iki talep arası minimum 60 sn, saatlik maksimum 3 talep.
+   */
+  checkLeadRateLimit: () => {
+    try {
+      const now = Date.now();
+      const history = getItem('tm_lead_rate_history', []).filter(ts => now - ts < 60 * 60 * 1000);
+      const lastTs = history.length > 0 ? history[history.length - 1] : 0;
+      if (now - lastTs < 60 * 1000) {
+        const waitSeconds = Math.ceil((60 * 1000 - (now - lastTs)) / 1000);
+        return { allowed: false, reason: `Güvenlik nedeniyle çok hızlı ardışık talep gönderimi engellendi. Lütfen ${waitSeconds} saniye bekleyip tekrar deneyin.` };
+      }
+      if (history.length >= 3) {
+        const waitMinutes = Math.ceil((60 * 60 * 1000 - (now - history[0])) / 60000);
+        return { allowed: false, reason: `Saatlik teklif talebi limitine ulaşıldı. Lütfen ${waitMinutes} dakika sonra tekrar deneyin veya bizi arayın: 0850 308 00 00` };
+      }
+      return { allowed: true };
+    } catch (e) {
+      return { allowed: true }; // Rate limit hatası kullanıcıyı engellememeli
     }
   },
 
@@ -285,8 +326,14 @@ export const storageService = {
    * Yeni teklif talebi ekler (Firestore + LocalStorage + Çok Kanallı Bildirim)
    */
   addLead: async (leadData) => {
+    // Spam / flood koruması (H5)
+    const rateCheck = storageService.checkLeadRateLimit();
+    if (!rateCheck.allowed) {
+      throw new Error(rateCheck.reason);
+    }
+
     const leads = storageService.getLeads();
-    const newId = `TLP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newId = storageService.generateLeadId();
     const newLead = {
       id: newId,
       createdAt: new Date().toISOString(),
@@ -309,6 +356,14 @@ export const storageService = {
     // 1. Önbelleğe anında yaz (Anlık UI tepkisi)
     leads.unshift(newLead);
     storageService.saveLeads(leads);
+
+    // 2. Spam koruması geçmişini güncelle (H5)
+    try {
+      const nowTs = Date.now();
+      const rateHistory = getItem('tm_lead_rate_history', []).filter(ts => nowTs - ts < 60 * 60 * 1000);
+      rateHistory.push(nowTs);
+      setItem('tm_lead_rate_history', rateHistory);
+    } catch (e) { /* Rate limit kaydı kritik değil */ }
 
     // 2. Firestore'a asenkron yaz
     if (db) {
@@ -356,11 +411,12 @@ export const storageService = {
           updatedAt: new Date().toISOString()
         });
       } catch (err) {
-        // Doküman yoksa setDoc ile oluştur
+        // Doküman yoksa merge:true ile oluştur (concurrent overwrite riski yok - M8 düzeltmesi)
         try {
-          if (updatedLead) {
-            await setDoc(doc(db, 'leads', id), updatedLead);
-          }
+          await setDoc(doc(db, 'leads', id), {
+            ...updates,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
         } catch (e) {
           console.warn('[Firestore] Lead update error:', e);
         }
@@ -395,24 +451,24 @@ export const storageService = {
 
     // Önce yerel önbellekte ara
     const leads = storageService.getLeads();
-    const localMatch = leads.find(l => 
-      l.id.toUpperCase() === term || 
+    const localMatch = leads.find(l =>
+      l.id.toUpperCase() === term ||
       l.id.replace(/[^0-9]/g, '') === term.replace(/[^0-9]/g, '') ||
       l.phone.replace(/[^0-9]/g, '').includes(term.replace(/[^0-9]/g, ''))
     );
 
     if (localMatch) return localMatch;
 
-    // Firestore'da ara
+    // Firestore'da ara (Tekil getDoc güvenli okuma)
     if (db) {
       try {
-        const qById = query(collection(db, 'leads'), where('id', '==', term));
-        const snapshot = await getDocs(qById);
-        if (!snapshot.empty) {
-          return snapshot.docs[0].data();
+        const docRef = doc(db, 'leads', term);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          return docSnap.data();
         }
       } catch (err) {
-        console.warn('[Firestore] findLead query error:', err);
+        console.warn('[Firestore] findLead getDoc error:', err);
       }
     }
 
@@ -451,7 +507,7 @@ export const storageService = {
   // ==========================================
   getSuppliers: () => getItem('tm_suppliers', INITIAL_SUPPLIERS),
   saveSuppliers: (suppliers) => setItem('tm_suppliers', suppliers),
-  
+
   addSupplier: async (supplier) => {
     const list = storageService.getSuppliers();
     const newId = `sup-${Date.now()}`;

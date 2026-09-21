@@ -27,6 +27,9 @@ export default function AdminPage() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [isSendingTestNotif, setIsSendingTestNotif] = useState(false);
   const [testNotifResult, setTestNotifResult] = useState(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState(0);
+  const [loginError, setLoginError] = useState('');
 
   // Modals & Selection
   const [selectedLead, setSelectedLead] = useState(null);
@@ -68,11 +71,28 @@ export default function AdminPage() {
 
   const handleLogin = (e) => {
     if (e) e.preventDefault();
-    if (pinInput === settings.adminPin || pinInput === '1234') {
+    if (Date.now() < lockoutUntil) {
+      const remainingSeconds = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      setLoginError(`Güvenlik nedeniyle giriş kilitli. Lütfen ${remainingSeconds} saniye bekleyin.`);
+      return;
+    }
+
+    const currentPin = settings?.adminPin || '1234';
+    if (pinInput && pinInput === currentPin) {
       setIsAuthenticated(true);
       sessionStorage.setItem('tm_admin_auth', 'true');
+      setFailedAttempts(0);
+      setLoginError('');
+      setPinInput('');
     } else {
-      alert('Hatalı Yönetici PIN Kodu! (Varsayılan PIN: 1234)');
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+      if (newAttempts >= 5) {
+        setLockoutUntil(Date.now() + 60000);
+        setLoginError('5 kez hatalı PIN girildi. Sistem 60 saniye süreyle kilitlendi.');
+      } else {
+        setLoginError(`Hatalı Yönetici PIN Kodu! (Kalan deneme hakkı: ${5 - newAttempts})`);
+      }
     }
   };
 
@@ -165,6 +185,12 @@ export default function AdminPage() {
             </p>
           </div>
 
+          {loginError && (
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700 text-center animate-shake">
+              {loginError}
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-left text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
@@ -172,31 +198,23 @@ export default function AdminPage() {
               </label>
               <input
                 type="password"
-                maxLength="6"
-                placeholder="**** (Varsayılan: 1234)"
+                maxLength="8"
+                placeholder="••••••"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-center text-xl tracking-widest text-slate-950 focus:outline-none focus:border-amber-600 font-mono font-bold"
+                disabled={Date.now() < lockoutUntil}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-center text-xl tracking-widest text-slate-950 focus:outline-none focus:border-amber-600 font-mono font-bold disabled:opacity-50 disabled:bg-slate-100"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-sm shadow-md hover:scale-102 transition"
+              disabled={Date.now() < lockoutUntil}
+              className="w-full py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-sm shadow-md hover:scale-102 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               Güvenli Giriş Yap
             </button>
           </form>
-
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => { setPinInput('1234'); }}
-              className="text-xs text-slate-500 hover:text-amber-800 underline font-semibold"
-            >
-              Demo Giriş PIN'ini Doldur (1234)
-            </button>
-          </div>
         </div>
       </div>
     );

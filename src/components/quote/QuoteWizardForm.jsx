@@ -4,9 +4,9 @@ import { storageService } from '../../services/storageService';
 import { generateProposalPdf } from '../../services/pdfService';
 import { analytics } from '../../services/analyticsService';
 import confetti from 'canvas-confetti';
-import { 
-  Building, Calendar, Users, CheckCircle2, ChevronRight, ChevronLeft, 
-  Sparkles, FileText, Send, Phone, MessageSquare, AlertCircle, Clock, Shield
+import {
+  Building, Calendar, Users, CheckCircle2, ChevronRight, ChevronLeft,
+  Sparkles, FileText, Send, Phone, MessageSquare, AlertCircle, Clock, Shield, X
 } from 'lucide-react';
 
 const ORG_TYPES = [
@@ -54,6 +54,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
   const [step, setStep] = useState(1);
   const [submittedLead, setSubmittedLead] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [formData, setFormData] = useState({
     organizationType: initialOrgType || 'Bayi Toplantısı',
@@ -87,7 +88,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
       const exists = prev.requirements.includes(reqId);
       return {
         ...prev,
-        requirements: exists 
+        requirements: exists
           ? prev.requirements.filter(r => r !== reqId)
           : [...prev.requirements, reqId]
       };
@@ -116,6 +117,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setSubmitError('');
 
     try {
       const newLead = await storageService.addLead({
@@ -155,6 +157,8 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
       if (onSuccess) onSuccess(newLead);
     } catch (err) {
       console.error('Teklif oluşturma hatası:', err);
+      analytics.formError('submit', err.message || 'Bilinmeyen hata');
+      setSubmitError(err.message || 'Teklif talebiniz gönderilirken bir sorun oluştu. Lütfen tekrar deneyin veya bizi arayın: 0850 308 00 00');
     } finally {
       setIsSubmitting(false);
     }
@@ -175,8 +179,8 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
           Teklif Talebiniz Başarıyla Alındı!
         </h3>
         <p className="mt-3 text-slate-600 text-sm md:text-base leading-relaxed">
-          Sayın <strong className="text-slate-900">{submittedLead.contactName}</strong>, 
-          <strong className="text-amber-700"> {submittedLead.company}</strong> adına ilettiğiniz 
+          Sayın <strong className="text-slate-900">{submittedLead.contactName}</strong>,
+          <strong className="text-amber-700"> {submittedLead.company}</strong> adına ilettiğiniz
           <strong className="text-slate-900"> {submittedLead.organizationType}</strong> organizasyonu talebiniz uzman koordinatörlerimize iletildi.
         </p>
 
@@ -228,16 +232,16 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
         <div className="flex items-center justify-between text-xs text-slate-500 font-bold mb-2">
           <span>Adım {step} / 7: {
             step === 1 ? 'Organizasyon Türü' :
-            step === 2 ? 'Lokasyon & Mekân' :
-            step === 3 ? 'Tarih & Zaman' :
-            step === 4 ? 'Katılımcı Sayısı' :
-            step === 5 ? 'Hizmet İhtiyaçları' :
-            step === 6 ? 'Tahmini Bütçe' : 'Firma Bilgileri'
+              step === 2 ? 'Lokasyon & Mekân' :
+                step === 3 ? 'Tarih & Zaman' :
+                  step === 4 ? 'Katılımcı Sayısı' :
+                    step === 5 ? 'Hizmet İhtiyaçları' :
+                      step === 6 ? 'Tahmini Bütçe' : 'Firma Bilgileri'
           }</span>
           <span className="text-amber-700 font-bold">%{Math.round((step / 7) * 100)}</span>
         </div>
         <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full gold-gradient-bg transition-all duration-300 rounded-full"
             style={{ width: `${(step / 7) * 100}%` }}
           ></div>
@@ -246,7 +250,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
 
       {/* Step Contents */}
       <div className="min-h-[360px]">
-        
+
         {/* STEP 1: Organizasyon Türü */}
         {step === 1 && (
           <div>
@@ -260,11 +264,10 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
                     key={item.id}
                     type="button"
                     onClick={() => updateField('organizationType', item.id)}
-                    className={`text-left p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${
-                      selected 
-                        ? 'bg-amber-500/10 border-amber-500 text-slate-900 shadow-sm font-bold' 
-                        : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-100/70'
-                    }`}
+                    className={`text-left p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${selected
+                      ? 'bg-amber-500/10 border-amber-500 text-slate-900 shadow-sm font-bold'
+                      : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-100/70'
+                      }`}
                   >
                     <div className="text-2xl mb-2">{item.icon}</div>
                     <div>
@@ -283,7 +286,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
           <div>
             <h4 className="text-xl font-bold text-slate-900 mb-1 font-display">Organizasyon nerede gerçekleşecek?</h4>
             <p className="text-xs sm:text-sm text-slate-500 mb-6">81 ilde hizmet veriyoruz. Hedef şehrinizi ve mekân durumunuzu belirtiniz.</p>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Şehir Seçimi (81 İl)</label>
@@ -321,11 +324,10 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
                       key={v.id}
                       type="button"
                       onClick={() => updateField('venueStatus', v.id)}
-                      className={`p-3 text-center rounded-xl border text-xs font-bold transition ${
-                        formData.venueStatus === v.id
-                          ? 'bg-amber-500/10 border-amber-600 text-amber-900 shadow-xs'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
-                      }`}
+                      className={`p-3 text-center rounded-xl border text-xs font-bold transition ${formData.venueStatus === v.id
+                        ? 'bg-amber-500/10 border-amber-600 text-amber-900 shadow-xs'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                        }`}
                     >
                       <div className="text-lg mb-1">{v.icon}</div>
                       <div>{v.label}</div>
@@ -428,11 +430,10 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
                     key={cnt}
                     type="button"
                     onClick={() => updateField('attendees', cnt)}
-                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition ${
-                      Number(formData.attendees) === cnt
-                        ? 'gold-gradient-bg text-slate-950 border-amber-500 shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
-                    }`}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition ${Number(formData.attendees) === cnt
+                      ? 'gold-gradient-bg text-slate-950 border-amber-500 shadow-sm'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                      }`}
                   >
                     {cnt} Kişi
                   </button>
@@ -468,11 +469,10 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
                     key={req.id}
                     type="button"
                     onClick={() => toggleRequirement(req.id)}
-                    className={`text-left p-3 rounded-xl border transition-all text-xs font-semibold flex items-center justify-between gap-2 ${
-                      selected
-                        ? 'bg-amber-500/10 border-amber-600 text-slate-900 font-bold'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
+                    className={`text-left p-3 rounded-xl border transition-all text-xs font-semibold flex items-center justify-between gap-2 ${selected
+                      ? 'bg-amber-500/10 border-amber-600 text-slate-900 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
                   >
                     <span>{req.label}</span>
                     <div className={`w-4 h-4 rounded flex items-center justify-center border ${selected ? 'bg-amber-600 border-amber-600 text-white' : 'border-slate-300 bg-white'}`}>
@@ -514,11 +514,10 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
                     key={bOpt}
                     type="button"
                     onClick={() => updateField('budgetRange', bOpt)}
-                    className={`w-full text-left p-4 rounded-xl border font-bold text-sm transition flex items-center justify-between ${
-                      selected
-                        ? 'bg-amber-500/10 border-amber-600 text-slate-900 shadow-xs'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
-                    }`}
+                    className={`w-full text-left p-4 rounded-xl border font-bold text-sm transition flex items-center justify-between ${selected
+                      ? 'bg-amber-500/10 border-amber-600 text-slate-900 shadow-xs'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                      }`}
                   >
                     <span>{bOpt}</span>
                     <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selected ? 'border-amber-600 bg-amber-600' : 'border-slate-300 bg-white'}`}>
@@ -625,6 +624,25 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
           </div>
         )}
       </div>
+
+      {/* Submit Error Banner (H5 düzeltmesi - kullanıcıya görünür geri bildirim) */}
+      {submitError && (
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+          <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-600" />
+          <div>
+            <p className="font-bold">Talep Gönderilemedi</p>
+            <p className="mt-0.5 text-red-700">{submitError}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSubmitError('')}
+            className="ml-auto shrink-0 text-red-400 hover:text-red-600 transition"
+            aria-label="Hata mesajını kapat"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Action Navigation Buttons */}
       <div className="mt-8 pt-4 border-t border-slate-200 flex items-center justify-between">
