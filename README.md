@@ -23,7 +23,7 @@
 | **Firebase Canlı Yayın** | [https://toplantimerkezi.web.app](https://toplantimerkezi.web.app) (Site / Target: `toplantimerkezi`) |
 | **GitHub Deposu** | [https://github.com/Highlife01/toplantimerkezi](https://github.com/Highlife01/toplantimerkezi) |
 | **Kurumsal E-posta** | [info@toplantimerkezi.com.tr](mailto:info@toplantimerkezi.com.tr) |
-| **Çağrı Merkezi** | +90 850 308 00 00 |
+| **Kurumsal İletişim / Tel** | +90 532 055 09 45 |
 | **WhatsApp Operasyon Hattı** | +90 532 055 09 45 |
 | **Merkez Adres** | Büyükdere Cad. No:199 Levent / Maslak Plaza, Levent, 34394 Beşiktaş / İstanbul |
 | **GEO Koordinatları** | `41.0778, 29.0125` (`TR-34`, Levent / Beşiktaş / İstanbul) |
@@ -221,7 +221,7 @@ git push origin main
 - **Firma**: Toplantı Merkezi Kurumsal Organizasyon A.Ş.
 - **Web Sitesi**: [www.toplantimerkezi.com.tr](https://www.toplantimerkezi.com.tr)
 - **Canlı Yayın**: [https://toplantimerkezi.web.app](https://toplantimerkezi.web.app)
-- **Çağrı Merkezi**: +90 850 308 00 00
+- **Kurumsal İletişim / Tel**: +90 532 055 09 45
 - **E-posta**: [info@toplantimerkezi.com.tr](mailto:info@toplantimerkezi.com.tr)
 - **WhatsApp**: +90 532 055 09 45
 - **Merkez Adres**: Büyükdere Cad. No:199 Levent / Maslak Plaza, Levent, Beşiktaş, 34394 İstanbul

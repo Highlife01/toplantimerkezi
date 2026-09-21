@@ -34,7 +34,7 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
             '@type': 'Organization',
             name: 'Toplantı Merkezi',
             url: 'https://www.toplantimerkezi.com.tr',
-            telephone: '+90 850 308 00 00'
+            telephone: '+90 532 055 09 45'
           },
           areaServed: {
             '@type': 'Country',

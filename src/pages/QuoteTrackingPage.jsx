@@ -237,7 +237,7 @@ export default function QuoteTrackingPage({ onOpenQuoteModal }) {
                   <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="text-xs text-slate-600">
                       <span className="font-bold text-slate-900 block">Atanan Proje Direktörlüğü:</span>
-                      Toplantı Merkezi B2B Operasyon Masası (0850 308 74 20)
+                      Toplantı Merkezi B2B Operasyon Masası (0532 055 09 45)
                     </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">

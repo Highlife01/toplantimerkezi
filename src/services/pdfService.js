@@ -54,7 +54,7 @@ export const generateProposalPdf = (lead) => {
   doc.setTextColor(200, 210, 230);
   doc.setFontSize(8);
   doc.text('Turkiye Geneli Tek Merkezden Organizasyon Cozumleri', margin, 30);
-  doc.text('Web: www.toplantimerkezi.com.tr  |  Tel: +90 850 308 00 00  |  E-posta: info@toplantimerkezi.com.tr', margin, 35);
+  doc.text('Web: www.toplantimerkezi.com.tr  |  Tel: +90 532 055 09 45  |  E-posta: info@toplantimerkezi.com.tr', margin, 35);
 
   // Proposal Meta Box (Right aligned in header)
   doc.setTextColor(255, 255, 255);

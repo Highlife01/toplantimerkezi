@@ -26,7 +26,7 @@ export default function ContactPage({ onOpenQuoteModal }) {
         mainEntity: {
           '@type': 'Organization',
           name: 'Toplantı Merkezi',
-          telephone: '+90 850 308 00 00',
+          telephone: '+90 532 055 09 45',
           email: 'info@toplantimerkezi.com.tr',
           address: {
             '@type': 'PostalAddress',

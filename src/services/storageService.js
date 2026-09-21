@@ -181,7 +181,7 @@ export const INITIAL_SETTINGS = {
   domain: 'www.toplantimerkezi.com.tr',
   slogan: "Türkiye'nin Her Yerinde, Tek Merkezden Organizasyon.",
   subSlogan: "Toplantıdan organizasyona, tüm süreç tek merkezden.",
-  phone: '+90 850 308 00 00',
+  phone: '+90 532 055 09 45',
   whatsappPhone: '+90 532 055 09 45',
   whatsappDisplay: '0532 055 09 45',
   email: 'info@toplantimerkezi.com.tr',
@@ -314,7 +314,7 @@ export const storageService = {
       }
       if (history.length >= 3) {
         const waitMinutes = Math.ceil((60 * 60 * 1000 - (now - history[0])) / 60000);
-        return { allowed: false, reason: `Saatlik teklif talebi limitine ulaşıldı. Lütfen ${waitMinutes} dakika sonra tekrar deneyin veya bizi arayın: 0850 308 00 00` };
+        return { allowed: false, reason: `Saatlik teklif talebi limitine ulaşıldı. Lütfen ${waitMinutes} dakika sonra tekrar deneyin veya bizi arayın: 0532 055 09 45` };
       }
       return { allowed: true };
     } catch (e) {

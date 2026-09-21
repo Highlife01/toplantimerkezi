@@ -158,7 +158,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
     } catch (err) {
       console.error('Teklif oluşturma hatası:', err);
       analytics.formError('submit', err.message || 'Bilinmeyen hata');
-      setSubmitError(err.message || 'Teklif talebiniz gönderilirken bir sorun oluştu. Lütfen tekrar deneyin veya bizi arayın: 0850 308 00 00');
+      setSubmitError(err.message || 'Teklif talebiniz gönderilirken bir sorun oluştu. Lütfen tekrar deneyin veya bizi arayın: 0532 055 09 45');
     } finally {
       setIsSubmitting(false);
     }

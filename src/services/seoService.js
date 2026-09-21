@@ -180,7 +180,7 @@ export const updatePageSeo = ({
           '@id': `${DEFAULT_SEO_CONFIG.domain}/#organization`,
           name: 'Toplantı Merkezi',
           url: DEFAULT_SEO_CONFIG.domain,
-          telephone: '+90 850 308 00 00'
+          telephone: '+90 532 055 09 45'
         },
         offers: {
           '@type': 'AggregateOffer',

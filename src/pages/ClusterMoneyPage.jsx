@@ -39,7 +39,7 @@ export default function ClusterMoneyPage({ onOpenQuoteModal }) {
   useEffect(() => {
     const defaultFaqs = [
       { q: `${matchedPage.title} organizasyonunda süreç nasıl işler?`, a: `${matchedPage.title} sürecinde talebiniz alındıktan sonra 2 saat içinde ihtiyaç analizi yapılır, 3D salon ve teknik yerleşim planı hazırlanır ve anahtar teslim resmi teklif sunulur.` },
-      { q: `${matchedPage.title} için nasıl teklif alabilirim?`, a: 'Sayfamızdaki hızlı teklif formunu doldurarak veya 850’li çağrı merkezimiz üzerinden 2 saat içinde detaylı maliyet tablosu alabilirsiniz.' },
+      { q: `${matchedPage.title} için nasıl teklif alabilirim?`, a: 'Sayfamızdaki hızlı teklif formunu doldurarak veya 0532 055 09 45 kurumsal hattımız üzerinden 2 saat içinde detaylı maliyet tablosu alabilirsiniz.' },
       { q: 'Türkiye genelinde hangi illerde hizmet veriyorsunuz?', a: 'İstanbul, Ankara, İzmir, Antalya, Adana, Bursa dahil 81 ilin tamamında yerel teknik ortaklarımızla anahtar teslim hizmet sunuyoruz.' },
       { q: 'Teklif sürecinde sahne ve 3D tasarım desteği veriliyor mu?', a: 'Evet, kurumsal etkinlikleriniz için 3D salon ve sahne görselleştirmesi teklif dosyanıza dahil olarak hazırlanır.' }
     ];
@@ -64,7 +64,7 @@ export default function ClusterMoneyPage({ onOpenQuoteModal }) {
           '@type': 'Organization',
           name: 'Toplantı Merkezi',
           url: 'https://www.toplantimerkezi.com.tr',
-          telephone: '+90 850 308 00 00'
+          telephone: '+90 532 055 09 45'
         },
         description: matchedPage.aiDirectAnswer,
         areaServed: {
@@ -258,7 +258,7 @@ export default function ClusterMoneyPage({ onOpenQuoteModal }) {
                   { q: 'Bayi toplantısı için otel nasıl seçilir?', a: 'Havalimanına yakınlık, salon tavan yüksekliği (min. 4.5m), kolonsuz mimari, oda kalitesi ve teknik altyapı kapasitesine göre seçilir.' },
                   { q: 'Bayi toplantısı için ne kadar önce planlama yapılmalıdır?', a: 'En iyi otel ve salon opsiyonlarını uygun fiyatla garantilemek için en az 2 ila 4 ay öncesinden planlamaya başlanması önerilir.' }
                 ] : [
-                  { q: `${matchedPage.title} için nasıl teklif alabilirim?`, a: 'Sayfamızdaki hızlı teklif formunu doldurarak veya 850’li çağrı merkezimiz üzerinden 2 saat içinde detaylı maliyet tablosu alabilirsiniz.' },
+                  { q: `${matchedPage.title} için nasıl teklif alabilirim?`, a: 'Sayfamızdaki hızlı teklif formunu doldurarak veya 0532 055 09 45 kurumsal hattımız üzerinden 2 saat içinde detaylı maliyet tablosu alabilirsiniz.' },
                   { q: 'Türkiye genelinde hangi illerde hizmet veriyorsunuz?', a: 'İstanbul, Ankara, İzmir, Antalya, Adana, Bursa dahil 81 ilin tamamında yerel teknik ortaklarımızla hizmet sunuyoruz.' },
                   { q: 'Teklif sürecinde sahne ve 3D tasarım desteği veriliyor mu?', a: 'Evet, kurumsal etkinlikleriniz için 3D salon ve sahne görselleştirmesi teklif dosyanıza dahil olarak hazırlanır.' }
                 ]).map((faq, idx) => (

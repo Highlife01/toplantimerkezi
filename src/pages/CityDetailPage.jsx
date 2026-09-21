@@ -43,7 +43,7 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
     },
     {
       q: `${city.name} kurumsal organizasyonu için resmi teklif süreci ne kadar sürer?`,
-      a: `Web sitemizdeki hızlı teklif formundan veya 0850 308 00 00 çağrı merkezimizden talebinizi iletmenizin ardından, ${city.name} operasyon masamız 2 saat içinde detaylı kalem maliyet tablosu ve 3D yerleşim planını içeren resmi kurumsal teklif dosyasını iletir.`
+      a: `Web sitemizdeki hızlı teklif formundan veya 0532 055 09 45 kurumsal hattımızdan talebinizi iletmenizin ardından, ${city.name} operasyon masamız 2 saat içinde detaylı kalem maliyet tablosu ve 3D yerleşim planını içeren resmi kurumsal teklif dosyasını iletir.`
     }
   ] : [];
 
@@ -65,7 +65,7 @@ export default function CityDetailPage({ onOpenQuoteModal }) {
         schemaType: 'LocalBusiness',
         schemaData: {
           name: `Toplantı Merkezi ${city.name} Kurumsal Organizasyon Masası`,
-          telephone: '+90 850 308 00 00',
+          telephone: '+90 532 055 09 45',
           email: 'info@toplantimerkezi.com.tr',
           url: `https://www.toplantimerkezi.com.tr/sehirler/${city.slug}`,
           priceRange: '₺₺₺₺',

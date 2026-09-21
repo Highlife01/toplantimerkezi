@@ -134,6 +134,14 @@ export default defineConfig({
             if (id.includes('lucide-react')) {
               return 'icons';
             }
+            // Firebase SDK ayrı chunk (yalnızca CRM/bulut işlemlerinde gerekli)
+            if (id.includes('firebase') || id.includes('@firebase')) {
+              return 'firebase';
+            }
+            // React çekirdeği ayrı chunk (router + render)
+            if (id.includes('react') || id.includes('scheduler')) {
+              return 'react-core';
+            }
             return 'vendor';
           }
         }

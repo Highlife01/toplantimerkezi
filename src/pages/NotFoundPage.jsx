@@ -70,11 +70,11 @@ export default function NotFoundPage({ onOpenQuoteModal }) {
           )}
 
           <a
-            href="tel:+908503080000"
+            href="tel:+905320550945"
             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100 transition"
           >
             <Phone size={16} className="text-amber-600" />
-            <span>0850 308 00 00</span>
+            <span>0532 055 09 45</span>
           </a>
         </div>
 
