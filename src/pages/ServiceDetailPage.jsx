@@ -98,7 +98,7 @@ export default function ServiceDetailPage({ onOpenQuoteModal }) {
               {service.title}
             </h1>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl font-light">
-              {service.longDesc}
+              {service.shortDesc}
             </p>
           </div>
 
@@ -122,7 +122,7 @@ export default function ServiceDetailPage({ onOpenQuoteModal }) {
                 Teknik Donanım ve Hizmet Standartlarımız
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                {service.highlights.map((hl, i) => (
+                {(service.details || []).map((hl, i) => (
                   <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
                     <CheckCircle2 size={18} className="text-amber-600 shrink-0" />
                     <span className="text-xs sm:text-sm font-semibold text-slate-800">{hl}</span>

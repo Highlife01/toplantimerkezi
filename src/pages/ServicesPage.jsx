@@ -72,16 +72,16 @@ export default function ServicesPage({ onOpenQuoteModal }) {
                   </div>
 
                   <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
-                    {srv.longDesc}
+                    {srv.shortDesc}
                   </p>
 
-                  {/* Highlights */}
+                  {/* Highlights / Details */}
                   <div className="space-y-2 mb-6">
                     <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                       Hizmet Standartları & Donanım:
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {srv.highlights.map((hl, i) => (
+                      {(srv.details || []).map((hl, i) => (
                         <div key={i} className="flex items-center gap-2 text-xs text-slate-700 p-2 rounded-xl bg-slate-50 border border-slate-200">
                           <CheckCircle2 size={14} className="text-amber-600 shrink-0" />
                           <span>{hl}</span>
