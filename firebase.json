@@ -66,6 +66,15 @@
         ]
       },
       {
+        "source": "/404.html",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, follow"
+          }
+        ]
+      },
+      {
         "source": "**",
         "headers": [
           {
@@ -121,12 +130,22 @@
         "source": "/sitemap.xml/",
         "destination": "/sitemap.xml",
         "type": 301
+      },
+      {
+        "source": "/yasal",
+        "destination": "/yasal/kvkk",
+        "type": 301
+      },
+      {
+        "source": "/yasal/",
+        "destination": "/yasal/kvkk",
+        "type": 301
       }
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/admin/**",
+        "destination": "/admin/index.html"
       }
     ]
   }

@@ -13,6 +13,7 @@ import { SEO_CLUSTERS, TOPIC_HUBS } from '../src/data/seoClustersData.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distDir = path.resolve(__dirname, '../dist');
+const publicDir = path.resolve(__dirname, '../public');
 
 const DOMAIN = 'https://www.toplantimerkezi.com.tr';
 
@@ -51,7 +52,9 @@ function buildHtml({
   bodyContent = '',
   breadcrumbs = [],
   faqs = [],
-  schemas = []
+  schemas = [],
+  is404 = false,
+  noIndex = false
 }) {
   const fullCanonical = canonicalUrl || `${DOMAIN}${route.startsWith('/') ? '' : '/'}${route}`;
   const finalTitle = title.includes('Toplantı Merkezi') ? title : `${title} | Toplantı Merkezi`;
@@ -70,11 +73,22 @@ function buildHtml({
   // 3. Replace Keywords
   html = html.replace(/<meta name="keywords"\s+content=".*?" \/>/s, `<meta name="keywords" content="${escapeHtml(finalKeywords)}" />`);
 
-  // 4. Replace or Set Canonical Tag
-  if (html.includes('<link rel="canonical"')) {
-    html = html.replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${fullCanonical}" />`);
+  // 4. Canonical & Robots Management
+  if (is404) {
+    // 404 Pages MUST NOT have a canonical pointing to the homepage or themselves
+    html = html.replace(/<link rel="canonical".*?\/>\s*/s, '');
+    html = html.replace(/<meta name="robots" content=".*?" \/>/s, '<meta name="robots" content="noindex, follow" />');
   } else {
-    html = html.replace('</head>', `  <link rel="canonical" href="${fullCanonical}" />\n</head>`);
+    // Replace or Set Self-Referencing Canonical Tag
+    if (html.includes('<link rel="canonical"')) {
+      html = html.replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${fullCanonical}" />`);
+    } else {
+      html = html.replace('</head>', `  <link rel="canonical" href="${fullCanonical}" />\n</head>`);
+    }
+
+    if (noIndex) {
+      html = html.replace(/<meta name="robots" content=".*?" \/>/s, '<meta name="robots" content="noindex, nofollow" />');
+    }
   }
 
   // 5. Replace OpenGraph & Twitter Tags
@@ -86,41 +100,43 @@ function buildHtml({
   html = html.replace(/<meta property="twitter:description"\s+content=".*?" \/>/s, `<meta property="twitter:description" content="${escapeHtml(description)}" />`);
 
   // 6. Build Rich Schemas (JSON-LD)
-  const fullSchemas = [...schemas];
+  if (!is404) {
+    const fullSchemas = [...schemas];
 
-  // Breadcrumbs Schema
-  if (breadcrumbs.length > 0) {
-    fullSchemas.push({
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: breadcrumbs.map((b, idx) => ({
-        '@type': 'ListItem',
-        position: idx + 1,
-        name: b.name,
-        item: b.url.startsWith('http') ? b.url : `${DOMAIN}${b.url.startsWith('/') ? '' : '/'}${b.url}`
-      }))
-    });
-  }
+    // Breadcrumbs Schema
+    if (breadcrumbs.length > 0) {
+      fullSchemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((b, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: b.name,
+          item: b.url.startsWith('http') ? b.url : `${DOMAIN}${b.url.startsWith('/') ? '' : '/'}${b.url}`
+        }))
+      });
+    }
 
-  // FAQPage Schema
-  if (faqs.length > 0) {
-    fullSchemas.push({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: faqs.map(f => ({
-        '@type': 'Question',
-        name: f.q || f.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: f.a || f.answer
-        }
-      }))
-    });
-  }
+    // FAQPage Schema
+    if (faqs.length > 0) {
+      fullSchemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map(f => ({
+          '@type': 'Question',
+          name: f.q || f.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: f.a || f.answer
+          }
+        }))
+      });
+    }
 
-  const schemaTags = fullSchemas.map(s => `  <script type="application/ld+json">\n${JSON.stringify(s, null, 2)}\n  </script>`).join('\n');
-  if (schemaTags) {
-    html = html.replace('</head>', `${schemaTags}\n</head>`);
+    const schemaTags = fullSchemas.map(s => `  <script type="application/ld+json">\n${JSON.stringify(s, null, 2)}\n  </script>`).join('\n');
+    if (schemaTags) {
+      html = html.replace('</head>', `${schemaTags}\n</head>`);
+    }
   }
 
   // 7. Semantic HTML Pre-rendered Shell inside <div id="root">
@@ -266,6 +282,19 @@ function writePage(route, htmlContent) {
 
   const targetPath = path.join(targetDir, 'index.html');
   fs.writeFileSync(targetPath, htmlContent, 'utf-8');
+}
+
+/**
+ * Writes an exact raw file to dist/{filename} and public/{filename}
+ */
+function writeRawFile(filename, htmlContent) {
+  const distPath = path.join(distDir, filename);
+  fs.writeFileSync(distPath, htmlContent, 'utf-8');
+
+  try {
+    const pubPath = path.join(publicDir, filename);
+    fs.writeFileSync(pubPath, htmlContent, 'utf-8');
+  } catch (e) {}
 }
 
 /**
@@ -448,9 +477,12 @@ async function runPrerender() {
     { slug: 'personel-etkinligi', title: 'Personel Etkinliği', parent: 'kurumsal-piknik-organizasyonu' },
     { slug: 'aile-gunu-organizasyonu', title: 'Aile Günü Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
     { slug: 'team-building', title: 'Takım Çalışması & Team Building', parent: 'kurumsal-piknik-organizasyonu' },
+    { slug: 'gala-organizasyonu', title: 'Gala Gecesi Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
     { slug: 'odul-toreni', title: 'Kurumsal Ödül Töreni', parent: 'kurumsal-piknik-organizasyonu' },
+    { slug: 'lansman-organizasyonu', title: 'Lansman Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
     { slug: 'acilis-organizasyonu', title: 'Açılış Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
     { slug: 'roadshow-organizasyonu', title: 'Roadshow Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
+    { slug: 'protokol-organizasyonu', title: 'Devlet & Protokol Organizasyonu', parent: 'kamu-organizasyonu' },
     { slug: 'resmi-toren-organizasyonu', title: 'Resmî Tören Organizasyonu', parent: 'kamu-organizasyonu' },
     { slug: 'kamu-toplantisi', title: 'Kamu Toplantısı Yönetimi', parent: 'kamu-organizasyonu' },
     { slug: 'acilis-toreni', title: 'Açılış Töreni Yönetimi', parent: 'kamu-organizasyonu' },
@@ -515,14 +547,21 @@ async function runPrerender() {
     pageCount++;
   });
 
-  // 4. Focus Cities x Popular Organizations (/sehirler/${citySlug}/${orgSlug})
-  const focusCities = ['istanbul', 'ankara', 'antalya', 'izmir', 'adana', 'bursa', 'kocaeli', 'gaziantep', 'konya', 'kayseri', 'mugla', 'eskisehir', 'samsun', 'trabzon'];
+  // 4. Focus Cities x Popular Organizations (15 Focus Cities x 7 Popular Orgs = 105 pages)
+  const focusCities = [
+    'istanbul', 'ankara', 'antalya', 'izmir', 'adana',
+    'mersin', 'bursa', 'kocaeli', 'gaziantep', 'konya',
+    'kayseri', 'mugla', 'eskisehir', 'samsun', 'trabzon'
+  ];
+
   const popularOrgs = [
     { slug: 'bayi-toplantisi', title: 'Bayi Toplantısı' },
     { slug: 'sirket-toplantilari', title: 'Şirket Toplantısı' },
     { slug: 'kongre-konferans', title: 'Kongre & Konferans' },
     { slug: 'kurumsal-piknik', title: 'Kurumsal Piknik' },
-    { slug: 'kamu-protokol-organizasyonlari', title: 'Kamu & Protokol' }
+    { slug: 'kamu-protokol-organizasyonlari', title: 'Kamu & Protokol' },
+    { slug: 'lansman-organizasyonu', title: 'Lansman Organizasyonu' },
+    { slug: 'gala-odul-geceleri', title: 'Gala & Ödül Geceleri' }
   ];
 
   focusCities.forEach(cSlug => {
@@ -530,19 +569,65 @@ async function runPrerender() {
     if (!city) return;
     popularOrgs.forEach(org => {
       const route = `/sehirler/${cSlug}/${org.slug}`;
-      const title = `${city.name} ${org.title} Organizasyonu | Toplantı Merkezi`;
-      const desc = `${city.name} ilinde profesyonel ${org.title.toLowerCase()} organizasyonu: Salon seçimi, dev LED ekran, profesyonel ses-ışık, sahne ve catering tek merkezden yönetilir.`;
+      const orgFullTitle = org.title.endsWith('Organizasyonu') ? org.title : `${org.title} Organizasyonu`;
+      const title = `${city.name} ${orgFullTitle} | Toplantı Merkezi`;
+      const desc = `${city.name} ilinde profesyonel ${orgFullTitle.toLowerCase()}: Salon seçimi, dev LED ekran, profesyonel ses-ışık, sahne ve catering tek merkezden yönetilir.`;
       const html = buildHtml({
         route,
         title,
         description: desc,
         canonicalUrl: `${DOMAIN}${route}`,
-        h1: `${city.name} ${org.title} Organizasyonu`,
-        aiDirectAnswer: `${city.name} ${org.title.toLowerCase()} organizasyonu; katılımcı sayısına göre en uygun otel ve salonların belirlenmesi, 3D sahne tasarımı, teknik ekipman ve saha yönetimini kapsayan anahtar teslim kurumsal hizmettir.`,
+        h1: `${city.name} ${orgFullTitle}`,
+        aiDirectAnswer: `${city.name} ${orgFullTitle.toLowerCase()}; katılımcı sayısına göre en uygun otel ve salonların belirlenmesi, 3D sahne tasarımı, teknik ekipman ve saha yönetimini kapsayan anahtar teslim kurumsal hizmettir.`,
         breadcrumbs: [
           { name: 'Şehirler', url: '/sehirler' },
           { name: city.name, url: `/sehirler/${cSlug}` },
           { name: org.title, url: route }
+        ],
+        bodyContent: `
+          <div class="border border-slate-200 rounded-2xl p-6 bg-white my-6 shadow-sm">
+            <h2 class="text-xl font-bold font-display text-slate-900 mb-3">${escapeHtml(city.name)} Bölgesinde ${escapeHtml(org.title)} Yönetimi</h2>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">
+              Toplantı Merkezi; ${escapeHtml(city.name)} lokasyonunda kurumunuzun hedeflerine uygun balo salonları, kongre otelleri ve etkinlik alanlarını analiz ederek anahtar teslim operasyon sağlar.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-700">
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div class="font-bold text-slate-900 mb-1">Mekân ve Salon Tahsisi</div>
+                <div>Katılımcı kapasitesine göre 5 yıldızlı otel ve salon seçenekleri.</div>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div class="font-bold text-slate-900 mb-1">Teknik Reji & Sahne</div>
+                <div>Dev LED ekran, line-array ses ve robot ışık parkuru.</div>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div class="font-bold text-slate-900 mb-1">Uçtan Uca Saha Ekibi</div>
+                <div>Yerleşik süpervizör, teknik şef ve karşılama hostesi desteği.</div>
+              </div>
+            </div>
+          </div>
+        `,
+        faqs: [
+          {
+            q: `${city.name} ${org.title} için salon seçimi nasıl yapılır?`,
+            a: `${city.name} genelindeki 5 yıldızlı oteller ve kongre merkezleri; katılımcı sayısı, tavan yüksekliği, teknik altyapı ve transfer süreleri dikkate alınarak filtrelenir ve 3 alternatif bütçelendirilir.`
+          },
+          {
+            q: `${city.name} operasyonunda teknik ekipman kim tarafından kurulur?`,
+            a: `Toplantı Merkezi'nin ${city.name} bölgesinde yerleşik profesyonel teknik reji ekipleri sahne, LED ekran, ses ve ışık sistemlerini sıfır hata prensibiyle kurar ve yönetir.`
+          }
+        ],
+        schemas: [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            name: `${city.name} ${org.title}`,
+            description: desc,
+            provider: {
+              '@type': 'Organization',
+              name: 'Toplantı Merkezi',
+              url: DOMAIN
+            }
+          }
         ]
       });
       writePage(route, html);
@@ -550,7 +635,78 @@ async function runPrerender() {
     });
   });
 
-  // 5. 9 Organizations Catalog Details (/organizasyonlar/${slug})
+  // 5. Top MICE Hubs x High-Intent Technical Services (6 Top Cities x 5 Technical Services = 30 pages)
+  const topHubs = ['istanbul', 'ankara', 'antalya', 'izmir', 'adana', 'bursa'];
+  const topServices = [
+    { slug: 'ses-isik', title: 'Ses & Işık Sistemleri', desc: 'profesyonel ses sistemi kiralama, akustik düzenleme ve robot ışıklandırma' },
+    { slug: 'sahne-dekor', title: 'Sahne & Dekor Tasarımı', desc: '3D sahne tasarımı, podyum kurulumu ve kurumsal backdrop dekorasyonu' },
+    { slug: 'led-ekran-goruntu', title: 'LED Ekran & Görüntü Rejisi', desc: 'yüksek çözünürlüklü dev LED ekran kiralama, canlı yayın ve reji masası' },
+    { slug: 'mekan-planlama', title: 'Mekân Planlama & Salon Tahsisi', desc: '5 yıldızlı kongre otelleri ve toplantı salonları tahsisi ve yerleşim planlaması' },
+    { slug: 'catering', title: 'Catering & Menü Yönetimi', desc: 'karşılama kokteyli, coffee break ve gala yemeği menü yönetimi' }
+  ];
+
+  topHubs.forEach(cSlug => {
+    const city = ALL_81_CITIES.find(c => c.slug === cSlug);
+    if (!city) return;
+    topServices.forEach(srv => {
+      const route = `/sehirler/${cSlug}/${srv.slug}`;
+      const title = `${city.name} ${srv.title} Kiralama & Kurulum | Toplantı Merkezi`;
+      const desc = `${city.name} ilinde ${srv.desc} çözümleri. Kongre otelleri ve toplantı salonlarında anahtar teslim profesyonel teknik prodüksiyon ve canlı reji hizmeti.`;
+      const html = buildHtml({
+        route,
+        title,
+        description: desc,
+        canonicalUrl: `${DOMAIN}${route}`,
+        h1: `${city.name} ${srv.title} Çözümleri`,
+        aiDirectAnswer: `${city.name} genelinde ${srv.title.toLowerCase()} hizmetleri; bölgedeki 5 yıldızlı oteller, kongre salonları ve kurumsal etkinlik alanlarında uzman teknik ekip ve anahtar teslim kurulum garantisiyle sağlanır.`,
+        breadcrumbs: [
+          { name: 'Şehirler', url: '/sehirler' },
+          { name: city.name, url: `/sehirler/${cSlug}` },
+          { name: srv.title, url: route }
+        ],
+        bodyContent: `
+          <div class="border border-slate-200 rounded-2xl p-6 bg-white my-6 shadow-sm">
+            <h2 class="text-xl font-bold font-display text-slate-900 mb-3">${escapeHtml(city.name)} ${escapeHtml(srv.title)} Hizmet Standardı</h2>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">
+              Toplantı Merkezi; ${escapeHtml(city.name)} lokasyonunda gerçekleştirilecek kurumsal toplantı, kongre ve bayi buluşmaları için son teknoloji ekipman parkuru ve deneyimli teknik şef kadrosuyla kusursuz altyapı kurar.
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-slate-700 text-xs sm:text-sm">
+              <li><strong>Yerel Depo & Hızlı Kurulum:</strong> Şehirlerarası nakliye maliyeti ve zaman kaybı olmadan ${escapeHtml(city.name)} yerleşik depolarımızdan doğrudan sevkiyat.</li>
+              <li><strong>Yedekli Sistem Güvencesi:</strong> Kritik sunumlarda kesintisiz yayın için yedekli reji masası ve jeneratör desteği.</li>
+              <li><strong>Uzman Teknik Personel:</strong> Etkinlik süresince salonda hazır bulunan ses, ışık ve görüntü operatörleri.</li>
+            </ul>
+          </div>
+        `,
+        faqs: [
+          {
+            q: `${city.name} için ${srv.title.toLowerCase()} kurulum süresi ne kadardır?`,
+            a: `Salon tahsis saatine göre etkinlikten en az 4 saat önce tüm sistemler kurulur, ses ve görüntü provaları tamamlanarak anahtar teslim teslim edilir.`
+          },
+          {
+            q: `${city.name} lokasyonuna özel bütçe teklifi nasıl alınır?`,
+            a: `Hızlı teklif formumuzdan salon adı, katılımcı sayısı ve etkinlik tarihinizi ileterek 2 saat içinde detaylı kalem maliyet dökümünü içeren resmi PDF teklifinizi alabilirsiniz.`
+          }
+        ],
+        schemas: [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            name: `${city.name} ${srv.title}`,
+            description: desc,
+            provider: {
+              '@type': 'Organization',
+              name: 'Toplantı Merkezi',
+              url: DOMAIN
+            }
+          }
+        ]
+      });
+      writePage(route, html);
+      pageCount++;
+    });
+  });
+
+  // 6. 9 Organizations Catalog Details (/organizasyonlar/${slug})
   ORGANIZATIONS.forEach(org => {
     const orgHtml = buildHtml({
       route: `/organizasyonlar/${org.slug}`,
@@ -585,7 +741,7 @@ async function runPrerender() {
     pageCount++;
   });
 
-  // 6. 10 Services Details (/hizmetler/${slug})
+  // 7. 10 Services Details (/hizmetler/${slug})
   SERVICES.forEach(service => {
     const srvHtml = buildHtml({
       route: `/hizmetler/${service.slug}`,
@@ -614,7 +770,7 @@ async function runPrerender() {
     pageCount++;
   });
 
-  // 7. Industry Details (/sektorler/${slug})
+  // 8. 5 Industry Details (/sektorler/${slug})
   INDUSTRIES.forEach(ind => {
     const indHtml = buildHtml({
       route: `/sektorler/${ind.slug}`,
@@ -646,7 +802,85 @@ async function runPrerender() {
     pageCount++;
   });
 
-  // 8. Blog Posts (/blog/${slug})
+  // 9. 4 Project Case Studies (/projeler/${slug})
+  PROJECTS.forEach(project => {
+    const projectHtml = buildHtml({
+      route: `/projeler/${project.slug}`,
+      title: `${project.title} | Case Study | Toplantı Merkezi`,
+      description: `${project.city} lokasyonunda ${project.attendees} kişilik ${project.title} kurumsal organizasyonu. Sahne tasarımı, teknik prodüksiyon ve operasyon yönetimi detayları.`,
+      canonicalUrl: `${DOMAIN}/projeler/${project.slug}`,
+      h1: project.title,
+      ogImage: project.image,
+      aiDirectAnswer: `${project.title}; ${project.city} lokasyonunda ${project.attendees} katılımcıyla hayata geçirilen, anahtar teslim sahne, LED ekran, ses-ışık sistemleri ve kusursuz saha yönetimini kapsayan kurumsal case study çalışmamızdır.`,
+      breadcrumbs: [
+        { name: 'Projelerimiz', url: '/projeler' },
+        { name: project.title, url: `/projeler/${project.slug}` }
+      ],
+      bodyContent: `
+        <div class="border border-slate-200 rounded-2xl p-6 sm:p-8 bg-white my-6 shadow-sm">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 pb-6 border-b border-slate-100 text-center">
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <div class="text-xs text-slate-500 mb-1">Şehir</div>
+              <div class="font-bold text-slate-900 text-sm">${escapeHtml(project.city)}</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <div class="text-xs text-slate-500 mb-1">Katılımcı</div>
+              <div class="font-bold text-slate-900 text-sm">${escapeHtml(project.attendees)} Kişi</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <div class="text-xs text-slate-500 mb-1">Mekân</div>
+              <div class="font-bold text-slate-900 text-sm">${escapeHtml(project.venue || 'Kongre Oteli')}</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <div class="text-xs text-slate-500 mb-1">Süre</div>
+              <div class="font-bold text-slate-900 text-sm">${escapeHtml(project.duration || '2 Gün')}</div>
+            </div>
+          </div>
+
+          <h2 class="text-xl font-bold font-display text-slate-900 mb-3">Proje Kapsamı ve Uygulanan Çözümler</h2>
+          <p class="text-slate-700 text-sm leading-relaxed mb-6">${escapeHtml(project.summary || project.results)}</p>
+
+          ${project.scope && project.scope.length > 0 ? `
+            <div class="mb-6">
+              <h3 class="font-bold text-slate-900 text-sm mb-3">Sağlanan Hizmet Modülleri:</h3>
+              <div class="flex flex-wrap gap-2">
+                ${project.scope.map(s => `<span class="bg-slate-100 text-slate-800 text-xs px-3 py-1.5 rounded-lg border border-slate-200">${escapeHtml(s)}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${project.results ? `
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <div class="font-bold text-emerald-900 text-sm mb-1">Operasyon Başarı Sonucu:</div>
+              <div class="text-emerald-800 text-xs sm:text-sm leading-relaxed">${escapeHtml(project.results)}</div>
+            </div>
+          ` : ''}
+        </div>
+      `,
+      schemas: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: project.title,
+          description: `${project.city} lokasyonunda ${project.attendees} kişilik ${project.title} organizasyonu.`,
+          image: project.image,
+          author: {
+            '@type': 'Organization',
+            name: 'Toplantı Merkezi'
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Toplantı Merkezi',
+            url: DOMAIN
+          }
+        }
+      ]
+    });
+    writePage(`/projeler/${project.slug}`, projectHtml);
+    pageCount++;
+  });
+
+  // 10. Blog Posts (/blog/${slug})
   BLOG_POSTS.forEach(post => {
     const postHtml = buildHtml({
       route: `/blog/${post.slug}`,
@@ -690,7 +924,7 @@ async function runPrerender() {
     pageCount++;
   });
 
-  // 9. Topic Hub Guides (/rehber/${slug})
+  // 11. Topic Hub Guides (/rehber/${slug})
   TOPIC_HUBS.forEach(hub => {
     const hubHtml = buildHtml({
       route: `/rehber/${hub.slug}`,
@@ -716,7 +950,7 @@ async function runPrerender() {
     pageCount++;
   });
 
-  // 10. Standard Core Pages
+  // 12. Standard Core Pages
   const standardPages = [
     { route: '/kurumsal', title: 'Hakkımızda & Kurumsal Standartlar', desc: 'Toplantı Merkezi: Türkiye genelinde 81 ilde tek merkezden kurumsal organizasyon ve toplantı yönetimi.' },
     { route: '/organizasyonlar', title: 'Kurumsal Organizasyon Kataloğu', desc: 'Bayi toplantısı, kongre, kurumsal piknik, lansman ve gala organizasyonları.' },
@@ -727,7 +961,8 @@ async function runPrerender() {
     { route: '/blog', title: 'Kurumsal Organizasyon Bilgi Merkezi & Blog', desc: 'Bayi toplantısı rehberleri, maliyet tabloları ve kurumsal etkinlik planlama ipuçları.' },
     { route: '/teklif-al', title: '7 Adımda Kurumsal Organizasyon Teklifi Al', desc: 'Talebinizi iletin, 2 saat içinde salon alternatifleri ve kalem maliyetli resmi PDF teklifinizi alın.' },
     { route: '/teklif-takip', title: 'Canlı Teklif ve Talep Takip Portalı', desc: 'Başvuru kodunuz ile organizasyon talebinizin aşamalarını canlı takip edin.' },
-    { route: '/iletisim', title: 'İletişim & Kurumsal Operasyon Ofisi', desc: 'Toplantı Merkezi çağrı merkezi, Levent operasyon ofisi ve kurumsal iletişim bilgileri.' }
+    { route: '/iletisim', title: 'İletişim & Kurumsal Operasyon Ofisi', desc: 'Toplantı Merkezi çağrı merkezi, Levent operasyon ofisi ve kurumsal iletişim bilgileri.' },
+    { route: '/admin', title: 'Yönetim Masası & Operasyon CRM', desc: 'Toplantı Merkezi kurumsal operasyon masası, teklif yönetimi ve tedarikçi ağı kontrol paneli.', noIndex: true }
   ];
 
   standardPages.forEach(p => {
@@ -737,6 +972,7 @@ async function runPrerender() {
       description: p.desc,
       canonicalUrl: `${DOMAIN}${p.route}`,
       h1: p.title,
+      noIndex: p.noIndex || false,
       breadcrumbs: [
         { name: p.title, url: p.route }
       ]
@@ -745,7 +981,139 @@ async function runPrerender() {
     pageCount++;
   });
 
-  console.log(`[Prerender] Successfully generated ${pageCount} static HTML pages in dist/!`);
+  // 13. Legal Pages (/yasal/kvkk, /yasal/gizlilik, /yasal/cerez, /yasal/kullanim, /yasal)
+  const legalPages = [
+    {
+      slug: 'kvkk',
+      title: 'KVKK Aydınlatma Metni | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi Kişisel Verilerin Korunması Kanunu (KVKK) aydınlatma metni, veri işleme politikası ve haklarınız.',
+      h1: 'Kişisel Verilerin Korunması ve Aydınlatma Metni',
+      content: `
+        <h2 class="text-xl font-bold font-display text-slate-900 mb-3">1. Veri Sorumlusu</h2>
+        <p class="text-slate-700 text-sm leading-relaxed mb-4">6698 sayılı Kişisel Verilerin Korunması Kanunu uyarınca Toplantı Merkezi Kurumsal Organizasyon A.Ş. veri sorumlusu sıfatıyla hareket etmektedir.</p>
+        <h2 class="text-xl font-bold font-display text-slate-900 mb-3">2. İşlenen Veriler ve Amaç</h2>
+        <p class="text-slate-700 text-sm leading-relaxed mb-4">Teklif formları, iletişim kanalları ve organizasyon talepleri kapsamında toplanan ad, soyad, kurumsal e-posta, telefon ve kurum bilgileri yalnızca organizasyon planlama ve resmi teklif iletimi amacıyla işlenir.</p>
+      `
+    },
+    {
+      slug: 'gizlilik',
+      title: 'Gizlilik Politikası | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi kurumsal gizlilik politikası, müşteri ve kurumsal verilerin korunması ve gizlilik standartlarımız.',
+      h1: 'Kurumsal Gizlilik Politikası',
+      content: `
+        <h2 class="text-xl font-bold font-display text-slate-900 mb-3">Kurumsal Bilgi Güvenliği Taahhüdü</h2>
+        <p class="text-slate-700 text-sm leading-relaxed mb-4">Toplantı Merkezi; holdingler, kurumsal firmalar ve kamu kurumları ile yürütülen tüm organizasyon süreçlerinde ticari sır, bütçe ve katılımcı listelerini sıkı gizlilik protokolleri (NDA) çerçevesinde korur.</p>
+      `
+    },
+    {
+      slug: 'cerez',
+      title: 'Çerez (Cookie) Politikası | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi web sitesinde kullanılan çerez türleri, kullanım amaçları ve çerez yönetim kılavuzu.',
+      h1: 'Çerez (Cookie) Kullanım Politikası',
+      content: `
+        <h2 class="text-xl font-bold font-display text-slate-900 mb-3">Çerez Türleri ve Kullanımı</h2>
+        <p class="text-slate-700 text-sm leading-relaxed mb-4">Sitemizde yalnızca platformun düzgün çalışması için zorunlu olan teknik çerezler ile performans analizine yönelik anonim analitik çerezler kullanılmaktadır.</p>
+      `
+    },
+    {
+      slug: 'kullanim',
+      title: 'Kullanım Koşulları | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi web sitesi, teklif platformu ve kurumsal organizasyon talep formları kullanım şartları.',
+      h1: 'Web Sitesi Kullanım Koşulları',
+      content: `
+        <h2 class="text-xl font-bold font-display text-slate-900 mb-3">Hizmet Şartları ve Sorumluluk Reddi</h2>
+        <p class="text-slate-700 text-sm leading-relaxed mb-4">Web sitemizde yer alan görsel, metin ve teklif hesaplama araçları Toplantı Merkezi mülkiyetindedir. Formlar aracılığıyla iletilen talepler ön teklif niteliğinde olup kesin sözleşme karşılıklı onay sonrasında düzenlenir.</p>
+      `
+    }
+  ];
+
+  legalPages.forEach(lp => {
+    const html = buildHtml({
+      route: `/yasal/${lp.slug}`,
+      title: lp.title,
+      description: lp.desc,
+      canonicalUrl: `${DOMAIN}/yasal/${lp.slug}`,
+      h1: lp.h1,
+      breadcrumbs: [
+        { name: 'Yasal Bilgilendirme', url: '/yasal/kvkk' },
+        { name: lp.h1, url: `/yasal/${lp.slug}` }
+      ],
+      bodyContent: `
+        <div class="border border-slate-200 rounded-2xl p-6 sm:p-8 bg-white my-6 shadow-sm">
+          ${lp.content}
+        </div>
+      `
+    });
+    writePage(`/yasal/${lp.slug}`, html);
+    pageCount++;
+  });
+
+  // Base /yasal route (mirrors kvkk with canonical to kvkk)
+  const yasalBaseHtml = buildHtml({
+    route: '/yasal',
+    title: 'Yasal Bilgilendirme & KVKK Politikası | Toplantı Merkezi',
+    description: 'Toplantı Merkezi KVKK aydınlatma metni, gizlilik politikası, çerez politikası ve kullanım koşulları.',
+    canonicalUrl: `${DOMAIN}/yasal/kvkk`,
+    h1: 'Yasal Bilgilendirme ve Kurumsal Politikalar',
+    breadcrumbs: [
+      { name: 'Yasal Bilgilendirme', url: '/yasal/kvkk' }
+    ],
+    bodyContent: `
+      <div class="border border-slate-200 rounded-2xl p-6 sm:p-8 bg-white my-6 shadow-sm">
+        <p class="text-slate-700 text-sm leading-relaxed mb-4">Lütfen incelemek istediğiniz yasal belgeyi seçiniz:</p>
+        <ul class="space-y-2 text-sm text-amber-700 font-semibold">
+          <li><a href="/yasal/kvkk" class="hover:underline">&rarr; KVKK Aydınlatma Metni</a></li>
+          <li><a href="/yasal/gizlilik" class="hover:underline">&rarr; Gizlilik Politikası</a></li>
+          <li><a href="/yasal/cerez" class="hover:underline">&rarr; Çerez Politikası</a></li>
+          <li><a href="/yasal/kullanim" class="hover:underline">&rarr; Kullanım Koşulları</a></li>
+        </ul>
+      </div>
+    `
+  });
+  writePage('/yasal', yasalBaseHtml);
+  pageCount++;
+
+  // 14. 404 Not Found Page (dist/404.html & public/404.html)
+  const html404 = buildHtml({
+    route: '/404.html',
+    title: 'Sayfa Bulunamadı (404) | Toplantı Merkezi',
+    description: 'Aradığınız sayfa taşınmış, adı değiştirilmiş veya geçici olarak kullanım dışı olabilir. 81 ilde kurumsal toplantı ve organizasyon çözümlerimiz için ana sayfayı ziyaret edebilirsiniz.',
+    h1: 'Aradığınız Sayfa Mevcut Değil veya Taşınmış Olabilir',
+    is404: true,
+    noIndex: true,
+    bodyContent: `
+      <div class="text-center py-12">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-800 text-xs font-bold uppercase tracking-wider mb-6">
+          <span>Hata Kodu 404 • Sayfa Bulunamadı</span>
+        </div>
+        <div class="text-7xl md:text-9xl font-black text-slate-900 font-display tracking-tight mb-4">
+          4<span class="text-amber-500">0</span>4
+        </div>
+        <p class="text-slate-600 text-base max-w-xl mx-auto mb-8">
+          Ulaşmaya çalıştığınız bağlantı güncellenmiş veya yazım hatası yapılmış olabilir. Aşağıdaki popüler bağlantılardan devam edebilir veya doğrudan kurumsal temsilcimizle iletişime geçebilirsiniz.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
+          <a href="/" class="px-6 py-3.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm shadow hover:bg-amber-400 transition">Ana Sayfaya Dön</a>
+          <a href="/teklif-al" class="px-6 py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition">Hızlı Teklif Al</a>
+          <a href="tel:+905320550945" class="px-6 py-3.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100 transition">0532 055 09 45</a>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 text-left max-w-3xl mx-auto">
+          <div class="font-bold text-slate-900 text-sm mb-3">Popüler Kurumsal Organizasyon Çözümleri:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+            <a href="/bayi-toplantisi-organizasyonu" class="p-2.5 rounded-lg border border-slate-100 hover:bg-amber-50 hover:text-amber-900 transition font-medium block">Bayi Toplantısı</a>
+            <a href="/toplanti-organizasyonu" class="p-2.5 rounded-lg border border-slate-100 hover:bg-amber-50 hover:text-amber-900 transition font-medium block">Şirket Toplantısı</a>
+            <a href="/kongre-organizasyonu" class="p-2.5 rounded-lg border border-slate-100 hover:bg-amber-50 hover:text-amber-900 transition font-medium block">Kongre & Konferans</a>
+            <a href="/kurumsal-piknik-organizasyonu" class="p-2.5 rounded-lg border border-slate-100 hover:bg-amber-50 hover:text-amber-900 transition font-medium block">Kurumsal Piknik</a>
+            <a href="/kamu-organizasyonu" class="p-2.5 rounded-lg border border-slate-100 hover:bg-amber-50 hover:text-amber-900 transition font-medium block">Kamu & Protokol</a>
+            <a href="/sehirler" class="p-2.5 rounded-lg border border-slate-100 hover:bg-amber-50 hover:text-amber-900 transition font-medium block">81 İl Rehberi</a>
+          </div>
+        </div>
+      </div>
+    `
+  });
+  writeRawFile('404.html', html404);
+
+  console.log(`[Prerender] Successfully generated ${pageCount} static HTML pages + 404.html in dist/!`);
 }
 
 runPrerender().catch(err => {

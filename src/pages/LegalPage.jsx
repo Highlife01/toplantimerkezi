@@ -8,10 +8,30 @@ export default function LegalPage() {
   const { type } = useParams();
   const currentType = type || 'kvkk';
 
+  const legalMeta = {
+    kvkk: {
+      title: 'KVKK Aydınlatma Metni | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi Kişisel Verilerin Korunması Kanunu (KVKK) aydınlatma metni, veri işleme politikası ve haklarınız.'
+    },
+    gizlilik: {
+      title: 'Gizlilik Politikası | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi kurumsal gizlilik politikası, müşteri ve kurumsal verilerin korunması ve gizlilik standartlarımız.'
+    },
+    cerez: {
+      title: 'Çerez (Cookie) Politikası | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi web sitesinde kullanılan çerez türleri, kullanım amaçları ve çerez yönetim kılavuzu.'
+    },
+    kullanim: {
+      title: 'Kullanım Koşulları | Toplantı Merkezi',
+      desc: 'Toplantı Merkezi web sitesi, teklif platformu ve kurumsal organizasyon talep formları kullanım şartları.'
+    }
+  };
+
   useEffect(() => {
+    const meta = legalMeta[currentType] || legalMeta.kvkk;
     updatePageSeo({
-      title: 'Yasal Bilgilendirme & KVKK Politikası | Toplantı Merkezi',
-      description: 'Toplantı Merkezi KVKK aydınlatma metni, gizlilik politikası, çerez politikası ve kullanım koşulları.',
+      title: meta.title,
+      description: meta.desc,
       canonicalUrl: `https://www.toplantimerkezi.com.tr/yasal/${currentType}`
     });
     window.scrollTo(0, 0);
