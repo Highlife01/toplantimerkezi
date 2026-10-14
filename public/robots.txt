@@ -43,9 +43,32 @@ User-agent: Bingbot
 Allow: /
 Disallow: /admin
 
+User-agent: Meta-ExternalAgent
+Allow: /
+Disallow: /admin
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /admin
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /admin
+
+User-agent: YouBot
+Allow: /
+Disallow: /admin
+
 # Host, Sitemaps & LLM Context Standards
 Host: https://www.toplantimerkezi.com.tr
 Sitemap: https://www.toplantimerkezi.com.tr/sitemap.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-pages.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-services.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-cities.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-locations.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-venues.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-projects.xml
+Sitemap: https://www.toplantimerkezi.com.tr/sitemap-blog.xml
 
 # LLM Direct Knowledge Context
 # https://www.toplantimerkezi.com.tr/llms.txt

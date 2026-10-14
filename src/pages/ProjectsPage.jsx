@@ -4,14 +4,23 @@ import { PROJECTS } from '../data/projectsData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { MapPin, Users, Calendar, ArrowRight, Award, CheckCircle2, Sparkles } from 'lucide-react';
+import { MapPin, Users, Calendar, ArrowRight, Award, CheckCircle2, Sparkles, Bot } from 'lucide-react';
 
 export default function ProjectsPage({ onOpenQuoteModal }) {
   useEffect(() => {
     updatePageSeo({
       title: 'Kurumsal Projelerimiz ve Case Studies | Toplantı Merkezi',
       description: 'Otomotiv, holding, kamu ve finans sektöründen markalar için Türkiye genelinde gerçekleştirdiğimiz başarı hikayeleri, bayi toplantıları ve kurumsal organizasyonlar.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/projeler'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/projeler',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Projelerimiz & Case Studies', url: '/projeler' }
+      ],
+      itemList: PROJECTS.map(p => ({
+        name: p.title,
+        url: `/projeler/${p.slug}`,
+        description: `${p.city} - ${p.attendees} Katılımcılı ${p.category}: ${p.summary}`
+      }))
     });
     window.scrollTo(0, 0);
   }, []);
@@ -32,6 +41,24 @@ export default function ProjectsPage({ onOpenQuoteModal }) {
           title="Gerçekleşen Kurumsal Organizasyonlarımız"
           subtitle="Holdinglerden kamu kurumlarına, otomotivden teknolojiye kadar geniş bir yelpazede hayata geçirdiğimiz anahtar teslim operasyonlar."
         />
+
+        {/* GEO Direct Answer Summary */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+            <Bot size={20} />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 block">
+              Kurumsal Vaka Analizleri (B2B Case Studies)
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              Toplantı Merkezi; otomotiv, ilaç, finans, sanayi, teknoloji ve kamu sektörlerinde 500’den fazla kurumsal organizasyon ve 250.000’in üzerinde katılımcı ağırlama tecrübesine sahiptir. Aşağıdaki vaka analizlerinde Antalya bayi zirvelerinden Ankara protokol çalıştaylarına, İstanbul global teknoloji konferanslarından sanayi şirket pikniklerine kadar gerçek saha operasyon parametreleri sunulmaktadır.
+            </p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {PROJECTS.map(project => (

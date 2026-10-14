@@ -15,6 +15,8 @@ export default function ProjectDetailPage({ onOpenQuoteModal }) {
         title: `${project.title} | Case Study`,
         description: `${project.title} projesinin detayları, ${project.city} lokasyonunda ${project.attendees} kişilik kurumsal organizasyon başarı kriterleri ve sahne/teknik yönetimi.`,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/projeler/${project.slug}`,
+        ogImage: project.image,
+        ogImageAlt: project.title,
         breadcrumbs: [
           { name: 'Ana Sayfa', url: '/' },
           { name: 'Projelerimiz', url: '/projeler' },
@@ -107,7 +109,7 @@ export default function ProjectDetailPage({ onOpenQuoteModal }) {
           <div className="lg:col-span-8 space-y-8">
             
             {/* Scope */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-4">
+            <div data-geo-answer="true" className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-4">
               <h2 className="text-xl font-bold text-slate-900 font-display">Projenin Kapsamı ve Hedefleri</h2>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                 {project.scope}

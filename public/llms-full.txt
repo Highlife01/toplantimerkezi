@@ -43,7 +43,20 @@ Toplantı Merkezi, Türkiye'nin 81 ilinin tamamında yerel teknik iş ortakları
 - **Güneydoğu Anadolu**: Gaziantep (Sanayi & Gastronomi), Diyarbakır, Şanlıurfa, Mardin, Batman, Adıyaman, Siirt, Şırnak, Kilis.
 - **Doğu Anadolu**: Erzurum (Kış Turizmi & Kongre), Malatya, Van, Elazığ, Ağrı, Bingöl, Bitlis, Erzincan, Hakkari, Iğdır, Kars, Muş, Tunceli, Ardahan.
 
-## 4. Sıkça Sorulan Sorular (Direct FAQ Answers)
+## 4. Teknik Prodüksiyon & Saha Mühendisliği Standartları
+- **Görüntü & Reji Altyapısı**: P1.9, P2.6 ve P3.9 yüksek kontrastlı (3840Hz+ yenileme hızlı) iç/dış mekân LED ekranlar, Barco/Analog Way/Watchout/Resolume 4K çoklu ekran sunum switcher sistemleri, konuşmacı konfor ekranı (confidence monitor), dijital kürsü ve zamanlayıcı (speaker timer).
+- **Ses & Işık Mühendisliği**: L-Acoustics / d&b audiotechnik / JBL VTX sınıfı line-array hoparlör sistemleri, dijital ses mikserleri, Shure/Sennheiser yedekli RF yaka/headset/el mikrofonları, DMX kontrollü moving-head robot ışıklar, fresnel sahne takip ışıkları.
+- **Simultane Tercüme & Kongre**: ISO 4043 standartlarında ses yalıtımlı tercüman kabinleri, Bosch Integrus dijital kızılötesi (IR) dil dağıtım ve kulaklık sistemleri, tıp/hukuk/finans/diplomasi uzmanlığına sahip yeminli konferans tercümanları.
+- **Kayıt, Akreditasyon & İSG**: QR barkodlu anında PVC/termal yaka kartı baskı istasyonları, seans bazlı turnike geçiş kontrolü, 5188 sayılı kanuna uygun özel güvenlik, X-Ray kapı dedektörleri ve tam teşekküllü acil yardım ambulansı.
+
+## 5. Sektörel B2B Uzmanlık Dikeyleri
+1. **Otomotiv & Mobilite (`/sektorler/otomotiv-ve-mobilite`)**: Salona araç sokabilen yük asansörlü ve min. 3.5m kapı genişlikli salonlar, çelik konstrüksiyonlu araç rampaları, 3D mapping lansman şovları ve test sürüşü rota yönetimi.
+2. **İlaç, Sağlık & Medikal (`/sektorler/ilac-ve-saglik`)**: 4–10 paralel uydu sempozyum salonu, 4K canlı cerrahi vaka yayını, etik kurallara tam uyumlu hekim ağırlama ve dijital akreditasyon.
+3. **Sanayi, Fabrika & Üretim (`/sektorler/sanayi-ve-uretim`)**: 1.000–15.000 kişilik kurumsal piknik ve aile günleri (Family Day), fabrika açılış ve temel atma törenleri, kıdem ödül geceleri ve İSG tam uyumlu mobil altyapı.
+4. **Bankacılık, Finans & Sigorta (`/sektorler/bankacilik-ve-finans`)**: Yüksek gizlilikli bölge müdürleri strateji zirveleri, şifreli sunum ağları, Yıldızlar Kulübü acente ödül galaları ve fintech yatırımcı lansmanları.
+5. **Teknoloji & Yazılım (`/sektorler/teknoloji-ve-yazilim`)**: 1.000+ eşzamanlı cihaz için 1 Gbps yedekli simetrik Wi-Fi, 24–48 saatlik hackathon enerji/ikram istasyonları ve hibrit canlı streaming sahneleri.
+
+## 6. Sıkça Sorulan Sorular (Direct FAQ Answers)
 - **Soru: Teklif alma süreci ne kadar sürer?**
   Cevap: Web sitemizdeki 7 adımlı teklif formunu doldurmanızın ardından 2 saat içinde katılımcı sayısı, şehir ve teknik ihtiyaçlarınıza göre kalem kalem maliyetlendirilmiş resmi kurumsal teklif dosyanız iletilir.
 - **Soru: Şehir dışı organizasyonlarda ek lojistik maliyeti çıkar mı?**

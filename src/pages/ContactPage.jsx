@@ -1,17 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { storageService } from '../services/storageService';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { Phone, Mail, MapPin, MessageSquare, Clock, ShieldCheck, Building2 } from 'lucide-react';
+import { Phone, Mail, MapPin, MessageSquare, Clock, ShieldCheck, Building2, CheckCircle2, Bot, AlertCircle } from 'lucide-react';
 
 export default function ContactPage({ onOpenQuoteModal }) {
   const settings = storageService.getSettings();
+  const [formData, setFormData] = useState({
+    contactName: '',
+    company: '',
+    phone: '',
+    email: '',
+    notes: ''
+  });
+  const [submitStatus, setSubmitStatus] = useState({ state: 'idle', trackingId: '', error: '' });
 
   useEffect(() => {
     updatePageSeo({
-      title: 'İletişim & Kurumsal Merkez',
+      title: 'İletişim & Kurumsal Merkez | 81 İl Operasyon Masası',
       description: 'Toplantı Merkezi genel merkez iletişim bilgileri, 81 il kurumsal operasyon masası telefon ve WhatsApp hatları. 7/24 kurumsal destek.',
       canonicalUrl: 'https://www.toplantimerkezi.com.tr/iletisim',
       breadcrumbs: [
@@ -42,6 +50,32 @@ export default function ContactPage({ onOpenQuoteModal }) {
     window.scrollTo(0, 0);
   }, []);
 
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitStatus({ state: 'submitting', trackingId: '', error: '' });
+    try {
+      const created = await storageService.addLead({
+        contactName: formData.contactName.trim(),
+        company: formData.company.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        notes: formData.notes.trim(),
+        organizationType: 'Kurumsal İletişim Talebi',
+        city: 'İstanbul',
+        attendees: 100,
+        budgetRange: 'Belirtilmedi'
+      });
+      setSubmitStatus({ state: 'success', trackingId: created?.id || '', error: '' });
+      setFormData({ contactName: '', company: '', phone: '', email: '', notes: '' });
+    } catch (err) {
+      setSubmitStatus({
+        state: 'error',
+        trackingId: '',
+        error: err?.message || 'Talebiniz iletilirken bir sorun oluştu. Lütfen doğrudan 0532 055 09 45 hattımızdan bize ulaşın.'
+      });
+    }
+  };
+
   return (
     <div className="pt-28 pb-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,6 +92,24 @@ export default function ContactPage({ onOpenQuoteModal }) {
           title="Bizimle İletişime Geçin"
           subtitle="Türkiye genelindeki tüm kurumsal organizasyon ve toplantı talepleriniz için uzman ekibimiz bir telefon uzağınızda."
         />
+
+        {/* GEO Direct Answer Summary */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+            <Bot size={20} />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 block">
+              Kurumsal Merkez & 81 İl Koordinasyon Bilgileri
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              Toplantı Merkezi Genel Merkezi; Büyükdere Cad. No:199 Levent / Beşiktaş, İstanbul adresinde yer almakta olup 0532 055 09 45 kurumsal çağrı merkezi, WhatsApp hızlı teklif hattı ve info@toplantimerkezi.com.tr resmi e-posta kanalı üzerinden Türkiye’nin 81 ilindeki B2B toplantı, bayi zirvesi, kongre ve kurumsal etkinlik taleplerine 2 saat içinde resmi teklif yanıtı sağlar.
+            </p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
           
@@ -144,13 +196,37 @@ export default function ContactPage({ onOpenQuoteModal }) {
               </p>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); alert('Mesajınız başarıyla iletildi. En kısa sürede sizinle iletişime geçeceğiz.'); }} className="space-y-4 text-xs sm:text-sm">
+            {submitStatus.state === 'success' && (
+              <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-emerald-800">
+                  <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                  <span>Mesajınız ve kurumsal talebiniz başarıyla kaydedildi!</span>
+                </div>
+                <p className="text-xs text-emerald-800 leading-relaxed">
+                  Operasyon masamız en kısa sürede sizinle iletişime geçecektir.
+                  {submitStatus.trackingId && (
+                    <> Talep takip kodunuz: <strong className="font-mono">{submitStatus.trackingId}</strong> — <Link to="/teklif-takip" className="underline font-bold">Canlı Takip Portalı</Link></>
+                  )}
+                </p>
+              </div>
+            )}
+
+            {submitStatus.state === 'error' && (
+              <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 flex items-start gap-2.5 text-xs">
+                <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                <span>{submitStatus.error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleFormSubmit} className="space-y-4 text-xs sm:text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">Adınız Soyadınız *</label>
                   <input
                     type="text"
                     required
+                    value={formData.contactName}
+                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                     placeholder="Adınız Soyadınız"
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-amber-600 focus:bg-white"
                   />
@@ -160,6 +236,8 @@ export default function ContactPage({ onOpenQuoteModal }) {
                   <input
                     type="text"
                     required
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     placeholder="Firma Adı"
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-amber-600 focus:bg-white"
                   />
@@ -172,6 +250,8 @@ export default function ContactPage({ onOpenQuoteModal }) {
                   <input
                     type="tel"
                     required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="0532 000 00 00"
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-amber-600 focus:bg-white"
                   />
@@ -181,6 +261,8 @@ export default function ContactPage({ onOpenQuoteModal }) {
                   <input
                     type="email"
                     required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="ad@sirket.com"
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-amber-600 focus:bg-white"
                   />
@@ -192,6 +274,8 @@ export default function ContactPage({ onOpenQuoteModal }) {
                 <textarea
                   rows="4"
                   required
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   placeholder="Planlanan etkinlik tarihi, katılımcı sayısı ve özel taleplerinizi yazabilirsiniz..."
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-amber-600 focus:bg-white"
                 ></textarea>
@@ -199,9 +283,10 @@ export default function ContactPage({ onOpenQuoteModal }) {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-sm shadow-md hover:scale-102 transition"
+                disabled={submitStatus.state === 'submitting'}
+                className="w-full py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-sm shadow-md hover:scale-102 transition disabled:opacity-60"
               >
-                Mesajı Gönder
+                {submitStatus.state === 'submitting' ? 'Gönderiliyor...' : 'Mesajı Gönder'}
               </button>
             </form>
           </div>

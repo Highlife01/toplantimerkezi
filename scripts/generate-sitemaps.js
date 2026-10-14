@@ -69,7 +69,7 @@ const generateServicesSitemap = () => {
   const entries = [];
   const addedSlugs = new Set();
 
-  // A) 5 SEO Cluster Money Pages
+  // A) 5 SEO Cluster Money Pages (All 45 routes)
   SEO_CLUSTERS.forEach(cluster => {
     cluster.pages.forEach(page => {
       if (!addedSlugs.has(page.slug)) {
@@ -78,24 +78,6 @@ const generateServicesSitemap = () => {
         entries.push(formatUrlEntry(`/${page.slug}`, priority, 'weekly'));
       }
     });
-  });
-
-  // Ekstra Cluster Rotaları (App.jsx içinde route olarak tanımlı olup cluster pages dizisinde olmayanlar)
-  const additionalClusterSlugs = [
-    'sirket-toplantisi', 'motivasyon-toplantisi', 'strateji-toplantisi', 'donem-toplantisi',
-    'bayi-bulusmasi', 'bayi-egitimi', 'bayi-motivasyon-toplantisi',
-    'sempozyum-organizasyonu', 'zirve-organizasyonu', 'panel-organizasyonu', 'seminer-organizasyonu', 'egitim-organizasyonu',
-    'kurumsal-organizasyon', 'kurumsal-etkinlik', 'kurumsal-piknik', 'sirket-piknigi', 'personel-etkinligi',
-    'aile-gunu-organizasyonu', 'team-building', 'gala-organizasyonu', 'odul-toreni', 'lansman-organizasyonu',
-    'acilis-organizasyonu', 'roadshow-organizasyonu',
-    'protokol-organizasyonu', 'resmi-toren-organizasyonu', 'kamu-toplantisi', 'acilis-toreni', 'temel-atma-toreni'
-  ];
-
-  additionalClusterSlugs.forEach(slug => {
-    if (!addedSlugs.has(slug)) {
-      addedSlugs.add(slug);
-      entries.push(formatUrlEntry(`/${slug}`, '0.9', 'weekly'));
-    }
   });
 
   // B) 9 Organizasyon Katalog Detay Sayfası
@@ -129,7 +111,7 @@ const generateCitiesSitemap = () => {
   return wrapUrlSet(entries);
 };
 
-// 4. sitemap-locations.xml (Öncelikli Şehirler x Organizasyon ve Teknik Hizmet Kombinasyonları)
+// 4. sitemap-locations.xml (Öncelikli Şehirler x 9 Organizasyon ve 6 Teknik Hizmet Kombinasyonları)
 const generateLocationsSitemap = () => {
   const entries = [];
   const focusCities = [
@@ -138,37 +120,20 @@ const generateLocationsSitemap = () => {
     'kayseri', 'mugla', 'eskisehir', 'samsun', 'trabzon'
   ];
 
-  const popularOrgs = [
-    'bayi-toplantisi',
-    'sirket-toplantilari',
-    'kongre-konferans',
-    'kurumsal-piknik',
-    'kamu-protokol-organizasyonlari',
-    'lansman-organizasyonu',
-    'gala-odul-geceleri'
-  ];
-
-  const topServices = [
-    'ses-isik',
-    'sahne-dekor',
-    'led-ekran-goruntu',
-    'mekan-planlama',
-    'catering'
-  ];
-
-  // A) Focus Cities x Popular Organizations
+  // A) 15 Focus Cities x All 9 Organizations (135 URLs)
   focusCities.forEach(citySlug => {
-    popularOrgs.forEach(orgSlug => {
-      const priority = ['istanbul', 'ankara', 'antalya'].includes(citySlug) ? '0.9' : '0.85';
-      entries.push(formatUrlEntry(`/sehirler/${citySlug}/${orgSlug}`, priority, 'weekly'));
+    ORGANIZATIONS.forEach(org => {
+      const priority = ['istanbul', 'ankara', 'antalya', 'izmir'].includes(citySlug) ? '0.9' : '0.85';
+      entries.push(formatUrlEntry(`/sehirler/${citySlug}/${org.slug}`, priority, 'weekly'));
     });
   });
 
-  // B) Top MICE Hubs x High-Intent Technical Services
-  const topHubs = ['istanbul', 'ankara', 'antalya', 'izmir', 'adana', 'bursa'];
-  topHubs.forEach(citySlug => {
-    topServices.forEach(srvSlug => {
-      entries.push(formatUrlEntry(`/sehirler/${citySlug}/${srvSlug}`, '0.85', 'weekly'));
+  // B) 15 Focus Cities x Top 6 Technical Services (90 URLs)
+  const topServices = SERVICES.slice(0, 6);
+  focusCities.forEach(citySlug => {
+    topServices.forEach(srv => {
+      const priority = ['istanbul', 'ankara', 'antalya', 'izmir'].includes(citySlug) ? '0.88' : '0.82';
+      entries.push(formatUrlEntry(`/sehirler/${citySlug}/${srv.slug}`, priority, 'weekly'));
     });
   });
 

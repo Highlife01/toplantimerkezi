@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { ALL_81_CITIES, PROMINENT_CITIES } from '../src/data/citiesData.js';
+import { ALL_81_CITIES, PROMINENT_CITIES, getCityGeo } from '../src/data/citiesData.js';
 import { ORGANIZATIONS } from '../src/data/organizationsData.js';
 import { SERVICES } from '../src/data/servicesData.js';
 import { INDUSTRIES } from '../src/data/industryData.js';
@@ -38,7 +38,7 @@ function escapeHtml(str) {
 }
 
 /**
- * Generates an SEO-optimized HTML document for a specific route
+ * Generates an SEO & GEO-optimized HTML document for a specific route
  */
 function buildHtml({
   route,
@@ -52,6 +52,8 @@ function buildHtml({
   bodyContent = '',
   breadcrumbs = [],
   faqs = [],
+  howTo = null,
+  geo = null,
   schemas = [],
   is404 = false,
   noIndex = false
@@ -73,46 +75,100 @@ function buildHtml({
   // 3. Replace Keywords
   html = html.replace(/<meta name="keywords"\s+content=".*?" \/>/s, `<meta name="keywords" content="${escapeHtml(finalKeywords)}" />`);
 
-  // 4. Canonical & Robots Management
-  if (is404) {
-    // 404 Pages MUST NOT have a canonical pointing to the homepage or themselves
-    html = html.replace(/<link rel="canonical".*?\/>\s*/s, '');
-    html = html.replace(/<meta name="robots" content=".*?" \/>/s, '<meta name="robots" content="noindex, follow" />');
+  // 4. Canonical, Hreflang & Robots Management
+  if (is404 || noIndex) {
+    html = html.replace(/<link rel="canonical".*?\/>\s*/g, '');
+    html = html.replace(/<link rel="alternate" hreflang=".*?".*?\/>\s*/g, '');
+    const robotsDirective = is404 ? 'noindex, follow' : 'noindex, nofollow';
+    html = html.replace(/<meta name="robots" content=".*?" \/>/s, `<meta name="robots" content="${robotsDirective}" />`);
+    html = html.replace(/<meta name="googlebot" content=".*?" \/>/s, `<meta name="googlebot" content="${robotsDirective}" />`);
   } else {
-    // Replace or Set Self-Referencing Canonical Tag
     if (html.includes('<link rel="canonical"')) {
       html = html.replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${fullCanonical}" />`);
     } else {
       html = html.replace('</head>', `  <link rel="canonical" href="${fullCanonical}" />\n</head>`);
     }
-
-    if (noIndex) {
-      html = html.replace(/<meta name="robots" content=".*?" \/>/s, '<meta name="robots" content="noindex, nofollow" />');
-    }
+    html = html.replace(/<link rel="alternate" hreflang="tr-TR" href=".*?" \/>/s, `<link rel="alternate" hreflang="tr-TR" href="${fullCanonical}" />`);
+    html = html.replace(/<link rel="alternate" hreflang="x-default" href=".*?" \/>/s, `<link rel="alternate" hreflang="x-default" href="${fullCanonical}" />`);
   }
 
-  // 5. Replace OpenGraph & Twitter Tags
+  // 5. Replace OpenGraph & Twitter Tags (supports both name="twitter:*" and property="twitter:*")
   html = html.replace(/<meta property="og:url" content=".*?" \/>/s, `<meta property="og:url" content="${fullCanonical}" />`);
   html = html.replace(/<meta property="og:title" content=".*?" \/>/s, `<meta property="og:title" content="${escapeHtml(finalTitle)}" />`);
   html = html.replace(/<meta property="og:description"\s+content=".*?" \/>/s, `<meta property="og:description" content="${escapeHtml(description)}" />`);
-  html = html.replace(/<meta property="twitter:url" content=".*?" \/>/s, `<meta property="twitter:url" content="${fullCanonical}" />`);
-  html = html.replace(/<meta property="twitter:title" content=".*?" \/>/s, `<meta property="twitter:title" content="${escapeHtml(finalTitle)}" />`);
-  html = html.replace(/<meta property="twitter:description"\s+content=".*?" \/>/s, `<meta property="twitter:description" content="${escapeHtml(description)}" />`);
+  html = html.replace(/<meta property="og:image" content=".*?" \/>/s, `<meta property="og:image" content="${finalOgImage}" />`);
+  html = html.replace(/<meta property="og:image:alt" content=".*?" \/>/s, `<meta property="og:image:alt" content="${escapeHtml(h1 || finalTitle)}" />`);
 
-  // 6. Build Rich Schemas (JSON-LD)
-  if (!is404) {
-    const fullSchemas = [...schemas];
+  html = html.replace(/<meta (?:name|property)="twitter:url" content=".*?" \/>/s, `<meta name="twitter:url" content="${fullCanonical}" />`);
+  html = html.replace(/<meta (?:name|property)="twitter:title" content=".*?" \/>/s, `<meta name="twitter:title" content="${escapeHtml(finalTitle)}" />`);
+  html = html.replace(/<meta (?:name|property)="twitter:description"\s+content=".*?" \/>/s, `<meta name="twitter:description" content="${escapeHtml(description)}" />`);
+  html = html.replace(/<meta (?:name|property)="twitter:image" content=".*?" \/>/s, `<meta name="twitter:image" content="${finalOgImage}" />`);
+
+  // 5b. Replace Dynamic GEO Meta Tags (ISO-3166-2:TR & GPS Coordinates)
+  if (geo && geo.region && geo.placename && geo.position && geo.icbm) {
+    html = html.replace(/<meta name="geo\.region" content=".*?" \/>/s, `<meta name="geo.region" content="${escapeHtml(geo.region)}" />`);
+    html = html.replace(/<meta name="geo\.placename" content=".*?" \/>/s, `<meta name="geo.placename" content="${escapeHtml(geo.placename)}" />`);
+    html = html.replace(/<meta name="geo\.position" content=".*?" \/>/s, `<meta name="geo.position" content="${escapeHtml(geo.position)}" />`);
+    html = html.replace(/<meta name="ICBM" content=".*?" \/>/s, `<meta name="ICBM" content="${escapeHtml(geo.icbm)}" />`);
+    html = html.replace(/<meta name="coverage" content=".*?" \/>/s, `<meta name="coverage" content="${escapeHtml(geo.placename)}" />`);
+    html = html.replace(/<meta name="dc\.coverage" content=".*?" \/>/s, `<meta name="dc.coverage" content="${escapeHtml(geo.placename)}" />`);
+  }
+
+  // 6. Build Rich Schemas (JSON-LD) & AI Citation Tags
+  if (!is404 && !noIndex) {
+    const citationMeta = [
+      `  <meta name="citation_title" content="${escapeHtml(finalTitle)}" />`,
+      `  <meta name="citation_author" content="Toplantı Merkezi Kurumsal Operasyon Masası" />`,
+      `  <meta name="citation_publisher" content="Toplantı Merkezi" />`,
+      `  <meta name="citation_public_url" content="${fullCanonical}" />`
+    ].join('\n');
+
+    const fullSchemas = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        '@id': `${fullCanonical}#webpage`,
+        url: fullCanonical,
+        name: finalTitle,
+        description,
+        inLanguage: 'tr-TR',
+        isPartOf: { '@id': `${DOMAIN}/#website` },
+        about: { '@id': `${DOMAIN}/#organization` },
+        speakable: {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['h1', '[data-geo-answer="true"]', 'main p']
+        }
+      },
+      ...schemas
+    ];
 
     // Breadcrumbs Schema
     if (breadcrumbs.length > 0) {
+      const bcItems = [{ name: 'Ana Sayfa', url: '/' }, ...breadcrumbs];
       fullSchemas.push({
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
-        itemListElement: breadcrumbs.map((b, idx) => ({
+        itemListElement: bcItems.map((b, idx) => ({
           '@type': 'ListItem',
           position: idx + 1,
           name: b.name,
-          item: b.url.startsWith('http') ? b.url : `${DOMAIN}${b.url.startsWith('/') ? '' : '/'}${b.url}`
+          item: b.url.startsWith('http') ? b.url : `${DOMAIN}${b.url.startsWith('/') ? '' : '/'}${b.url === '/' ? '' : b.url}`
+        }))
+      });
+    }
+
+    // HowTo Schema
+    if (howTo && Array.isArray(howTo.steps) && howTo.steps.length > 0) {
+      fullSchemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: howTo.name || finalTitle,
+        description: howTo.description || description,
+        step: howTo.steps.map((s, idx) => ({
+          '@type': 'HowToStep',
+          position: idx + 1,
+          name: s.name || s.title,
+          text: s.text || s.desc
         }))
       });
     }
@@ -134,9 +190,7 @@ function buildHtml({
     }
 
     const schemaTags = fullSchemas.map(s => `  <script type="application/ld+json">\n${JSON.stringify(s, null, 2)}\n  </script>`).join('\n');
-    if (schemaTags) {
-      html = html.replace('</head>', `${schemaTags}\n</head>`);
-    }
+    html = html.replace('</head>', `${citationMeta}\n${schemaTags}\n</head>`);
   }
 
   // 7. Semantic HTML Pre-rendered Shell inside <div id="root">
@@ -456,70 +510,22 @@ async function runPrerender() {
     });
   });
 
-  // Additional Cluster Routes defined in App.jsx
-  const additionalClusterSlugs = [
-    { slug: 'sirket-toplantisi', title: 'Şirket Toplantısı', parent: 'toplanti-organizasyonu' },
-    { slug: 'motivasyon-toplantisi', title: 'Motivasyon Toplantısı', parent: 'toplanti-organizasyonu' },
-    { slug: 'strateji-toplantisi', title: 'Strateji Toplantısı', parent: 'toplanti-organizasyonu' },
-    { slug: 'donem-toplantisi', title: 'Dönem Toplantısı', parent: 'toplanti-organizasyonu' },
-    { slug: 'bayi-bulusmasi', title: 'Bayi Buluşması', parent: 'bayi-toplantisi-organizasyonu' },
-    { slug: 'bayi-egitimi', title: 'Bayi Eğitimi', parent: 'bayi-toplantisi-organizasyonu' },
-    { slug: 'bayi-motivasyon-toplantisi', title: 'Bayi Motivasyon Toplantısı', parent: 'bayi-toplantisi-organizasyonu' },
-    { slug: 'sempozyum-organizasyonu', title: 'Sempozyum Organizasyonu', parent: 'kongre-organizasyonu' },
-    { slug: 'zirve-organizasyonu', title: 'Zirve Organizasyonu', parent: 'kongre-organizasyonu' },
-    { slug: 'panel-organizasyonu', title: 'Panel Organizasyonu', parent: 'kongre-organizasyonu' },
-    { slug: 'seminer-organizasyonu', title: 'Seminer Organizasyonu', parent: 'kongre-organizasyonu' },
-    { slug: 'egitim-organizasyonu', title: 'Kurumsal Eğitim Organizasyonu', parent: 'kongre-organizasyonu' },
-    { slug: 'kurumsal-organizasyon', title: 'Kurumsal Organizasyon', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'kurumsal-etkinlik', title: 'Kurumsal Etkinlik Yönetimi', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'kurumsal-piknik', title: 'Kurumsal Piknik', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'sirket-piknigi', title: 'Şirket Pikniği', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'personel-etkinligi', title: 'Personel Etkinliği', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'aile-gunu-organizasyonu', title: 'Aile Günü Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'team-building', title: 'Takım Çalışması & Team Building', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'gala-organizasyonu', title: 'Gala Gecesi Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'odul-toreni', title: 'Kurumsal Ödül Töreni', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'lansman-organizasyonu', title: 'Lansman Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'acilis-organizasyonu', title: 'Açılış Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'roadshow-organizasyonu', title: 'Roadshow Organizasyonu', parent: 'kurumsal-piknik-organizasyonu' },
-    { slug: 'protokol-organizasyonu', title: 'Devlet & Protokol Organizasyonu', parent: 'kamu-organizasyonu' },
-    { slug: 'resmi-toren-organizasyonu', title: 'Resmî Tören Organizasyonu', parent: 'kamu-organizasyonu' },
-    { slug: 'kamu-toplantisi', title: 'Kamu Toplantısı Yönetimi', parent: 'kamu-organizasyonu' },
-    { slug: 'acilis-toreni', title: 'Açılış Töreni Yönetimi', parent: 'kamu-organizasyonu' },
-    { slug: 'temel-atma-toreni', title: 'Temel Atma Töreni Organizasyonu', parent: 'kamu-organizasyonu' }
-  ];
-
-  additionalClusterSlugs.forEach(item => {
-    if (!addedClusterSlugs.has(item.slug)) {
-      addedClusterSlugs.add(item.slug);
-      const html = buildHtml({
-        route: `/${item.slug}`,
-        title: `${item.title} Organizasyonu | Toplantı Merkezi`,
-        description: `Türkiye genelinde 81 ilde profesyonel ${item.title.toLowerCase()} çözümleri: Mekân, ses-ışık, LED ekran, reji ve ikram yönetimi.`,
-        canonicalUrl: `${DOMAIN}/${item.slug}`,
-        h1: `${item.title} Çözümleri`,
-        aiDirectAnswer: `${item.title}; şirket ve kurumların kurumsal hedeflerini gerçekleştirmek üzere düzenledikleri, profesyonel salon seçimi, teknik reji, karşılama ve ikram hizmetleri içeren B2B etkinliktir.`,
-        breadcrumbs: [
-          { name: 'Organizasyonlar', url: `/${item.parent}` },
-          { name: item.title, url: `/${item.slug}` }
-        ]
-      });
-      writePage(`/${item.slug}`, html);
-      pageCount++;
-    }
-  });
-
-  // 3. 81 Cities Pages (/sehirler/${slug})
+  // 3. 81 Cities Pages (/sehirler/${slug} + direct alias /${slug})
   ALL_81_CITIES.forEach(city => {
     const prominent = PROMINENT_CITIES.find(p => p.slug === city.slug) || {};
+    const cityGeo = getCityGeo(city.slug);
     const overview = prominent.overview || `${city.name} ilinde bayi toplantısı, şirket toplantısı, kurumsal etkinlik ve kongre organizasyonları için profesyonel salon ve teknik altyapı çözümleri sunuyoruz.`;
+    const aiAnswer = `${city.name} kurumsal organizasyon ve toplantı yönetimi; bölgedeki 5 yıldızlı kongre otelleri, balo salonları ve etkinlik alanlarında bayi toplantısı, şirket vizyon oturumları, kongre, seminer ve kurumsal pikniklerin uçtan uca koordine edilmesidir. Toplantı Merkezi; salon tahsisinden 3D sahne tasarımına, dev LED ekranlardan ses-ışık sistemlerine, simultane tercümeden havalimanı VIP transferine kadar tüm süreci ${city.name} ilinde tek sözleşme ve yerel operasyon gücüyle anahtar teslim yönetir.`;
+
     const cityHtml = buildHtml({
       route: `/sehirler/${city.slug}`,
       title: `${city.name} Kurumsal Toplantı & Organizasyon Çözümleri | Toplantı Merkezi`,
       description: `${city.name} toplantı salonları, kongre otelleri, bayi toplantısı ve kurumsal etkinlik yönetimi. 81 ilde tek merkezden yerel operasyon güvencesi.`,
       canonicalUrl: `${DOMAIN}/sehirler/${city.slug}`,
+      ogImage: prominent.image,
+      geo: cityGeo,
       h1: `${city.name} Kurumsal Toplantı ve Organizasyon Çözümleri`,
-      aiDirectAnswer: `${city.name} genelinde kurumsal organizasyonlar; şehirdeki 5 yıldızlı kongre otelleri, toplantı salonları ve açık hava tesislerinde LED ekran, ses-ışık, reji, transfer ve catering hizmetleri tek merkezden koordine edilerek gerçekleştirilir.`,
+      aiDirectAnswer: aiAnswer,
       breadcrumbs: [
         { name: 'Şehirler', url: '/sehirler' },
         { name: city.name, url: `/sehirler/${city.slug}` }
@@ -541,47 +547,73 @@ async function runPrerender() {
           q: `${city.name} operasyonlarında teknik ekip yerel mi sağlanıyor?`,
           a: `Evet, Toplantı Merkezi ${city.name} bölgesinde yerleşik profesyonel teknik ortakları ve süpervizörleriyle sıfır hata prensibiyle çalışır.`
         }
+      ],
+      schemas: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'LocalBusiness',
+          name: `Toplantı Merkezi ${city.name} Kurumsal Organizasyon Masası`,
+          telephone: '+90 532 055 09 45',
+          email: 'info@toplantimerkezi.com.tr',
+          url: `${DOMAIN}/sehirler/${city.slug}`,
+          priceRange: '₺₺₺₺',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: city.name,
+            addressRegion: city.region || 'Türkiye',
+            addressCountry: 'TR'
+          },
+          geo: cityGeo ? {
+            '@type': 'GeoCoordinates',
+            latitude: cityGeo.lat,
+            longitude: cityGeo.lng
+          } : undefined,
+          areaServed: {
+            '@type': 'AdministrativeArea',
+            name: `${city.name}, Türkiye`
+          },
+          description: aiAnswer
+        }
       ]
     });
     writePage(`/sehirler/${city.slug}`, cityHtml);
+    // Direct root alias e.g. /istanbul -> canonical /sehirler/istanbul
+    writePage(`/${city.slug}`, cityHtml);
     pageCount++;
   });
 
-  // 4. Focus Cities x Popular Organizations (15 Focus Cities x 7 Popular Orgs = 105 pages)
-  const focusCities = [
+  // 4. All 81 Cities x All 9 Organizations & Top 6 Technical Services
+  const focusCitiesSet = new Set([
     'istanbul', 'ankara', 'antalya', 'izmir', 'adana',
     'mersin', 'bursa', 'kocaeli', 'gaziantep', 'konya',
     'kayseri', 'mugla', 'eskisehir', 'samsun', 'trabzon'
-  ];
+  ]);
+  const topServicesList = SERVICES.slice(0, 6);
 
-  const popularOrgs = [
-    { slug: 'bayi-toplantisi', title: 'Bayi Toplantısı' },
-    { slug: 'sirket-toplantilari', title: 'Şirket Toplantısı' },
-    { slug: 'kongre-konferans', title: 'Kongre & Konferans' },
-    { slug: 'kurumsal-piknik', title: 'Kurumsal Piknik' },
-    { slug: 'kamu-protokol-organizasyonlari', title: 'Kamu & Protokol' },
-    { slug: 'lansman-organizasyonu', title: 'Lansman Organizasyonu' },
-    { slug: 'gala-odul-geceleri', title: 'Gala & Ödül Geceleri' }
-  ];
+  ALL_81_CITIES.forEach(city => {
+    const cityGeo = getCityGeo(city.slug);
+    const isFocusCity = focusCitiesSet.has(city.slug);
 
-  focusCities.forEach(cSlug => {
-    const city = ALL_81_CITIES.find(c => c.slug === cSlug);
-    if (!city) return;
-    popularOrgs.forEach(org => {
-      const route = `/sehirler/${cSlug}/${org.slug}`;
+    // A) City x 9 Organizations
+    ORGANIZATIONS.forEach(org => {
+      const route = `/sehirler/${city.slug}/${org.slug}`;
       const orgFullTitle = org.title.endsWith('Organizasyonu') ? org.title : `${org.title} Organizasyonu`;
       const title = `${city.name} ${orgFullTitle} | Toplantı Merkezi`;
       const desc = `${city.name} ilinde profesyonel ${orgFullTitle.toLowerCase()}: Salon seçimi, dev LED ekran, profesyonel ses-ışık, sahne ve catering tek merkezden yönetilir.`;
+      const aiAnswer = `${city.name} ${orgFullTitle.toLowerCase()}; bölgedeki 5 yıldızlı oteller, kongre salonları ve açık alanlarda katılımcı kayıt, 3D sahne tasarımı, profesyonel ses-ışık sistemleri, dev LED ekran prodüksiyonu, VIP karşılama ve catering süreçlerinin tek merkezden yönetilmesidir. Toplantı Merkezi, ${city.name} ilinde tek sözleşme ve sıfır bütçe sapması garantisiyle anahtar teslim kurumsal çözümler sunar.`;
+
       const html = buildHtml({
         route,
         title,
         description: desc,
         canonicalUrl: `${DOMAIN}${route}`,
+        ogImage: org.heroImage,
+        geo: cityGeo,
         h1: `${city.name} ${orgFullTitle}`,
-        aiDirectAnswer: `${city.name} ${orgFullTitle.toLowerCase()}; katılımcı sayısına göre en uygun otel ve salonların belirlenmesi, 3D sahne tasarımı, teknik ekipman ve saha yönetimini kapsayan anahtar teslim kurumsal hizmettir.`,
+        aiDirectAnswer: aiAnswer,
         breadcrumbs: [
           { name: 'Şehirler', url: '/sehirler' },
-          { name: city.name, url: `/sehirler/${cSlug}` },
+          { name: city.name, url: `/sehirler/${city.slug}` },
           { name: org.title, url: route }
         ],
         bodyContent: `
@@ -590,20 +622,6 @@ async function runPrerender() {
             <p class="text-slate-600 text-sm leading-relaxed mb-4">
               Toplantı Merkezi; ${escapeHtml(city.name)} lokasyonunda kurumunuzun hedeflerine uygun balo salonları, kongre otelleri ve etkinlik alanlarını analiz ederek anahtar teslim operasyon sağlar.
             </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-700">
-              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div class="font-bold text-slate-900 mb-1">Mekân ve Salon Tahsisi</div>
-                <div>Katılımcı kapasitesine göre 5 yıldızlı otel ve salon seçenekleri.</div>
-              </div>
-              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div class="font-bold text-slate-900 mb-1">Teknik Reji & Sahne</div>
-                <div>Dev LED ekran, line-array ses ve robot ışık parkuru.</div>
-              </div>
-              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div class="font-bold text-slate-900 mb-1">Uçtan Uca Saha Ekibi</div>
-                <div>Yerleşik süpervizör, teknik şef ve karşılama hostesi desteği.</div>
-              </div>
-            </div>
           </div>
         `,
         faqs: [
@@ -621,47 +639,50 @@ async function runPrerender() {
             '@context': 'https://schema.org',
             '@type': 'Service',
             name: `${city.name} ${org.title}`,
-            description: desc,
+            description: aiAnswer,
             provider: {
               '@type': 'Organization',
               name: 'Toplantı Merkezi',
               url: DOMAIN
+            },
+            areaServed: {
+              '@type': 'AdministrativeArea',
+              name: `${city.name}, Türkiye`,
+              geo: cityGeo ? {
+                '@type': 'GeoCoordinates',
+                latitude: cityGeo.lat,
+                longitude: cityGeo.lng
+              } : undefined
             }
           }
         ]
       });
       writePage(route, html);
+      if (isFocusCity) {
+        writePage(`/${city.slug}/${org.slug}`, html);
+      }
       pageCount++;
     });
-  });
 
-  // 5. Top MICE Hubs x High-Intent Technical Services (6 Top Cities x 5 Technical Services = 30 pages)
-  const topHubs = ['istanbul', 'ankara', 'antalya', 'izmir', 'adana', 'bursa'];
-  const topServices = [
-    { slug: 'ses-isik', title: 'Ses & Işık Sistemleri', desc: 'profesyonel ses sistemi kiralama, akustik düzenleme ve robot ışıklandırma' },
-    { slug: 'sahne-dekor', title: 'Sahne & Dekor Tasarımı', desc: '3D sahne tasarımı, podyum kurulumu ve kurumsal backdrop dekorasyonu' },
-    { slug: 'led-ekran-goruntu', title: 'LED Ekran & Görüntü Rejisi', desc: 'yüksek çözünürlüklü dev LED ekran kiralama, canlı yayın ve reji masası' },
-    { slug: 'mekan-planlama', title: 'Mekân Planlama & Salon Tahsisi', desc: '5 yıldızlı kongre otelleri ve toplantı salonları tahsisi ve yerleşim planlaması' },
-    { slug: 'catering', title: 'Catering & Menü Yönetimi', desc: 'karşılama kokteyli, coffee break ve gala yemeği menü yönetimi' }
-  ];
-
-  topHubs.forEach(cSlug => {
-    const city = ALL_81_CITIES.find(c => c.slug === cSlug);
-    if (!city) return;
-    topServices.forEach(srv => {
-      const route = `/sehirler/${cSlug}/${srv.slug}`;
+    // B) City x Top 6 Technical Services
+    topServicesList.forEach(srv => {
+      const route = `/sehirler/${city.slug}/${srv.slug}`;
       const title = `${city.name} ${srv.title} Kiralama & Kurulum | Toplantı Merkezi`;
-      const desc = `${city.name} ilinde ${srv.desc} çözümleri. Kongre otelleri ve toplantı salonlarında anahtar teslim profesyonel teknik prodüksiyon ve canlı reji hizmeti.`;
+      const desc = `${city.name} ilinde ${srv.shortDesc.toLowerCase()} Kongre otelleri ve toplantı salonlarında anahtar teslim profesyonel teknik prodüksiyon ve canlı reji hizmeti.`;
+      const aiAnswer = `${city.name} genelinde ${srv.title.toLowerCase()} hizmetleri; bölgedeki 5 yıldızlı oteller, kongre salonları ve kurumsal etkinlik alanlarında uzman teknik ekip ve anahtar teslim kurulum garantisiyle sağlanır.`;
+
       const html = buildHtml({
         route,
         title,
         description: desc,
         canonicalUrl: `${DOMAIN}${route}`,
+        ogImage: srv.image,
+        geo: cityGeo,
         h1: `${city.name} ${srv.title} Çözümleri`,
-        aiDirectAnswer: `${city.name} genelinde ${srv.title.toLowerCase()} hizmetleri; bölgedeki 5 yıldızlı oteller, kongre salonları ve kurumsal etkinlik alanlarında uzman teknik ekip ve anahtar teslim kurulum garantisiyle sağlanır.`,
+        aiDirectAnswer: aiAnswer,
         breadcrumbs: [
           { name: 'Şehirler', url: '/sehirler' },
-          { name: city.name, url: `/sehirler/${cSlug}` },
+          { name: city.name, url: `/sehirler/${city.slug}` },
           { name: srv.title, url: route }
         ],
         bodyContent: `
@@ -670,11 +691,6 @@ async function runPrerender() {
             <p class="text-slate-600 text-sm leading-relaxed mb-4">
               Toplantı Merkezi; ${escapeHtml(city.name)} lokasyonunda gerçekleştirilecek kurumsal toplantı, kongre ve bayi buluşmaları için son teknoloji ekipman parkuru ve deneyimli teknik şef kadrosuyla kusursuz altyapı kurar.
             </p>
-            <ul class="list-disc list-inside space-y-2 text-slate-700 text-xs sm:text-sm">
-              <li><strong>Yerel Depo & Hızlı Kurulum:</strong> Şehirlerarası nakliye maliyeti ve zaman kaybı olmadan ${escapeHtml(city.name)} yerleşik depolarımızdan doğrudan sevkiyat.</li>
-              <li><strong>Yedekli Sistem Güvencesi:</strong> Kritik sunumlarda kesintisiz yayın için yedekli reji masası ve jeneratör desteği.</li>
-              <li><strong>Uzman Teknik Personel:</strong> Etkinlik süresince salonda hazır bulunan ses, ışık ve görüntü operatörleri.</li>
-            </ul>
           </div>
         `,
         faqs: [
@@ -692,18 +708,56 @@ async function runPrerender() {
             '@context': 'https://schema.org',
             '@type': 'Service',
             name: `${city.name} ${srv.title}`,
-            description: desc,
+            description: aiAnswer,
             provider: {
               '@type': 'Organization',
               name: 'Toplantı Merkezi',
               url: DOMAIN
+            },
+            areaServed: {
+              '@type': 'AdministrativeArea',
+              name: `${city.name}, Türkiye`,
+              geo: cityGeo ? {
+                '@type': 'GeoCoordinates',
+                latitude: cityGeo.lat,
+                longitude: cityGeo.lng
+              } : undefined
             }
           }
         ]
       });
       writePage(route, html);
+      if (isFocusCity) {
+        writePage(`/${city.slug}/${srv.slug}`, html);
+      }
       pageCount++;
     });
+
+    // C) Focus Cities x Primary Cluster Slugs (e.g., /antalya/bayi-toplantisi-organizasyonu, /ankara/kamu-organizasyonu)
+    if (isFocusCity) {
+      SEO_CLUSTERS.forEach(cluster => {
+        const primaryPage = cluster.pages[0];
+        if (!primaryPage) return;
+        const route = `/sehirler/${city.slug}/${primaryPage.slug}`;
+        const html = buildHtml({
+          route,
+          title: `${city.name} ${primaryPage.title} | Toplantı Merkezi`,
+          description: `${city.name} ilinde profesyonel ${primaryPage.title.toLowerCase()}: 5 yıldızlı kongre otelleri, 3D sahne, LED ekran, ses-ışık ve VIP transfer yönetimi.`,
+          canonicalUrl: `${DOMAIN}${route}`,
+          geo: cityGeo,
+          h1: `${city.name} ${primaryPage.title}`,
+          aiDirectAnswer: `${city.name} ${primaryPage.title.toLowerCase()}; ${primaryPage.aiDirectAnswer}`,
+          breadcrumbs: [
+            { name: 'Şehirler', url: '/sehirler' },
+            { name: city.name, url: `/sehirler/${city.slug}` },
+            { name: primaryPage.title, url: route }
+          ]
+        });
+        writePage(route, html);
+        writePage(`/${city.slug}/${primaryPage.slug}`, html);
+        pageCount++;
+      });
+    }
   });
 
   // 6. 9 Organizations Catalog Details (/organizasyonlar/${slug})
@@ -713,8 +767,14 @@ async function runPrerender() {
       title: `${org.title} | Toplantı Merkezi`,
       description: org.shortDesc || org.overview,
       canonicalUrl: `${DOMAIN}/organizasyonlar/${org.slug}`,
+      ogImage: org.heroImage,
       h1: org.title,
       aiDirectAnswer: org.overview,
+      howTo: org.workflow ? {
+        name: `${org.title} Nasıl Planlanır?`,
+        description: org.shortDesc,
+        steps: org.workflow.map(w => ({ name: w.step, text: w.desc }))
+      } : null,
       breadcrumbs: [
         { name: 'Organizasyonlar', url: '/organizasyonlar' },
         { name: org.title, url: `/organizasyonlar/${org.slug}` }
@@ -748,6 +808,7 @@ async function runPrerender() {
       title: `${service.title} Hizmeti | Toplantı Merkezi`,
       description: service.shortDesc,
       canonicalUrl: `${DOMAIN}/hizmetler/${service.slug}`,
+      ogImage: service.image,
       h1: `${service.title} Çözümleri`,
       aiDirectAnswer: `${service.title}; kurumsal organizasyon ve toplantılarda profesyonel standartlarda ekipman, kurulum, teknik reji ve canlı operasyon desteği sağlayan uzmanlık modülüdür.`,
       breadcrumbs: [
@@ -777,6 +838,7 @@ async function runPrerender() {
       title: ind.seoTitle || `${ind.title} Organizasyon Çözümleri | Toplantı Merkezi`,
       description: ind.metaDesc,
       canonicalUrl: `${DOMAIN}/sektorler/${ind.slug}`,
+      ogImage: ind.bannerImage,
       h1: ind.title,
       aiDirectAnswer: ind.subtitle,
       breadcrumbs: [
@@ -838,23 +900,7 @@ async function runPrerender() {
           </div>
 
           <h2 class="text-xl font-bold font-display text-slate-900 mb-3">Proje Kapsamı ve Uygulanan Çözümler</h2>
-          <p class="text-slate-700 text-sm leading-relaxed mb-6">${escapeHtml(project.summary || project.results)}</p>
-
-          ${project.scope && project.scope.length > 0 ? `
-            <div class="mb-6">
-              <h3 class="font-bold text-slate-900 text-sm mb-3">Sağlanan Hizmet Modülleri:</h3>
-              <div class="flex flex-wrap gap-2">
-                ${project.scope.map(s => `<span class="bg-slate-100 text-slate-800 text-xs px-3 py-1.5 rounded-lg border border-slate-200">${escapeHtml(s)}</span>`).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          ${project.results ? `
-            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <div class="font-bold text-emerald-900 text-sm mb-1">Operasyon Başarı Sonucu:</div>
-              <div class="text-emerald-800 text-xs sm:text-sm leading-relaxed">${escapeHtml(project.results)}</div>
-            </div>
-          ` : ''}
+          <p class="text-slate-700 text-sm leading-relaxed mb-6">${escapeHtml(project.summary || project.scope)}</p>
         </div>
       `,
       schemas: [
@@ -889,6 +935,7 @@ async function runPrerender() {
       canonicalUrl: `${DOMAIN}/blog/${post.slug}`,
       h1: post.title,
       ogImage: post.image,
+      aiDirectAnswer: post.summary,
       breadcrumbs: [
         { name: 'Blog & Bilgi Merkezi', url: '/blog' },
         { name: post.title, url: `/blog/${post.slug}` }
@@ -932,6 +979,13 @@ async function runPrerender() {
       description: hub.metaDesc,
       canonicalUrl: `${DOMAIN}/rehber/${hub.slug}`,
       h1: hub.title,
+      aiDirectAnswer: hub.aiDirectAnswer || hub.metaDesc,
+      howTo: hub.steps ? {
+        name: hub.title,
+        description: hub.metaDesc,
+        steps: hub.steps
+      } : null,
+      faqs: hub.faqs || [],
       breadcrumbs: [
         { name: 'Rehberler', url: '/blog' },
         { name: hub.title, url: `/rehber/${hub.slug}` }

@@ -7,7 +7,7 @@ import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
 import {
   Building, MapPin, Users, Filter, Search,
-  Sparkles, ArrowRight, Star, CheckCircle2, ChevronDown
+  Sparkles, ArrowRight, Star, CheckCircle2, ChevronDown, Bot
 } from 'lucide-react';
 
 export default function VenuesPage({ onOpenQuoteModal }) {
@@ -24,7 +24,16 @@ export default function VenuesPage({ onOpenQuoteModal }) {
     updatePageSeo({
       title: 'Toplantı ve Kongre Mekânları | Türkiye Geneli Salon Arama Motoru',
       description: '5 yıldızlı kongre otelleri, bağımsız toplantı salonları ve açık hava etkinlik alanları. Filtreli mekân arama ve anında kurumsal teklif alma.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/mekanlar'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/mekanlar',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Mekânlar & Salonlar', url: '/mekanlar' }
+      ],
+      itemList: VENUES.slice(0, 12).map(v => ({
+        name: `${v.name} (${v.city})`,
+        url: `/mekanlar?q=${encodeURIComponent(v.name)}`,
+        description: `${v.city} / ${v.district} - Maks. ${v.capacity} Kişilik ${v.venueType}. ${v.description}`
+      }))
     });
     window.scrollTo(0, 0);
   }, []);
@@ -64,6 +73,24 @@ export default function VenuesPage({ onOpenQuoteModal }) {
           title="Toplantı & Kongre Mekânları Arama Motoru"
           subtitle="Türkiye genelinde 5 yıldızlı kongre otelleri, prestijli bağımsız salonlar ve doğa içi kurumsal etkinlik alanlarını filtreleyip karşılaştırın."
         />
+
+        {/* GEO AI Direct Answer Card */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-10 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+            <Bot size={20} />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 block">
+              Yapay Zekâ ve Arama Motoru Doğrudan Yanıtı (AI Summary)
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              Toplantı Merkezi Mekân Portföyü; İstanbul, Antalya, Ankara, İzmir ve Adana başta olmak üzere 81 ilde 100 kişilik yönetim kurulu odalarından 5.000+ kişilik kolonsuz kongre merkezlerine, 5 yıldızlı MICE resort otellerden doğa içi kurumsal piknik alanlarına kadar kurumsal etkinliklere uygun salonları tavan yüksekliği, paralel salon sayısı ve teknik altyapı kriterleriyle filtreleyerek 2 saatte karşılaştırmalı teklif sunar.
+            </p>
+          </div>
+        </div>
 
         {/* Filter Bar */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-md mb-10 space-y-4">

@@ -4,14 +4,26 @@ import QuoteWizardForm from '../components/quote/QuoteWizardForm';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { Sparkles, ShieldCheck, Clock, CheckCircle2, Phone } from 'lucide-react';
+import { Sparkles, ShieldCheck, Clock, CheckCircle2, Phone, Bot } from 'lucide-react';
 
 export default function QuotePage() {
   useEffect(() => {
     updatePageSeo({
       title: 'Kurumsal Organizasyon Teklifi Al | 7 Adımda Hızlı Teklif Modülü',
       description: 'Bayi toplantısı, kongre, seminer, lansman ve kurumsal piknik organizasyonlarınız için 81 ilde geçerli resmi fiyat teklifi alın.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/teklif-al'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/teklif-al',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Teklif Al', url: '/teklif-al' }
+      ],
+      schemaType: 'WebApplication',
+      schemaData: {
+        name: 'Toplantı Merkezi 7 Adımlı Kurumsal Teklif Modülü',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'All',
+        url: 'https://www.toplantimerkezi.com.tr/teklif-al',
+        description: '81 ilde bayi toplantısı, kongre, şirket toplantısı ve kurumsal piknik organizasyonları için 2 saatte resmi PDF teklif oluşturma portalı.'
+      }
     });
     window.scrollTo(0, 0);
   }, []);
@@ -32,6 +44,19 @@ export default function QuotePage() {
           title="Kurumsal Organizasyon Fiyat Teklifi Alın"
           subtitle="7 kısa adımda organizasyon detaylarınızı girin; 81 ildeki mekân ve teknik çözümlerimizle 2 saat içinde detaylı resmi teklifinizi iletelim."
         />
+
+        {/* GEO Direct Answer Summary */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-5 sm:p-6 border border-amber-300 shadow-sm mb-8 flex items-start gap-3.5"
+        >
+          <div className="w-9 h-9 rounded-xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-xs text-slate-950">
+            <Bot size={18} />
+          </div>
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <strong>7 Adımda Hızlı Kurumsal Teklif Sistemi:</strong> Organizasyon türünüzü, hedef şehrinizi, tahmini katılımcı sayınızı ve teknik gereksinimlerinizi (mekân, sahne, LED ekran, ses-ışık, catering) seçerek başvurunuzu tamamlayın; 2 saat içinde kalem bazlı resmi bütçe tablonuz hazırlanır.
+          </p>
+        </div>
 
         {/* Wizard Card Container */}
         <div className="bg-white rounded-3xl p-6 sm:p-10 md:p-12 border border-slate-200 shadow-xl mb-14">

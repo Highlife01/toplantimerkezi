@@ -4,14 +4,23 @@ import { BLOG_POSTS } from '../data/blogData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { BookOpen, Calendar, Clock, ArrowRight, Tag } from 'lucide-react';
+import { BookOpen, Calendar, Clock, ArrowRight, Tag, Bot } from 'lucide-react';
 
 export default function BlogPage({ onOpenQuoteModal }) {
   useEffect(() => {
     updatePageSeo({
       title: 'Kurumsal Etkinlik & Toplantı Rehberi | Toplantı Merkezi Blog',
       description: 'Bayi toplantısı nasıl organize edilir, maliyet nasıl hesaplanır, kongre mekânı seçimi ve şirket organizasyonu püf noktaları.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/blog'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/blog',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Rehber & Blog', url: '/blog' }
+      ],
+      itemList: BLOG_POSTS.map(post => ({
+        name: post.title,
+        url: `/blog/${post.slug}`,
+        description: post.summary
+      }))
     });
     window.scrollTo(0, 0);
   }, []);
@@ -32,6 +41,24 @@ export default function BlogPage({ onOpenQuoteModal }) {
           title="Kurumsal Etkinlik ve Toplantı Kılavuzu"
           subtitle="Toplantı bütçelemesinden sahne tasarımına, kurumsal organizasyonlarınızı başarıya ulaştıracak profesyonel ipuçları ve analizler."
         />
+
+        {/* GEO Direct Answer Summary */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+            <Bot size={20} />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 block">
+              Kurumsal MICE Bilgi Merkezi & Operasyon Rehberleri
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              Toplantı Merkezi Bilgi Merkezi; kurumsal satın alma, İK, pazarlama ve kurumsal iletişim profesyonelleri için bayi toplantısı bütçeleme formülleri, kongre salonu akustik ve tavan yüksekliği kriterleri, açık hava şirket pikniği İSG protokolleri ve 81 il destinasyon karşılaştırma rehberleri sunar.
+            </p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {BLOG_POSTS.map(post => (

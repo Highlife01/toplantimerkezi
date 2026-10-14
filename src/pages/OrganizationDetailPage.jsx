@@ -1,18 +1,20 @@
 import React, { useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ORGANIZATIONS } from '../data/organizationsData';
-import SectionTitle from '../components/common/SectionTitle';
+import { PROMINENT_CITIES } from '../data/citiesData';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
 import { 
-  Building2, Users, Calendar, CheckCircle2, ChevronRight, 
-  HelpCircle, ArrowRight, Sparkles, Phone, MessageSquare, ShieldCheck, Clock
+  CheckCircle2, HelpCircle, ArrowRight, Sparkles, MapPin, Bot
 } from 'lucide-react';
 
 export default function OrganizationDetailPage({ onOpenQuoteModal }) {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const org = ORGANIZATIONS.find(o => o.slug === slug);
+
+  const aiDirectAnswer = org
+    ? `${org.title}; ${org.overview} Toplantı Merkezi, Türkiye'nin 81 ilinde ${org.title.toLowerCase()} süreçlerini mekân tahsisi, 3D sahne tasarımı, P2 LED ekran, ses-ışık rejisi, simultane çeviri ve kurumsal catering modülleriyle tek sözleşme altında anahtar teslim yönetir.`
+    : '';
 
   useEffect(() => {
     if (org) {
@@ -20,18 +22,30 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
         title: `${org.title} Organizasyonu`,
         description: `${org.shortDesc} 81 ilde profesyonel planlama, sahne, teknik ekipman ve mekân yönetimiyle tek merkezden kurumsal hizmet.`,
         canonicalUrl: `https://www.toplantimerkezi.com.tr/organizasyonlar/${org.slug}`,
+        ogImage: org.heroImage,
+        ogImageAlt: org.title,
         breadcrumbs: [
           { name: 'Ana Sayfa', url: '/' },
           { name: 'Organizasyonlar', url: '/organizasyonlar' },
           { name: org.title, url: `/organizasyonlar/${org.slug}` }
         ],
         faqs: org.faqs || undefined,
+        howTo: org.workflow ? {
+          name: `${org.title} Nasıl Yönetilir?`,
+          description: org.overview || org.shortDesc,
+          totalTime: 'PT2H',
+          steps: org.workflow.map(wf => ({
+            name: wf.title || wf.step,
+            text: wf.desc
+          }))
+        } : undefined,
         schemaType: 'Service',
         schemaData: {
           serviceType: org.title,
           name: `${org.title} - Toplantı Merkezi`,
           provider: {
             '@type': 'Organization',
+            '@id': 'https://www.toplantimerkezi.com.tr/#organization',
             name: 'Toplantı Merkezi',
             url: 'https://www.toplantimerkezi.com.tr',
             telephone: '+90 532 055 09 45'
@@ -40,12 +54,12 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
             '@type': 'Country',
             name: 'Turkey'
           },
-          description: org.overview || org.shortDesc
+          description: aiDirectAnswer
         }
       });
       window.scrollTo(0, 0);
     }
-  }, [org, slug]);
+  }, [org, slug, aiDirectAnswer]);
 
   if (!org) {
     return (
@@ -64,16 +78,16 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-8 overflow-x-auto whitespace-nowrap">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-slate-500 mb-8 overflow-x-auto whitespace-nowrap">
           <Link to="/" className="hover:text-amber-700">Ana Sayfa</Link>
           <span>/</span>
           <Link to="/organizasyonlar" className="hover:text-amber-700">Kurumsal Organizasyonlar</Link>
           <span>/</span>
           <span className="text-amber-800 font-bold">{org.title}</span>
-        </div>
+        </nav>
 
         {/* Hero Section */}
-        <div className="relative rounded-3xl overflow-hidden min-h-[420px] flex items-end p-6 sm:p-10 md:p-12 mb-12 shadow-xl border border-slate-200">
+        <div className="relative rounded-3xl overflow-hidden min-h-[420px] flex items-end p-6 sm:p-10 md:p-12 mb-10 shadow-xl border border-slate-200">
           <img
             src={org.heroImage}
             alt={org.title}
@@ -88,11 +102,11 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-display leading-tight">
-              {org.title} Organizasyonu
+              {org.title.endsWith('Organizasyonu') ? org.title : `${org.title} Organizasyonu`}
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-light">
-              {org.longDesc}
+            <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-light overview-text">
+              {org.longDesc || org.overview}
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -110,6 +124,26 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
               >
                 Uzmanla Görüş
               </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* GEO AI Direct Answer Card */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 relative overflow-hidden"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+              <Bot size={20} />
+            </div>
+            <div className="space-y-1.5">
+              <div className="text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                Yapay Zekâ ve Arama Motoru Doğrudan Yanıtı (GEO Summary)
+              </div>
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {aiDirectAnswer}
+              </p>
             </div>
           </div>
         </div>
@@ -147,7 +181,7 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
             {/* Workflow Process */}
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">
-                {org.title} Organizasyonu Nasıl Yönetilir?
+                {org.title} Nasıl Yönetilir?
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
                 Aksaklık riskini sıfıra indiren adım adım operasyon akışımız:
@@ -157,10 +191,10 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
                 {org.workflow.map((wf, i) => (
                   <div key={i} className="flex gap-4 items-start p-4 rounded-2xl bg-slate-50 border border-slate-200">
                     <span className="w-8 h-8 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                      {i + 1}
+                      {wf.step || i + 1}
                     </span>
                     <div>
-                      <h3 className="font-bold text-sm text-slate-900 mb-1">{wf.step}</h3>
+                      <h3 className="font-bold text-sm text-slate-900 mb-1">{wf.title || wf.step}</h3>
                       <p className="text-xs text-slate-600 leading-relaxed">{wf.desc}</p>
                     </div>
                   </div>
@@ -178,6 +212,28 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
                   <span key={i} className="px-3.5 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-semibold">
                     {sector}
                   </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Prominent Cities Matrix Links */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-4">
+              <h2 className="text-lg font-bold text-slate-900 font-display">
+                81 İlde {org.title} Hizmet Noktalarımız
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                {PROMINENT_CITIES.slice(0, 9).map(city => (
+                  <Link
+                    key={city.slug}
+                    to={`/sehirler/${city.slug}/${org.slug}`}
+                    className="p-3 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-xs font-bold text-slate-800 hover:text-amber-900 transition flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <MapPin size={13} className="text-amber-600 shrink-0" />
+                      <span className="truncate">{city.name}</span>
+                    </span>
+                    <ArrowRight size={12} className="text-amber-700 shrink-0" />
+                  </Link>
                 ))}
               </div>
             </div>
@@ -251,7 +307,7 @@ export default function OrganizationDetailPage({ onOpenQuoteModal }) {
                   Diğer Kurumsal Organizasyonlar:
                 </h4>
                 <div className="space-y-1.5">
-                  {ORGANIZATIONS.filter(o => o.slug !== org.slug).slice(0, 5).map(other => (
+                  {ORGANIZATIONS.filter(o => o.slug !== org.slug).map(other => (
                     <Link
                       key={other.slug}
                       to={`/organizasyonlar/${other.slug}`}

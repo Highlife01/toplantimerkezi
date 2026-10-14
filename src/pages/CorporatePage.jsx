@@ -13,7 +13,20 @@ export default function CorporatePage({ onOpenQuoteModal }) {
     updatePageSeo({
       title: 'Kurumsal | Hakkımızda ve Kalite Standartlarımız | Toplantı Merkezi',
       description: 'Türkiye genelinde 81 ilde B2B kurumsal organizasyon ve toplantı yönetimi hizmeti veren Toplantı Merkezi hakkında kurumsal bilgiler ve kalite taahhütlerimiz.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/kurumsal'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/kurumsal',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Kurumsal', url: '/kurumsal' }
+      ],
+      schemaType: 'AboutPage',
+      schemaData: {
+        name: 'Toplantı Merkezi Kurumsal Hakkımızda',
+        description: 'Türkiye genelinde 81 ilde B2B kurumsal organizasyon, bayi toplantısı, kongre ve protokol etkinlik yönetimi.',
+        url: 'https://www.toplantimerkezi.com.tr/kurumsal',
+        mainEntity: {
+          '@id': 'https://www.toplantimerkezi.com.tr/#organization'
+        }
+      }
     });
     window.scrollTo(0, 0);
   }, []);
@@ -36,7 +49,7 @@ export default function CorporatePage({ onOpenQuoteModal }) {
         />
 
         {/* Story Section */}
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-md mb-16 space-y-6">
+        <div data-geo-answer="true" className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-md mb-16 space-y-6">
           <div className="max-w-3xl space-y-4">
             <h3 className="text-2xl font-bold text-slate-900 font-display">
               B2B ve Kurumsal Organizasyonların Güvenilir Çözüm Ortağı

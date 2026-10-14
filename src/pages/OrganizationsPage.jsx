@@ -11,7 +11,17 @@ export default function OrganizationsPage({ onOpenQuoteModal }) {
     updatePageSeo({
       title: 'Kurumsal Organizasyonlar | B2B Etkinlik ve Toplantı Çözümleri',
       description: 'Bayi toplantısı, kongre, konferans, kurumsal piknik, lansman, gala gecesi ve personel etkinlikleri için Türkiye genelinde anahtar teslim B2B organizasyon yönetimi.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/organizasyonlar'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/organizasyonlar',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Kurumsal Organizasyonlar', url: '/organizasyonlar' }
+      ],
+      schemaType: 'CollectionPage',
+      itemList: ORGANIZATIONS.map(o => ({
+        name: o.title,
+        description: o.shortDesc,
+        url: `/organizasyonlar/${o.slug}`
+      }))
     });
     window.scrollTo(0, 0);
   }, []);
@@ -21,11 +31,11 @@ export default function OrganizationsPage({ onOpenQuoteModal }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-8">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-slate-500 mb-8">
           <Link to="/" className="hover:text-amber-700">Ana Sayfa</Link>
           <span>/</span>
           <span className="text-amber-800 font-bold">Kurumsal Organizasyonlar</span>
-        </div>
+        </nav>
 
         <SectionTitle
           badge="B2B & Kurumsal Faaliyet Alanları"
@@ -61,7 +71,7 @@ export default function OrganizationsPage({ onOpenQuoteModal }) {
 
                   <div className="absolute bottom-6 left-6 right-6">
                     <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block mb-1">
-                      {org.idealFor}
+                      {org.idealFor || (org.targetSectors && org.targetSectors.slice(0, 3).join(' • '))}
                     </span>
                     <h3 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
                       {org.title}
@@ -73,7 +83,7 @@ export default function OrganizationsPage({ onOpenQuoteModal }) {
                 <div className="w-full lg:w-1/2 flex flex-col justify-between space-y-6">
                   <div>
                     <p className="text-slate-700 text-sm sm:text-base leading-relaxed mb-6 font-normal">
-                      {org.longDesc}
+                      {org.longDesc || org.overview}
                     </p>
 
                     {/* Sub-services */}

@@ -4,7 +4,7 @@ import { BLOG_POSTS } from '../data/blogData';
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { Calendar, Clock, Tag, ArrowRight, Sparkles, BookOpen, Share2 } from 'lucide-react';
+import { Calendar, Clock, Tag, ArrowRight, Sparkles, BookOpen, Share2, Bot } from 'lucide-react';
 
 export default function BlogDetailPage({ onOpenQuoteModal }) {
   const { slug } = useParams();
@@ -100,6 +100,24 @@ export default function BlogDetailPage({ onOpenQuoteModal }) {
               <Clock size={14} className="text-amber-600" />
               {post.readTime}
             </span>
+          </div>
+        </div>
+
+        {/* GEO Executive Summary */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-7 border border-amber-300 shadow-md mb-8 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+            <Bot size={20} />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 block">
+              Yönetici Özeti & Doğrudan Yanıt (AI Summary)
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              {post.summary}
+            </p>
           </div>
         </div>
 

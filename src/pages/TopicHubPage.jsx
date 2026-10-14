@@ -1,37 +1,49 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { TOPIC_HUBS, SEO_CLUSTERS } from '../data/seoClustersData';
-import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
-import { BookOpen, Clock, Tag, ArrowRight, Sparkles, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { BookOpen, Clock, ArrowRight, Sparkles, CheckCircle2, HelpCircle, Bot } from 'lucide-react';
 
 export default function TopicHubPage({ onOpenQuoteModal }) {
   const { hubSlug } = useParams();
   const hub = TOPIC_HUBS.find(h => h.slug === hubSlug) || TOPIC_HUBS[0];
   const cluster = SEO_CLUSTERS.find(c => c.id === hub.relatedCluster) || SEO_CLUSTERS[0];
 
+  const aiSummary = hub.aiDirectAnswer || hub.metaDesc;
+
   useEffect(() => {
     updatePageSeo({
       title: `${hub.title} | Toplantı Merkezi Rehber`,
       description: hub.metaDesc,
       canonicalUrl: `https://www.toplantimerkezi.com.tr/rehber/${hub.slug}`,
+      ogType: 'article',
       breadcrumbs: [
         { name: 'Ana Sayfa', url: '/' },
-        { name: 'Rehberler', url: '/rehber/bayi-toplantisi-rehberi' },
+        { name: 'Rehberler', url: '/blog' },
         { name: hub.title, url: `/rehber/${hub.slug}` }
       ],
+      faqs: hub.faqs || [],
+      howTo: hub.steps ? {
+        name: hub.title,
+        description: hub.metaDesc,
+        totalTime: 'PT2H',
+        steps: hub.steps
+      } : undefined,
       schemaType: 'Article',
       schemaData: {
         headline: hub.title,
         description: hub.metaDesc,
+        articleBody: aiSummary,
         author: {
           '@type': 'Organization',
+          '@id': 'https://www.toplantimerkezi.com.tr/#organization',
           name: 'Toplantı Merkezi Kurumsal Masası',
           url: 'https://www.toplantimerkezi.com.tr'
         },
         publisher: {
           '@type': 'Organization',
+          '@id': 'https://www.toplantimerkezi.com.tr/#organization',
           name: 'Toplantı Merkezi',
           logo: {
             '@type': 'ImageObject',
@@ -42,23 +54,23 @@ export default function TopicHubPage({ onOpenQuoteModal }) {
       }
     });
     window.scrollTo(0, 0);
-  }, [hub, hubSlug]);
+  }, [hub, hubSlug, aiSummary]);
 
   return (
     <div className="pt-28 pb-20 bg-slate-50 text-slate-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-8 overflow-x-auto whitespace-nowrap">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-slate-500 mb-8 overflow-x-auto whitespace-nowrap">
           <Link to="/" className="hover:text-amber-800">Ana Sayfa</Link>
           <span>/</span>
-          <span className="text-slate-400">Rehberler</span>
+          <Link to="/blog" className="hover:text-amber-800 text-slate-500">Rehberler</Link>
           <span>/</span>
           <span className="text-amber-900 font-bold">{hub.title}</span>
-        </div>
+        </nav>
 
         {/* Header */}
-        <div className="space-y-4 mb-10">
+        <div className="space-y-4 mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold">
             <BookOpen size={13} />
             <span>{hub.category} Topic Hub Rehberi</span>
@@ -78,34 +90,85 @@ export default function TopicHubPage({ onOpenQuoteModal }) {
           </div>
         </div>
 
+        {/* GEO AI Direct Answer Card */}
+        <div
+          data-geo-answer="true"
+          className="bg-amber-500/10 border-2 border-amber-400/80 rounded-3xl p-6 sm:p-8 mb-10 shadow-sm"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+              <Bot size={20} />
+            </div>
+            <div className="space-y-1.5">
+              <div className="text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                Yapay Zekâ ve Yönetici Özeti (GEO Direct Answer)
+              </div>
+              <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
+                {aiSummary}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Pillar Article Body */}
         <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-md space-y-8 mb-12">
           <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed space-y-6 text-sm sm:text-base">
-            <p className="text-base sm:text-lg font-medium text-slate-900 leading-relaxed">
+            <p className="text-base sm:text-lg font-medium text-slate-900 leading-relaxed overview-text">
               {hub.metaDesc}
             </p>
 
+            {/* Dynamic Step-by-Step Guide */}
+            {hub.steps && hub.steps.length > 0 && (
+              <div className="space-y-4 pt-2">
+                <h2 className="text-2xl font-bold text-slate-950 font-display pt-4 border-t border-slate-100">
+                  Adım Adım {hub.category} Planlama Süreci
+                </h2>
+                {hub.steps.map((step, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-4">
+                    <span className="w-8 h-8 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                      0{idx + 1}
+                    </span>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-950 mb-1">{step.name}</h3>
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{step.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <h2 className="text-2xl font-bold text-slate-950 font-display pt-4 border-t border-slate-100">
-              1. İhtiyaç Analizi ve Bütçe Çerçevesi
+              Teknik Altyapı, Sahne ve Akustik Standartları
             </h2>
             <p>
-              Kurumsal organizasyonlarda en sık yapılan hata, teknik ihtiyaçlar ve katılımcı profili tam olarak analiz edilmeden mekân sözleşmesi yapılmasıdır. Mekânın tavan yüksekliği, elektrik altyapısı (kaç kW jeneratör gerektiği) ve fuaye akreditasyon alanları en baştan projelendirilmelidir.
+              Kurumsal organizasyonlarda en sık yapılan hata, teknik ihtiyaçlar ve katılımcı profili tam olarak analiz edilmeden mekân sözleşmesi yapılmasıdır. Mekânın tavan yüksekliği (en az 4.5m), elektrik altyapısı (yedekli jeneratör kapasitesi) ve fuaye akreditasyon alanları en baştan projelendirilmelidir. Sunumların net okunabilmesi için pikseller arası mesafe (Pitch) salon derinliğine göre P2 veya P2.6 olarak seçilmelidir.
             </p>
 
             <h2 className="text-2xl font-bold text-slate-950 font-display pt-4 border-t border-slate-100">
-              2. Sahne, Dev LED Ekran ve Akustik Ses Tasarımı
+              Tek Merkezden Koordinasyonun Bütçe Avantajı
             </h2>
             <p>
-              Sunumların net okunabilmesi için pikseller arası mesafe (Pitch) salon derinliğine göre P2.6 veya P3.9 olarak seçilmelidir. Konuşmacıların sahnede rahat hareket edebilmesi için telsiz yaka mikrofonları ve yedekli reji masaları kurulmalıdır.
-            </p>
-
-            <h2 className="text-2xl font-bold text-slate-950 font-display pt-4 border-t border-slate-100">
-              3. Tek Merkezden Koordinasyonun Önemi
-            </h2>
-            <p>
-              Otel, sahne, ses, LED, catering, hostes ve transferi ayrı ayrı tedarikçilerden temin etmek ciddi koordinasyon kopukluklarına ve maliyet aşımlarına yol açar. Toplantı Merkezi olarak tüm bu adımları tek bir muhatap ve tek bir şeffaf sözleşme ile yönetiyoruz.
+              Otel, sahne, ses, LED, catering, hostes ve transferi ayrı ayrı tedarikçilerden temin etmek ciddi koordinasyon kopukluklarına ve maliyet aşımlarına yol açar. Toplantı Merkezi olarak 81 ilde tüm bu adımları tek bir muhatap ve tek bir şeffaf sözleşme ile yönetiyoruz.
             </p>
           </div>
+
+          {/* Hub FAQs */}
+          {hub.faqs && hub.faqs.length > 0 && (
+            <div className="pt-6 border-t border-slate-100 space-y-4">
+              <h2 className="text-xl font-bold text-slate-950 font-display flex items-center gap-2">
+                <HelpCircle size={20} className="text-amber-700" />
+                <span>Sıkça Sorulan Sorular</span>
+              </h2>
+              <div className="space-y-3">
+                {hub.faqs.map((faq, idx) => (
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                    <h3 className="text-sm font-bold text-slate-900">{faq.q}</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Connected Money Pages in this Hub Cluster */}
           <div className="p-6 rounded-2xl bg-amber-50 border border-amber-300 space-y-4">
@@ -126,6 +189,25 @@ export default function TopicHubPage({ onOpenQuoteModal }) {
             </div>
           </div>
 
+          {/* Other Topic Hubs */}
+          <div className="pt-4 border-t border-slate-100">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+              Diğer Kurumsal Rehberlerimiz:
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {TOPIC_HUBS.filter(h => h.slug !== hub.slug).map(other => (
+                <Link
+                  key={other.slug}
+                  to={`/rehber/${other.slug}`}
+                  className="p-3 rounded-xl bg-slate-50 hover:bg-amber-50/50 border border-slate-200 text-xs font-semibold text-slate-800 hover:text-amber-900 transition flex items-center justify-between"
+                >
+                  <span>{other.title}</span>
+                  <ArrowRight size={12} className="text-amber-700 shrink-0 ml-2" />
+                </Link>
+              ))}
+            </div>
+          </div>
+
           {/* Hub Call to Action */}
           <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
@@ -134,9 +216,10 @@ export default function TopicHubPage({ onOpenQuoteModal }) {
             </div>
             <button
               onClick={() => onOpenQuoteModal({ initialOrgType: hub.category })}
-              className="px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-xs shadow-md hover:scale-105 transition"
+              className="px-6 py-3 rounded-xl gold-gradient-bg text-slate-950 font-extrabold text-xs shadow-md hover:scale-105 transition flex items-center gap-2"
             >
-              Hemen Teklif Al
+              <Sparkles size={15} />
+              <span>Hemen Teklif Al</span>
             </button>
           </div>
         </div>

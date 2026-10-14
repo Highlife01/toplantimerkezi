@@ -6,7 +6,7 @@ import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
 import { 
   Building2, Layers, Volume2, Tv, Utensils, QrCode, Users, 
-  Camera, Headphones, ShieldCheck, ArrowRight, Sparkles, CheckCircle2
+  Camera, Headphones, ShieldCheck, ArrowRight, Sparkles, CheckCircle2, Bot
 } from 'lucide-react';
 
 const iconMap = {
@@ -23,11 +23,22 @@ const iconMap = {
 };
 
 export default function ServicesPage({ onOpenQuoteModal }) {
+  const aiDirectAnswer = 'Toplantı Merkezi teknik ve operasyonel hizmet kataloğu; mekân planlama, 3D sahne ve dekor imalatı, line-array ses ve robot ışık sistemleri, P2/P3 yüksek çözünürlüklü LED ekran ve Watchout reji, kurumsal catering, QR barkodlu kayıt-karşılama, yabancı dil bilen host/hostes kadrosu, 4K fotoğraf/video prodüksiyonu, ISO simultane tercüme ve sertifikalı güvenlik/ambulans koordinasyonundan oluşan 10 entegre modülü Türkiye’nin 81 ilinde tek sözleşme altında sunar.';
+
   useEffect(() => {
     updatePageSeo({
       title: 'Hizmetlerimiz | Sahne, LED, Ses-Işık, Catering ve Teknik Yönetim',
       description: 'Mekân planlama, sahne tasarımı, profesyonel ses ve ışık sistemleri, dev LED ekranlar, simultane tercüme ve kurumsal catering hizmetleri 81 ilde tek merkezden sağlanır.',
-      canonicalUrl: 'https://www.toplantimerkezi.com.tr/hizmetler'
+      canonicalUrl: 'https://www.toplantimerkezi.com.tr/hizmetler',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Hizmetlerimiz', url: '/hizmetler' }
+      ],
+      itemList: SERVICES.map(srv => ({
+        name: srv.title,
+        url: `/hizmetler/${srv.slug}`,
+        description: srv.shortDesc
+      }))
     });
     window.scrollTo(0, 0);
   }, []);
@@ -48,6 +59,31 @@ export default function ServicesPage({ onOpenQuoteModal }) {
           title="Teknik ve Operasyonel Hizmetlerimiz"
           subtitle="Ayrı ayrı onlarca tedarikçi ile vakit kaybetmeyin; ihtiyacınız olan tüm donanım ve saha hizmetlerini tek sözleşmeyle güvence altına alın."
         />
+
+        {/* GEO AI Direct Answer Block */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 relative overflow-hidden"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+              <Bot size={20} />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                  Yapay Zekâ ve Arama Motoru Doğrudan Yanıtı (AI Summary)
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
+                  10 Entegre Teknik Modül
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {aiDirectAnswer}
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {SERVICES.map((srv) => {

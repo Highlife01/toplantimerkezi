@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SectionTitle from '../common/SectionTitle';
 import { 
   Globe, Workflow, ShieldCheck, UserCheck, Network, 
-  Calculator, Zap, TrendingUp, CheckCircle2, ArrowRight 
+  Calculator, Zap, TrendingUp, CheckCircle2, ArrowRight,
+  Bot, HelpCircle, ChevronDown, ChevronUp
 } from 'lucide-react';
+
+const HOME_FAQS = [
+  {
+    q: 'Toplantı Merkezi hangi kurumsal organizasyon türlerinde hizmet vermektedir?',
+    a: 'Toplantı Merkezi; B2B bayi toplantısı, şirket toplantısı, kongre ve konferans, kurumsal piknik, lansman ve kamu protokol organizasyonlarını tek merkezden, anahtar teslim olarak 81 ilde yönetir.'
+  },
+  {
+    q: 'Kurumsal organizasyon için ne kadar sürede bütçe teklifi alabilirim?',
+    a: 'Platformumuz üzerinden talebinizi ilettikten sonra 2 saat içinde detaylı salon alternatifleri, 3D sahne tasarımı ve kalem maliyet dökümünü içeren resmi PDF teklif dosyanız iletilir.'
+  },
+  {
+    q: "Türkiye'nin 81 ilinde yerel operasyon garantiniz var mı?",
+    a: 'Evet. İstanbul, Ankara, İzmir, Antalya, Adana, Bursa başta olmak üzere 81 ilin tamamında yerleşik teknik ortaklarımız, bölge yöneticilerimiz ve anlaşmalı kongre otellerimizle hizmet sunuyoruz.'
+  },
+  {
+    q: 'Düğün veya bireysel etkinlik organize ediyor musunuz?',
+    a: 'Hayır. Toplantı Merkezi yalnızca kurumsal şirketler, holdingler, yetkili satıcı ağları ve kamu kurumlarına yönelik B2B organizasyonlar düzenler.'
+  }
+];
 
 const WHY_POINTS = [
   {
@@ -50,6 +70,8 @@ const WHY_POINTS = [
 ];
 
 export default function WhyUsSection({ onOpenQuoteModal }) {
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
   return (
     <section className="py-24 bg-slate-50 border-t border-slate-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,6 +81,24 @@ export default function WhyUsSection({ onOpenQuoteModal }) {
           title="Neden Toplantı Merkezi?"
           subtitle="Şirketlerin, holdinglerin ve kamu kurumlarının organizasyon risklerini sıfıra indiren kurumsal kurallarımız ve değerlerimiz."
         />
+
+        {/* GEO AI Direct Answer Card */}
+        <div
+          data-geo-answer="true"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-amber-300 shadow-md mb-12 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 rounded-2xl gold-gradient-bg flex items-center justify-center shrink-0 shadow-sm text-slate-950">
+            <Bot size={20} />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 block">
+              Yapay Zekâ ve Arama Motoru Doğrudan Yanıtı (AI Summary)
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              Toplantı Merkezi; yalnızca B2B kurumsal şirketler, holdingler, bayilik ağları ve kamu kurumlarına hizmet veren ulusal kurumsal organizasyon yönetim platformudur. Türkiye’nin 81 ilinde bayi toplantısı, şirket toplantısı, kongre, lansman, kurumsal piknik ve resmi protokol törenlerini 5 yıldızlı mekân tahsisi, 3D sahne ve P2/P3 LED ekran prodüksiyonu, line-array ses-ışık sistemleri, simultane tercüme ve VIP transfer modülleriyle tek sözleşme altında anahtar teslim yönetir.
+            </p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {WHY_POINTS.map((item, index) => {
@@ -89,6 +129,42 @@ export default function WhyUsSection({ onOpenQuoteModal }) {
               </div>
             );
           })}
+        </div>
+
+        {/* Visible Homepage FAQ Section (Matches HomePage FAQPage JSON-LD) */}
+        <div className="mt-14 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-md space-y-6">
+          <div className="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wider">
+            <HelpCircle size={16} />
+            <span>Kurumsal Organizasyon Sıkça Sorulan Sorular</span>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">
+            Merak Edilen Kurumsal Süreçler
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {HOME_FAQS.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div key={idx} className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 font-bold text-xs sm:text-sm text-slate-900 hover:text-amber-800 transition"
+                  >
+                    <span>{faq.q}</span>
+                    {isOpen ? (
+                      <ChevronUp size={18} className="text-amber-700 shrink-0" />
+                    ) : (
+                      <ChevronDown size={18} className="text-slate-400 shrink-0" />
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="p-4 sm:p-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Corporate Trust Banner */}

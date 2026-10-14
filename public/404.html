@@ -44,6 +44,7 @@
   <meta name="geo.placename" content="Levent, Beşiktaş, İstanbul, Türkiye" />
   <meta name="geo.position" content="41.0778;29.0125" />
   <meta name="ICBM" content="41.0778, 29.0125" />
+  <meta name="geo.country" content="TR" />
   <meta name="distribution" content="global" />
   <meta name="coverage" content="Turkey" />
   <meta name="target_country" content="tr" />
@@ -59,19 +60,20 @@
     content="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Toplantı Merkezi kurumsal organizasyon sahnesi ve dev LED ekran" />
+  <meta property="og:image:alt" content="Aradığınız Sayfa Mevcut Değil veya Taşınmış Olabilir" />
 
   <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://www.toplantimerkezi.com.tr/404.html" />
-  <meta property="twitter:title" content="Sayfa Bulunamadı (404) | Toplantı Merkezi" />
-  <meta property="twitter:description" content="Aradığınız sayfa taşınmış, adı değiştirilmiş veya geçici olarak kullanım dışı olabilir. 81 ilde kurumsal toplantı ve organizasyon çözümlerimiz için ana sayfayı ziyaret edebilirsiniz." />
-  <meta property="twitter:image"
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://www.toplantimerkezi.com.tr/404.html" />
+  <meta name="twitter:title" content="Sayfa Bulunamadı (404) | Toplantı Merkezi" />
+  <meta name="twitter:description" content="Aradığınız sayfa taşınmış, adı değiştirilmiş veya geçici olarak kullanım dışı olabilir. 81 ilde kurumsal toplantı ve organizasyon çözümlerimiz için ana sayfayı ziyaret edebilirsiniz." />
+  <meta name="twitter:image"
     content="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80" />
-  <meta property="twitter:image:alt" content="Toplantı Merkezi kurumsal organizasyon sahnesi ve dev LED ekran" />
+  <meta name="twitter:image:alt" content="Toplantı Merkezi kurumsal organizasyon sahnesi ve dev LED ekran" />
 
-  <!-- LLM Context Link for AI Engines -->
+  <!-- LLM Context Links for AI Engines (ChatGPT, Gemini, Perplexity, Claude, Copilot) -->
   <link rel="alternate" type="text/plain" href="https://www.toplantimerkezi.com.tr/llms.txt" title="LLM Context" />
+  <link rel="alternate" type="text/plain" href="https://www.toplantimerkezi.com.tr/llms-full.txt" title="LLM Full Knowledge Base" />
   <meta name="dc.language" content="tr" />
   <meta name="dc.coverage" content="Turkey" />
   <meta name="dc.publisher" content="Toplantı Merkezi Kurumsal Organizasyon A.Ş." />
@@ -87,110 +89,143 @@
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap"
     rel="stylesheet" />
 
-  <!-- Schema.org Structured Data -->
+  <!-- Schema.org Structured Data Graph -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": ["Organization", "ProfessionalService"],
-      "@id": "https://www.toplantimerkezi.com.tr/#organization",
-      "name": "Toplantı Merkezi",
-      "legalName": "Toplantı Merkezi Kurumsal Organizasyon A.Ş.",
-      "url": "https://www.toplantimerkezi.com.tr",
-      "logo": "https://www.toplantimerkezi.com.tr/pwa-192x192.svg",
-      "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
-      "description": "Türkiye genelinde 81 ilde B2B kurumsal organizasyon, bayi toplantısı, kongre, seminer, şirket etkinlikleri ve protokol yönetimi platformu.",
-      "telephone": "+90 532 055 09 45",
-      "email": "info@toplantimerkezi.com.tr",
-      "priceRange": "₺₺₺₺",
-      "currenciesAccepted": "TRY",
-      "paymentAccepted": "Corporate Bank Transfer, Invoice",
-      "openingHours": "Mo-Sa 08:30-19:30",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Büyükdere Cad. No:199 Levent / Maslak Plaza",
-        "addressLocality": "Levent, Beşiktaş",
-        "addressRegion": "İstanbul",
-        "postalCode": "34394",
-        "addressCountry": "TR"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 41.0778,
-        "longitude": 29.0125
-      },
-      "areaServed": [
+      "@graph": [
         {
-          "@type": "Country",
-          "name": "Turkey"
+          "@type": ["Organization", "ProfessionalService"],
+          "@id": "https://www.toplantimerkezi.com.tr/#organization",
+          "name": "Toplantı Merkezi",
+          "legalName": "Toplantı Merkezi Kurumsal Organizasyon A.Ş.",
+          "slogan": "Türkiye'nin Her Yerinde, Tek Merkezden Organizasyon.",
+          "url": "https://www.toplantimerkezi.com.tr",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.toplantimerkezi.com.tr/pwa-192x192.svg",
+            "width": 192,
+            "height": 192
+          },
+          "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+          "description": "Türkiye genelinde 81 ilde B2B kurumsal organizasyon, bayi toplantısı, kongre, seminer, şirket etkinlikleri ve protokol yönetimi platformu.",
+          "telephone": "+90 532 055 09 45",
+          "email": "info@toplantimerkezi.com.tr",
+          "priceRange": "₺₺₺₺",
+          "currenciesAccepted": "TRY",
+          "paymentAccepted": "Corporate Bank Transfer, Invoice",
+          "openingHours": "Mo-Sa 08:30-19:30",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Büyükdere Cad. No:199 Levent / Maslak Plaza",
+            "addressLocality": "Levent, Beşiktaş",
+            "addressRegion": "İstanbul",
+            "postalCode": "34394",
+            "addressCountry": "TR"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 41.0778,
+            "longitude": 29.0125
+          },
+          "areaServed": [
+            {
+              "@type": "Country",
+              "name": "Turkey"
+            },
+            {
+              "@type": "AdministrativeArea",
+              "name": "81 İl (İstanbul, Ankara, İzmir, Antalya, Adana, Bursa, Gaziantep, Konya, Kayseri, Samsun, Trabzon, Diyarbakır, Eskişehir, Kocaeli, Mersin, Muğla...)"
+            }
+          ],
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+90 532 055 09 45",
+              "contactType": "customer service",
+              "areaServed": "TR",
+              "availableLanguage": ["Turkish", "English"]
+            },
+            {
+              "@type": "ContactPoint",
+              "telephone": "+90 532 055 09 45",
+              "contactType": "sales",
+              "areaServed": "TR",
+              "availableLanguage": ["Turkish", "English"]
+            }
+          ],
+          "knowsAbout": [
+            "Bayi Toplantısı Organizasyonu",
+            "Şirket Toplantısı Yönetimi",
+            "Kongre ve Konferans Yönetimi (PCO)",
+            "Kurumsal Piknik ve Aile Günü Organizasyonu",
+            "Kamu ve Protokol Törenleri",
+            "3D Sahne ve P2 LED Ekran Prodüksiyonu",
+            "Simültane Tercüme ve Canlı Yayın Rejisi",
+            "MICE ve Kurumsal Etkinlik Turizmi"
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "B2B Kurumsal Etkinlik Hizmetleri",
+            "itemListElement": [
+              {
+                "@type": "OfferCatalog",
+                "name": "Bayi Toplantıları",
+                "url": "https://www.toplantimerkezi.com.tr/bayi-toplantisi-organizasyonu"
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Şirket Toplantıları",
+                "url": "https://www.toplantimerkezi.com.tr/sirket-toplantisi-organizasyonu"
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Kongre Organizasyonu",
+                "url": "https://www.toplantimerkezi.com.tr/kongre-organizasyonu"
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Kurumsal Piknik",
+                "url": "https://www.toplantimerkezi.com.tr/kurumsal-piknik-organizasyonu"
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Kamu Protokol Organizasyonu",
+                "url": "https://www.toplantimerkezi.com.tr/kamu-organizasyonu"
+              }
+            ]
+          },
+          "sameAs": [
+            "https://www.linkedin.com/company/toplantimerkezi",
+            "https://www.instagram.com/toplantimerkezi"
+          ]
         },
         {
-          "@type": "AdministrativeArea",
-          "name": "81 İl (İstanbul, Ankara, İzmir, Antalya, Adana, Bursa, Gaziantep, Konya, Kayseri, Samsun, Trabzon, Diyarbakır, Eskişehir, Kocaeli...)"
-        }
-      ],
-      "contactPoint": [
-        {
-          "@type": "ContactPoint",
-          "telephone": "+90 532 055 09 45",
-          "contactType": "customer service",
-          "areaServed": "TR",
-          "availableLanguage": ["Turkish", "English"]
-        }
-      ],
-      "knowsAbout": [
-        "Bayi Toplantısı Organizasyonu",
-        "Şirket Toplantısı Yönetimi",
-        "Kongre ve Konferans Yönetimi",
-        "Kurumsal Piknik Organizasyonu",
-        "Kamu ve Protokol Törenleri",
-        "Sahne ve LED Ekran Prodüksiyonu",
-        "MICE ve Etkinlik Turizmi"
-      ],
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "B2B Kurumsal Etkinlik Hizmetleri",
-        "itemListElement": [
-          {
-            "@type": "OfferCatalog",
-            "name": "Bayi Toplantıları",
-            "url": "https://www.toplantimerkezi.com.tr/bayi-toplantisi-organizasyonu"
+          "@type": "WebSite",
+          "@id": "https://www.toplantimerkezi.com.tr/#website",
+          "url": "https://www.toplantimerkezi.com.tr",
+          "name": "Toplantı Merkezi",
+          "inLanguage": "tr-TR",
+          "publisher": {
+            "@id": "https://www.toplantimerkezi.com.tr/#organization"
           },
-          {
-            "@type": "OfferCatalog",
-            "name": "Şirket Toplantıları",
-            "url": "https://www.toplantimerkezi.com.tr/sirket-toplantisi-organizasyonu"
-          },
-          {
-            "@type": "OfferCatalog",
-            "name": "Kongre Organizasyonu",
-            "url": "https://www.toplantimerkezi.com.tr/kongre-organizasyonu"
-          },
-          {
-            "@type": "OfferCatalog",
-            "name": "Kurumsal Piknik",
-            "url": "https://www.toplantimerkezi.com.tr/kurumsal-piknik-organizasyonu"
-          },
-          {
-            "@type": "OfferCatalog",
-            "name": "Kamu Protokol Organizasyonu",
-            "url": "https://www.toplantimerkezi.com.tr/kamu-organizasyonu"
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.toplantimerkezi.com.tr/mekanlar?q={search_term_string}",
+            "query-input": "required name=search_term_string"
           }
-        ]
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/toplantimerkezi",
-        "https://www.instagram.com/toplantimerkezi"
+        }
       ]
     }
-    </script>
-  <script type="module" crossorigin src="/assets/index-CeLHWvbh.js"></script>
+  </script>
+  <script type="module" crossorigin src="/assets/index-D53vSECD.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-hePW80VL.js">
   <link rel="modulepreload" crossorigin href="/assets/icons-DojMi72q.js">
   <link rel="modulepreload" crossorigin href="/assets/pdf-generator-BKKivO2-.js">
-  <link rel="modulepreload" crossorigin href="/assets/react-core-ggckwmSz.js">
+  <link rel="modulepreload" crossorigin href="/assets/react-core-CxLDWV6h.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-TFVypLYR.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-CY4F_4QY.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-BBfYhqMh.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-DIvkdGMu.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body
