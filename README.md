@@ -229,3 +229,19 @@ git push origin main
 ---
 
 *© 2026 Toplantı Merkezi. Tüm hakları saklıdır. Türkiye'nin Her Yerinde, Tek Merkezden Organizasyon.*
+
+---
+
+## 🚀 Deploy & Firebase Kullanımı (Ortak Proje)
+
+Bu site, Firebase kotası dolduğu için **bilinçli olarak** ortak `adanahizlisatis` projesi altında `toplantimerkezi` hosting sitesi olarak çalışır. Aynı projede başka siteler de yayınlanır; her biri ayrı bir hosting sitesi ve target'tır.
+
+```bash
+npm run build
+npx firebase deploy --only hosting:toplantimerkezi
+```
+
+> [!WARNING]
+> - `--only hosting:toplantimerkezi` olmadan deploy etmeyin. `firestore:rules` ve `functions` deploy'u ortak kuralları ezer ve diğer siteleri bozabilir.
+> - Auth, Firestore ve Storage ortaktır. Yeni Firestore koleksiyonları `tm_` önekiyle açılmalıdır (örn. `tm_users`).
+> - Ortam değişkenleri `.env` içindeki `VITE_FIREBASE_*` değerlerinden okunur (`src/services/firebase.js`).

@@ -15,6 +15,7 @@ Bu belge, **Toplantı Merkezi** ([www.toplantimerkezi.com.tr](https://www.toplan
 - **Faaliyet Alanı**: Yalnızca **B2B ve kurumsal organizasyonlar** (Holdingler, büyük/orta ölçekli şirketler, kamu kurumları, belediyeler, odalar, bankalar, otomotiv, sanayi vb.). Bireysel tüketici etkinlikleri (düğün, kına vb.) kesinlikle yapılmaz.
 - **Kısıtlama / Kalite Kuralı**: Asla sahte referans, sahte müşteri yorumu, sahte ödül veya thin content üretilmez. Bütün veriler gerçek kurumsal operasyon mantığına uygun olmalıdır.
 - **Çalışma Dizini & İzolasyon**: Yalnızca `d:\web_siteleri\toplantimerkezi` klasörü içerisinde çalışılır. Başka projelerin isimleri, hosting hedefleri veya bağlantıları bu depoya asla dahil edilemez.
+- **Firebase Projesi (bilinçli ortak kullanım)**: Bu site kota nedeniyle ortak `adanahizlisatis` projesinde, `toplantimerkezi` hosting sitesi olarak çalışır. Deploy her zaman `npx firebase deploy --only hosting:toplantimerkezi` ile yapılır. `--only` olmadan deploy, `firestore:rules` ve `functions` deploy'u yasaktır; ortak kuralları ezer. Yeni Firestore koleksiyonları `tm_` önekiyle açılır.
 
 ---
 
