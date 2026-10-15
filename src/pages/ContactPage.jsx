@@ -65,12 +65,18 @@ export default function ContactPage({ onOpenQuoteModal }) {
         attendees: 100,
         budgetRange: 'Belirtilmedi'
       });
-      setSubmitStatus({ state: 'success', trackingId: created?.id || '', error: '' });
+      setSubmitStatus({
+        state: 'success',
+        trackingId: created?.id || '',
+        accessToken: created?.accessToken || '',
+        error: ''
+      });
       setFormData({ contactName: '', company: '', phone: '', email: '', notes: '' });
     } catch (err) {
       setSubmitStatus({
         state: 'error',
         trackingId: '',
+        accessToken: '',
         error: err?.message || 'Talebiniz iletilirken bir sorun oluştu. Lütfen doğrudan 0532 055 09 45 hattımızdan bize ulaşın.'
       });
     }
@@ -205,7 +211,19 @@ export default function ContactPage({ onOpenQuoteModal }) {
                 <p className="text-xs text-emerald-800 leading-relaxed">
                   Operasyon masamız en kısa sürede sizinle iletişime geçecektir.
                   {submitStatus.trackingId && (
-                    <> Talep takip kodunuz: <strong className="font-mono">{submitStatus.trackingId}</strong> — <Link to="/teklif-takip" className="underline font-bold">Canlı Takip Portalı</Link></>
+                    <>
+                      {' '}Talep Kodunuz: <strong className="font-mono">{submitStatus.trackingId}</strong>
+                      {submitStatus.accessToken && (
+                        <> | Güvenlik Anahtarı: <strong className="font-mono select-all">{submitStatus.accessToken}</strong></>
+                      )}
+                      {' '}—{' '}
+                      <Link
+                        to={`/teklif-takip?kod=${encodeURIComponent(submitStatus.trackingId)}&token=${encodeURIComponent(submitStatus.accessToken || '')}`}
+                        className="underline font-bold"
+                      >
+                        Güvenli Takip Portalı
+                      </Link>
+                    </>
                   )}
                 </p>
               </div>

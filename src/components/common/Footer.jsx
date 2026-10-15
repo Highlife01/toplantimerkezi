@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ORGANIZATIONS } from '../../data/organizationsData';
 import { SERVICES } from '../../data/servicesData';
 import { ALL_81_CITIES } from '../../data/citiesData';
+import { SUPPORTED_LANGUAGES } from '../../data/i18nData';
 import { storageService } from '../../services/storageService';
 import { 
   Building2, Phone, Mail, MapPin, MessageSquare, 
@@ -213,6 +214,31 @@ export default function Footer({ onOpenQuoteModal }) {
             </ul>
           </div>
 
+        </div>
+
+        {/* 15-Language Global B2B MICE Desks Strip */}
+        <div className="py-6 border-b border-slate-800/80">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              🌐 Global B2B MICE & International Congress Desks (15 Dil):
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Simultane Tercüme & Çok Dilli Proje Yönetimi
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <Link
+                key={lang.code}
+                to={lang.path}
+                className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-amber-300 text-[11px] font-semibold transition flex items-center gap-1.5"
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.nativeName}</span>
+                <span className="text-[10px] text-slate-500">({lang.name})</span>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* 81 Provinces SEO Matrix Quick Strip */}

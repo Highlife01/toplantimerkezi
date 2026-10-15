@@ -9,6 +9,7 @@ import { INDUSTRIES } from '../src/data/industryData.js';
 import { PROJECTS } from '../src/data/projectsData.js';
 import { BLOG_POSTS } from '../src/data/blogData.js';
 import { SEO_CLUSTERS, TOPIC_HUBS } from '../src/data/seoClustersData.js';
+import { SUPPORTED_LANGUAGES, I18N_CONTENT } from '../src/data/i18nData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,17 @@ const distDir = path.resolve(__dirname, '../dist');
 const publicDir = path.resolve(__dirname, '../public');
 
 const DOMAIN = 'https://www.toplantimerkezi.com.tr';
+
+let cloudSeoOverrides = {};
+const cachePath = path.resolve(__dirname, '.cloud-seo-cache.json');
+if (fs.existsSync(cachePath)) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(cachePath, 'utf-8'));
+    cloudSeoOverrides = parsed.seoOverrides || {};
+  } catch {
+    cloudSeoOverrides = {};
+  }
+}
 
 if (!fs.existsSync(distDir)) {
   console.error('[Prerender] dist/ directory not found! Run "vite build" first.');
@@ -55,15 +67,46 @@ function buildHtml({
   howTo = null,
   geo = null,
   schemas = [],
+  lang = 'tr',
+  hreflangCode = 'tr-TR',
+  ogLocale = 'tr_TR',
+  dir = 'ltr',
+  includeGlobalHreflang = false,
   is404 = false,
   noIndex = false
 }) {
-  const fullCanonical = canonicalUrl || `${DOMAIN}${route.startsWith('/') ? '' : '/'}${route}`;
+  const normRoute = route === '/' ? '/' : `${route.startsWith('/') ? '' : '/'}${route}`.replace(/\/+$/, '');
+  const ov = !is404 ? cloudSeoOverrides[normRoute] : null;
+
+  if (ov) {
+    if (ov.title) title = ov.title;
+    if (ov.metaDesc) description = ov.metaDesc;
+    if (ov.h1) h1 = ov.h1;
+    if (ov.canonicalUrl) canonicalUrl = ov.canonicalUrl;
+    if (ov.isIndexed === false) noIndex = true;
+  }
+
+  if (normRoute === '/admin' || normRoute === '/teklif-takip') {
+    noIndex = true;
+  }
+
+  let fullCanonical = canonicalUrl || `${DOMAIN}${normRoute === '/' ? '/' : normRoute}`;
+  if (!fullCanonical.startsWith('http')) {
+    fullCanonical = `${DOMAIN}${fullCanonical.startsWith('/') ? '' : '/'}${fullCanonical}`;
+  }
+  // Alt sayfalara yanlışlıkla ana sayfa canonical URL'si uygulanmasını engelle
+  if (normRoute !== '/' && (fullCanonical === DOMAIN || fullCanonical === `${DOMAIN}/`)) {
+    fullCanonical = `${DOMAIN}${normRoute}`;
+  }
+
   const finalTitle = title.includes('Toplantı Merkezi') ? title : `${title} | Toplantı Merkezi`;
   const finalOgImage = ogImage || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
-  const finalKeywords = keywords || 'toplantı organizasyonu, bayi toplantısı, şirket toplantısı, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, 81 il organizasyon';
+  const finalKeywords = keywords || 'toplantı organizasyonu, bayi toplantısı, şirket toplantısı, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, 81 il organizasyon, 15 dilde simultane tercüme, ingilizce rusça almanca italyanca ispanyolca çince hintçe arapça farsça fransızca azerbaycanca japonca korece felemenkçe kongre organizasyonu';
 
   let html = baseTemplate;
+
+  // 0. Set <html lang="..." dir="...">
+  html = html.replace(/<html[^>]*>/i, `<html lang="${escapeHtml(lang)}" dir="${escapeHtml(dir)}">`);
 
   // 1. Replace Title
   html = html.replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(finalTitle)}</title>`);
@@ -88,11 +131,26 @@ function buildHtml({
     } else {
       html = html.replace('</head>', `  <link rel="canonical" href="${fullCanonical}" />\n</head>`);
     }
-    html = html.replace(/<link rel="alternate" hreflang="tr-TR" href=".*?" \/>/s, `<link rel="alternate" hreflang="tr-TR" href="${fullCanonical}" />`);
-    html = html.replace(/<link rel="alternate" hreflang="x-default" href=".*?" \/>/s, `<link rel="alternate" hreflang="x-default" href="${fullCanonical}" />`);
+
+    if (includeGlobalHreflang || normRoute === '/') {
+      // Remove existing alternate hreflang tags and inject all 15 languages + x-default
+      html = html.replace(/<link rel="alternate" hreflang=".*?".*?\/>\s*/g, '');
+      const hreflangTags = SUPPORTED_LANGUAGES.map(l => {
+        const hrefUrl = l.code === 'tr' ? `${DOMAIN}/` : `${DOMAIN}/${l.code}`;
+        return l.hreflang !== l.code
+          ? `  <link rel="alternate" hreflang="${l.hreflang}" href="${hrefUrl}" />\n  <link rel="alternate" hreflang="${l.code}" href="${hrefUrl}" />`
+          : `  <link rel="alternate" hreflang="${l.hreflang}" href="${hrefUrl}" />`;
+      });
+      hreflangTags.push(`  <link rel="alternate" hreflang="x-default" href="${DOMAIN}/" />`);
+      html = html.replace('</head>', `${hreflangTags.join('\n')}\n</head>`);
+    } else {
+      html = html.replace(/<link rel="alternate" hreflang="tr-TR" href=".*?" \/>/s, `<link rel="alternate" hreflang="tr-TR" href="${fullCanonical}" />`);
+      html = html.replace(/<link rel="alternate" hreflang="x-default" href=".*?" \/>/s, `<link rel="alternate" hreflang="x-default" href="${fullCanonical}" />`);
+    }
   }
 
   // 5. Replace OpenGraph & Twitter Tags (supports both name="twitter:*" and property="twitter:*")
+  html = html.replace(/<meta property="og:locale" content=".*?" \/>/s, `<meta property="og:locale" content="${escapeHtml(ogLocale || 'tr_TR')}" />`);
   html = html.replace(/<meta property="og:url" content=".*?" \/>/s, `<meta property="og:url" content="${fullCanonical}" />`);
   html = html.replace(/<meta property="og:title" content=".*?" \/>/s, `<meta property="og:title" content="${escapeHtml(finalTitle)}" />`);
   html = html.replace(/<meta property="og:description"\s+content=".*?" \/>/s, `<meta property="og:description" content="${escapeHtml(description)}" />`);
@@ -120,6 +178,7 @@ function buildHtml({
       `  <meta name="citation_title" content="${escapeHtml(finalTitle)}" />`,
       `  <meta name="citation_author" content="Toplantı Merkezi Kurumsal Operasyon Masası" />`,
       `  <meta name="citation_publisher" content="Toplantı Merkezi" />`,
+      `  <meta name="citation_language" content="${escapeHtml(lang)}" />`,
       `  <meta name="citation_public_url" content="${fullCanonical}" />`
     ].join('\n');
 
@@ -131,7 +190,7 @@ function buildHtml({
         url: fullCanonical,
         name: finalTitle,
         description,
-        inLanguage: 'tr-TR',
+        inLanguage: hreflangCode || 'tr-TR',
         isPartOf: { '@id': `${DOMAIN}/#website` },
         about: { '@id': `${DOMAIN}/#organization` },
         speakable: {
@@ -239,6 +298,7 @@ function buildHtml({
           <a href="/kurumsal-piknik-organizasyonu" class="hover:text-amber-400">Kurumsal Piknik</a>
           <a href="/kamu-organizasyonu" class="hover:text-amber-400">Kamu & Protokol</a>
           <a href="/sehirler" class="hover:text-amber-400">81 İl</a>
+          <a href="/mekanlar" class="hover:text-amber-400">15 Dil MICE Arama</a>
           <a href="/teklif-al" class="bg-amber-500 text-slate-950 px-4 py-2 rounded-xl font-bold hover:bg-amber-400">Hızlı Teklif</a>
         </nav>
       </div>
@@ -257,7 +317,7 @@ function buildHtml({
       <div class="mt-12 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-8 md:p-12 shadow-xl text-center">
         <h2 class="text-2xl md:text-3xl font-bold font-display mb-3">Kurumsal Organizasyonunuz İçin Teklif Alın</h2>
         <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto mb-6">
-          81 ilde anahtar teslim kongre, bayi toplantısı, sahne, LED ekran ve salon çözümleri için 2 saat içinde detaylı bütçenizi hazırlayalım.
+          81 ilde ve 15 dilde anahtar teslim kongre, bayi toplantısı, sahne, LED ekran ve salon çözümleri için 2 saat içinde detaylı bütçenizi hazırlayalım.
         </p>
         <div class="flex flex-wrap items-center justify-center gap-4">
           <a href="/teklif-al" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3.5 rounded-2xl shadow-lg transition">Hızlı Teklif Al</a>
@@ -307,6 +367,12 @@ function buildHtml({
             <li><a href="/iletisim" class="hover:text-amber-400">İletişim & Ofisler</a></li>
             <li><a href="/yasal/kvkk" class="hover:text-amber-400">KVKK Aydınlatma Metni</a></li>
           </ul>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto pt-6 border-t border-slate-800 mb-6">
+        <div class="text-xs font-bold text-slate-300 mb-3">🌐 Uluslararası B2B MICE & Kongre Portalları (15 Dil):</div>
+        <div class="flex flex-wrap gap-2 text-xs">
+          ${SUPPORTED_LANGUAGES.map(l => `<a href="${l.path}" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:text-amber-400">${escapeHtml(l.flag)} ${escapeHtml(l.name)} (${escapeHtml(l.nativeName)})</a>`).join('')}
         </div>
       </div>
       <div class="max-w-7xl mx-auto pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
@@ -1126,6 +1192,98 @@ async function runPrerender() {
   });
   writePage('/yasal', yasalBaseHtml);
   pageCount++;
+
+  // 13b. 14 International Multi-Language B2B MICE Portals (/en, /ru, /de, /it, /es, /zh, /hi, /ar, /fa, /fr, /az, /ja, /ko, /nl)
+  SUPPORTED_LANGUAGES.forEach(langMeta => {
+    if (langMeta.code === 'tr') return;
+    const content = I18N_CONTENT[langMeta.code];
+    if (!content) return;
+
+    const route = `/${langMeta.code}`;
+    const fullH1 = `${content.hero.titleLine1} ${content.hero.titleHighlight}`;
+
+    const langHtml = buildHtml({
+      route,
+      title: content.metaTitle,
+      description: content.metaDesc,
+      canonicalUrl: `${DOMAIN}${route}`,
+      h1: fullH1,
+      aiDirectAnswer: content.aiDirectAnswer,
+      lang: langMeta.code,
+      hreflangCode: langMeta.hreflang,
+      dir: langMeta.dir || 'ltr',
+      includeGlobalHreflang: true,
+      breadcrumbs: [
+        { name: `${langMeta.flag} ${langMeta.nativeName} (${langMeta.trName})`, url: route }
+      ],
+      faqs: content.faqs || [],
+      bodyContent: `
+        <section class="my-8">
+          <div class="flex flex-wrap gap-2 mb-6">
+            ${SUPPORTED_LANGUAGES.map(l => `
+              <a href="${l.path}" class="px-3 py-1.5 rounded-xl border text-xs font-bold ${l.code === langMeta.code ? 'bg-slate-900 text-amber-400 border-slate-900' : 'bg-white text-slate-700 border-slate-200'}">
+                ${escapeHtml(l.flag)} ${escapeHtml(l.nativeName)}
+              </a>
+            `).join('')}
+          </div>
+
+          <h2 class="text-2xl font-bold font-display text-slate-900 mb-4">${escapeHtml(content.solutionsTitle)}</h2>
+          <p class="text-slate-600 text-sm mb-6">${escapeHtml(content.solutionsSubtitle)}</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+            ${(content.solutions || []).map(item => `
+              <a href="${item.link}" class="border border-slate-200 rounded-2xl p-5 bg-white shadow-sm block hover:border-amber-500">
+                <h3 class="font-bold text-slate-900 text-base mb-2">${escapeHtml(item.title)}</h3>
+                <p class="text-slate-600 text-xs leading-relaxed">${escapeHtml(item.desc)}</p>
+              </a>
+            `).join('')}
+          </div>
+
+          <h2 class="text-2xl font-bold font-display text-slate-900 mb-4">${escapeHtml(content.techTitle)}</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            ${(content.techItems || []).map(t => `
+              <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50">
+                <h3 class="font-bold text-slate-900 text-sm mb-1">${escapeHtml(t.title)}</h3>
+                <p class="text-slate-600 text-xs leading-relaxed">${escapeHtml(t.desc)}</p>
+              </div>
+            `).join('')}
+          </div>
+
+          <h2 class="text-2xl font-bold font-display text-slate-900 mb-4">${escapeHtml(content.destinationsTitle)}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            ${(content.destinations || []).map(dest => `
+              <a href="/sehirler/${dest.slug}" class="border border-slate-200 rounded-2xl p-4 bg-white block">
+                <div class="font-bold text-slate-900 text-sm mb-1">${escapeHtml(dest.city)}</div>
+                <div class="text-amber-700 text-xs font-semibold mb-1">${escapeHtml(dest.tag)}</div>
+                <p class="text-slate-600 text-xs">${escapeHtml(dest.desc)}</p>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `,
+      schemas: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: content.metaTitle,
+          description: content.aiDirectAnswer,
+          inLanguage: langMeta.hreflang,
+          provider: {
+            '@type': 'Organization',
+            name: 'Toplantı Merkezi',
+            url: DOMAIN,
+            availableLanguage: SUPPORTED_LANGUAGES.map(l => l.hreflang)
+          },
+          areaServed: {
+            '@type': 'Country',
+            name: 'Türkiye'
+          }
+        }
+      ]
+    });
+
+    writePage(route, langHtml);
+    pageCount++;
+  });
 
   // 14. 404 Not Found Page (dist/404.html & public/404.html)
   const html404 = buildHtml({

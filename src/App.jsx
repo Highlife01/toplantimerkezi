@@ -8,6 +8,8 @@ import CookieConsent from './components/common/CookieConsent';
 import PwaInstallPrompt from './components/common/PwaInstallPrompt';
 import QuoteWizardModal from './components/quote/QuoteWizardModal';
 import ScrollToTop from './components/common/ScrollToTop';
+import { LanguageProvider } from './context/LanguageContext';
+import { INTERNATIONAL_LANG_CODES } from './data/i18nData';
 
 // Critical Initial Pages
 import HomePage from './pages/HomePage';
@@ -36,6 +38,7 @@ const ClusterMoneyPage = lazy(() => import('./pages/ClusterMoneyPage'));
 const TopicHubPage = lazy(() => import('./pages/TopicHubPage'));
 const QuoteTrackingPage = lazy(() => import('./pages/QuoteTrackingPage'));
 const IndustryDetailPage = lazy(() => import('./pages/IndustryDetailPage'));
+const InternationalMicePage = lazy(() => import('./pages/InternationalMicePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Elegant Loading Fallback
@@ -66,23 +69,33 @@ export default function App() {
 
   return (
     <Router>
-      <ScrollToTop />
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-amber-200 selection:text-slate-900">
-        
-        {/* Navigation */}
-        <Navbar onOpenQuoteModal={() => handleOpenQuoteModal()} />
+      <LanguageProvider>
+        <ScrollToTop />
+        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-amber-200 selection:text-slate-900">
+          
+          {/* Navigation */}
+          <Navbar onOpenQuoteModal={() => handleOpenQuoteModal()} />
 
-        {/* Dynamic Main Routes with Code Splitting */}
-        <main className="flex-grow">
-          <Suspense fallback={<PageLoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<HomePage onOpenQuoteModal={handleOpenQuoteModal} />} />
-              
-              {/* Canlı Teklif & Talep Takip Portalı */}
-              <Route path="/teklif-takip" element={<QuoteTrackingPage onOpenQuoteModal={handleOpenQuoteModal} />} />
+          {/* Dynamic Main Routes with Code Splitting */}
+          <main className="flex-grow">
+            <Suspense fallback={<PageLoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<HomePage onOpenQuoteModal={handleOpenQuoteModal} />} />
 
-              {/* Sektörel B2B Çözüm Merkezleri */}
-              <Route path="/sektorler/:slug" element={<IndustryDetailPage onOpenQuoteModal={handleOpenQuoteModal} />} />
+                {/* 14 Uluslararası B2B MICE & Kongre Masası (/en, /ru, /de, /it, /es, /zh, /hi, /ar, /fa, /fr, /az, /ja, /ko, /nl) */}
+                {INTERNATIONAL_LANG_CODES.map((langCode) => (
+                  <Route
+                    key={langCode}
+                    path={`/${langCode}`}
+                    element={<InternationalMicePage langCode={langCode} onOpenQuoteModal={handleOpenQuoteModal} />}
+                  />
+                ))}
+                
+                {/* Canlı Teklif & Talep Takip Portalı */}
+                <Route path="/teklif-takip" element={<QuoteTrackingPage onOpenQuoteModal={handleOpenQuoteModal} />} />
+
+                {/* Sektörel B2B Çözüm Merkezleri */}
+                <Route path="/sektorler/:slug" element={<IndustryDetailPage onOpenQuoteModal={handleOpenQuoteModal} />} />
 
               {/* Money Pages - Cluster 1: Toplantı */}
               <Route path="/toplanti-organizasyonu" element={<ClusterMoneyPage onOpenQuoteModal={handleOpenQuoteModal} />} />
@@ -208,6 +221,7 @@ export default function App() {
           initialCity={quoteModalConfig.initialCity}
         />
       </div>
+      </LanguageProvider>
     </Router>
   );
 }

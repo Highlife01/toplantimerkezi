@@ -96,13 +96,14 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
   };
 
   const nextStep = () => {
+    setSubmitError('');
     if (step === 7) {
       if (!formData.company.trim() || !formData.contactName.trim() || !formData.phone.trim()) {
-        alert('Lütfen Firma Adı, Ad Soyad ve Telefon alanlarını doldurunuz.');
+        setSubmitError('Lütfen Firma Adı, Yetkili Ad Soyad ve Telefon alanlarını eksiksiz doldurunuz.');
         return;
       }
       if (!formData.kvkkConsent) {
-        alert('Lütfen KVKK Aydınlatma Metnini onaylayınız.');
+        setSubmitError('Lütfen KVKK Aydınlatma Metnini onaylayınız.');
         return;
       }
       handleSubmit();
@@ -112,10 +113,12 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
   };
 
   const prevStep = () => {
+    setSubmitError('');
     setStep(s => Math.max(s - 1, 1));
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setSubmitError('');
 
@@ -136,8 +139,7 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
         attendees: Number(formData.attendees) || 100,
         budgetRange: formData.budgetRange,
         notes: `${formData.notes ? formData.notes + ' | ' : ''}Mekân Durumu: ${formData.venueStatus}${formData.needAccommodationTransfer ? ' | Konaklama/Transfer talebi var.' : ''}`,
-        requirements: formData.requirements,
-        quotedPrice: formData.budgetRange.includes('1.000.000') ? 1200000 : formData.budgetRange.includes('500.000') ? 650000 : 350000
+        requirements: formData.requirements
       });
 
       analytics.generateLead(newLead.id, newLead.company, newLead.city, newLead.organizationType);
@@ -149,14 +151,13 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
           spread: 80,
           origin: { y: 0.6 }
         });
-      } catch (e) {
-        console.log(e);
+      } catch {
+        // confetti opsiyonel
       }
 
       setSubmittedLead(newLead);
       if (onSuccess) onSuccess(newLead);
     } catch (err) {
-      console.error('Teklif oluşturma hatası:', err);
       analytics.formError('submit', err.message || 'Bilinmeyen hata');
       setSubmitError(err.message || 'Teklif talebiniz gönderilirken bir sorun oluştu. Lütfen tekrar deneyin veya bizi arayın: 0532 055 09 45');
     } finally {
@@ -167,24 +168,33 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
   const settings = storageService.getSettings();
 
   if (submittedLead) {
+    const secureTrackPath = `/teklif-takip?kod=${encodeURIComponent(submittedLead.id)}&token=${encodeURIComponent(submittedLead.accessToken || '')}`;
     return (
       <div className="text-center py-8 px-4 max-w-xl mx-auto text-slate-800">
         <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 border border-emerald-300 flex items-center justify-center mx-auto mb-6 shadow-sm animate-bounce">
           <CheckCircle2 size={42} />
         </div>
-        <span className="inline-block px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-amber-800 text-xs font-bold mb-3">
-          BAŞVURU NO: {submittedLead.id}
+        <span className="inline-block px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-amber-800 text-xs font-bold mb-3 font-mono">
+          REFERANS KODU: {submittedLead.id}
         </span>
         <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-display">
-          Teklif Talebiniz Başarıyla Alındı!
+          Teklif Talebiniz Başarıyla Kaydedildi!
         </h3>
         <p className="mt-3 text-slate-600 text-sm md:text-base leading-relaxed">
           Sayın <strong className="text-slate-900">{submittedLead.contactName}</strong>,
           <strong className="text-amber-700"> {submittedLead.company}</strong> adına ilettiğiniz
-          <strong className="text-slate-900"> {submittedLead.organizationType}</strong> organizasyonu talebiniz uzman koordinatörlerimize iletildi.
+          <strong className="text-slate-900"> {submittedLead.organizationType}</strong> organizasyonu talebiniz operasyon masamıza düşmüştür.
         </p>
 
         <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs md:text-sm text-slate-700 space-y-2.5 shadow-sm">
+          <div className="flex justify-between border-b border-slate-200 pb-2">
+            <span className="text-slate-500">Talep Referans No:</span>
+            <span className="font-mono font-bold text-slate-950">{submittedLead.id}</span>
+          </div>
+          <div className="flex justify-between border-b border-slate-200 pb-2">
+            <span className="text-slate-500">Güvenlik Erişim Anahtarı:</span>
+            <span className="font-mono font-bold text-amber-800 select-all">{submittedLead.accessToken}</span>
+          </div>
           <div className="flex justify-between border-b border-slate-200 pb-2">
             <span className="text-slate-500">Şehir / Lokasyon:</span>
             <span className="font-bold text-slate-900">{submittedLead.city} {submittedLead.district ? `(${submittedLead.district})` : ''}</span>
@@ -193,24 +203,20 @@ export default function QuoteWizardForm({ initialOrgType = '', initialCity = '',
             <span className="text-slate-500">Katılımcı Sayısı:</span>
             <span className="font-bold text-slate-900">{submittedLead.attendees} Kişi</span>
           </div>
-          <div className="flex justify-between border-b border-slate-200 pb-2">
-            <span className="text-slate-500">Seçilen Hizmetler:</span>
-            <span className="font-bold text-amber-700">{submittedLead.requirements?.length} Kalem Seçildi</span>
-          </div>
           <div className="flex justify-between pt-1">
-            <span className="text-slate-500">Geri Dönüş Süresi:</span>
+            <span className="text-slate-500">Maliyetlendirme & Teklif Süresi:</span>
             <span className="font-bold text-emerald-600">En Geç 2 Saat İçinde</span>
           </div>
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={() => generateProposalPdf(submittedLead)}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold border border-slate-300 shadow-sm transition"
+          <a
+            href={secureTrackPath}
+            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl gold-gradient-bg text-slate-950 font-extrabold shadow-sm transition"
           >
-            <FileText size={18} className="text-amber-600" />
-            <span>Örnek Teklif PDF'i İndir</span>
-          </button>
+            <Shield size={18} />
+            <span>Güvenli Teklif Takip Ekranına Git</span>
+          </a>
           <a
             href={`https://wa.me/${settings.whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Merhaba Toplantı Merkezi, ${submittedLead.id} numaralı ${submittedLead.organizationType} teklif talebimiz hakkında hızlı görüşmek istiyorum.`)}`}
             target="_blank"

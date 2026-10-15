@@ -125,6 +125,24 @@
             "value": "no-cache"
           }
         ]
+      },
+      {
+        "source": "/teklif-takip",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/teklif-takip/**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
       }
     ],
     "redirects": [
@@ -151,6 +169,11 @@
       {
         "source": "/yasal/",
         "destination": "/yasal/kvkk",
+        "type": 301
+      },
+      {
+        "source": "/hizmetler/catering-coffee-break",
+        "destination": "/hizmetler/kurumsal-catering-ikram",
         "type": 301
       }
     ],

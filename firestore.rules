@@ -1,59 +1,288 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Yardımcı fonksiyonlar: Admin kontrolü
-    function isAdmin() {
+
+    // =========================================================================
+    // TOPLANTI MERKEZİ ROL TABANLI ERİŞİM KONTROLÜ (RBAC)
+    // Roller: 'superadmin' | 'sales' | 'operations' | 'viewer'
+    // =========================================================================
+
+    function isSignedIn() {
       return request.auth != null;
     }
-    
-    // Teklif Talepleri (leads)
-    // Ziyaretçiler sadece geçerli şirket ve telefon bilgisiyle talep oluşturabilir (create).
-    // Tüm müşteri veritabanını toplu çekmek (list) kesinlikle kamuya KAPALIDIR (KVKK koruması).
-    // Ziyaretçi yalnızca elindeki benzersiz takip koduyla doğrudan tekil dokümanı okuyabilir (get).
-    // Güncelleme ve silme yalnızca yetkili yöneticilere aittir.
+
+    function isOwnerBootstrapAdmin() {
+      return isSignedIn() && (
+        ('tmRole' in request.auth.token && request.auth.token.tmRole == 'superadmin')
+        || ('email' in request.auth.token && request.auth.token.email.lower() in [
+          'yonetim@toplantimerkezi.com.tr',
+          'info@toplantimerkezi.com.tr',
+          'cebokar@gmail.com',
+          'cebrailkara@gmail.com',
+          'cebo@me.com'
+        ])
+      );
+    }
+
+    function getTmUserDoc() {
+      return get(/databases/$(database)/documents/tm_users/$(request.auth.uid));
+    }
+
+    function hasActiveTmUser() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/tm_users/$(request.auth.uid))
+        && getTmUserDoc().data.isActive == true;
+    }
+
+    function getTmRole() {
+      return isOwnerBootstrapAdmin()
+        ? 'superadmin'
+        : (hasActiveTmUser() ? getTmUserDoc().data.role : 'none');
+    }
+
+    function isTmSuperAdmin() {
+      return getTmRole() == 'superadmin';
+    }
+
+    function isTmSales() {
+      return getTmRole() in ['superadmin', 'sales'];
+    }
+
+    function isTmOperations() {
+      return getTmRole() in ['superadmin', 'operations'];
+    }
+
+    function isTmWriteStaff() {
+      return getTmRole() in ['superadmin', 'sales', 'operations'];
+    }
+
+    function isTmAnyStaff() {
+      return getTmRole() in ['superadmin', 'sales', 'operations', 'viewer'];
+    }
+
+    // Kullanıcı ve Rol Yönetimi (tm_users)
+    match /tm_users/{uid} {
+      allow get: if isSignedIn() && (request.auth.uid == uid || isTmAnyStaff());
+      allow list: if isTmAnyStaff();
+      allow create, update: if isTmSuperAdmin()
+        || (isOwnerBootstrapAdmin() && request.auth.uid == uid);
+      allow delete: if isTmSuperAdmin();
+    }
+
+    // Paylaşılan Kullanıcı Profilleri (mevcut yapıyı korur)
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isTmSuperAdmin());
+    }
+
+    // Teklif Talepleri (leads) — İç maliyet, tedarikçi ve kâr verisi içerir.
+    // Kamuya okuma (get/list) TAMAMEN KAPALIDIR. Müşteriler yalnızca /public_proposals üzerinden özet görür.
     match /leads/{leadId} {
-      allow create: if request.resource.data.company != null 
-                    && request.resource.data.phone != null;
-      allow get: if true;
-      allow list: if isAdmin();
-      allow update, delete: if isAdmin();
+      allow create: if isTmWriteStaff() || (
+        request.resource.data.company is string
+        && request.resource.data.company.size() >= 2
+        && request.resource.data.company.size() <= 200
+        && request.resource.data.contactName is string
+        && request.resource.data.contactName.size() >= 2
+        && request.resource.data.contactName.size() <= 150
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 7
+        && request.resource.data.phone.size() <= 30
+        && request.resource.data.stage == 'Yeni Talep'
+      );
+      allow read: if isTmAnyStaff();
+      allow update: if isTmWriteStaff();
+      allow delete: if isTmSuperAdmin();
     }
-    
-    // Sistem Ayarları (settings)
-    // Hassas admin PIN, CRM ayarları ve API bilgileri kamuya kapalıdır.
-    match /settings/{settingId} {
-      allow read, write: if isAdmin();
+
+    // Müşteri Güvenli Teklif Takip Özeti (public_proposals/{leadId}_{accessToken})
+    // Tahmin edilemez kriptografik erişim anahtarı ve süre sınırı (expiresAt) ile korunur.
+    // İç maliyet, kâr marjı, tedarikçi bilgisi ve yönetici notu barındırmaz.
+    match /public_proposals/{accessKey} {
+      allow create: if isTmWriteStaff() || (
+        request.resource.data.leadId is string
+        && request.resource.data.company is string
+        && request.resource.data.expiresAt is number
+        && !('costBreakdown' in request.resource.data)
+        && !('costItems' in request.resource.data)
+        && !('grossProfit' in request.resource.data)
+        && !('internalNotes' in request.resource.data)
+      );
+      allow get: if isTmAnyStaff() || (
+        resource.data.expiresAt is number
+        && resource.data.expiresAt > request.time.toMillis()
+      );
+      allow list: if isTmAnyStaff();
+      allow update: if isTmWriteStaff() || (
+        resource.data.expiresAt is number
+        && resource.data.expiresAt > request.time.toMillis()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['customerResponse', 'customerResponseHistory', 'updatedAt'])
+        && request.resource.data.customerResponse is map
+        && request.resource.data.customerResponse.status in ['approved', 'revision_requested']
+        && request.resource.data.customerResponse.versionNumber is number
+      );
+      allow delete: if isTmSuperAdmin();
     }
-    
-    // Tedarikçiler (suppliers)
-    // Tedarikçi listesi, özel fiyat seviyeleri ve iletişimler iç CRM verisidir.
+
+    // 81 İl Tedarikçi Veritabanı (suppliers)
     match /suppliers/{supplierId} {
-      allow read, write: if isAdmin();
+      allow read: if isTmAnyStaff();
+      allow create, update: if isTmSuperAdmin() || isTmOperations() || isTmSales();
+      allow delete: if isTmSuperAdmin();
     }
-    
-    // Mekânlar (venues)
-    // Ziyaretçiler salon ve otel kataloğunu görüntüleyebilir.
+
+    // Mekân ve Oteller (venues)
     match /venues/{venueId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isTmSuperAdmin() || isTmOperations() || isTmSales();
+      allow delete: if isTmSuperAdmin();
     }
-    
-    // SEO Sayfaları (seo_pages)
+
+    // Programmatic SEO Sayfaları (seo_pages)
     match /seo_pages/{pageId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isTmSuperAdmin() || isTmSales();
+      allow delete: if isTmSuperAdmin();
     }
-    
-    // Yönlendirmeler (redirects)
+
+    // 301 / 302 Yönlendirmeler (redirects)
     match /redirects/{redirectId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isTmSuperAdmin();
     }
-    
+
+    // Sistem Ayarları (settings)
+    // Yalnızca genel iletişim yapılandırması (general_config) ve bağlantı testi (connection_probe) herkese açıktır.
+    // Bildirim sırları (notification_secrets) ve güvenlik ayarları yalnızca superadmin tarafından okunabilir/yazılabilir.
+    match /settings/{settingId} {
+      allow get: if settingId in ['general_config', 'connection_probe'] || isTmAnyStaff();
+      allow list: if isTmAnyStaff();
+      allow write: if isTmSuperAdmin();
+    }
+
+    match /notification_secrets/{secretId} {
+      allow read, write: if isTmSuperAdmin();
+    }
+
     // Bildirim Günlükleri (notification_logs)
     match /notification_logs/{logId} {
-      allow create, read, update, delete: if isAdmin();
+      allow read: if isTmAnyStaff();
+      allow create: if isTmWriteStaff() || (
+        request.resource.data.leadId is string
+        && request.resource.data.eventType in ['new_lead', 'customer_response']
+      );
+      allow update, delete: if isTmSuperAdmin();
     }
+
+    // İşlem Geçmişi / Denetim Günlüğü (audit_logs) — Değiştirilemez ve silinemez
+    match /audit_logs/{logId} {
+      allow read: if isTmAnyStaff();
+      allow create: if isTmWriteStaff() || (
+        request.resource.data.module == 'customer_portal'
+        && request.resource.data.action in ['customer_approved', 'customer_revision_requested']
+      );
+      allow update, delete: if false;
+    }
+
+    // BEGIN Corner Gayrimenkul scoped rules
+    function isCornerAdmin() {
+      return request.auth != null && (
+        ('cornerSuperAdmin' in request.auth.token && request.auth.token.cornerSuperAdmin == true)
+        || ('email' in request.auth.token && 'email_verified' in request.auth.token
+          && request.auth.token.email_verified == true
+          && request.auth.token.email.lower() == 'cornergayrimenkul001@gmail.com')
+      );
+    }
+
+    function validCornerListing(data, listingId) {
+      return data.keys().hasAll([
+        'id', 'slug', 'title', 'description', 'fullDescription', 'type', 'category',
+        'price', 'currency', 'ilce', 'ilceSlug', 'mahalle', 'mahalleSlug', 'address',
+        'netArea', 'grossArea', 'buildingAge', 'floor', 'heating', 'balcony', 'site',
+        'images', 'features', 'agent', 'createdAt', 'updatedAt', 'status'
+      ]) && data.keys().hasOnly([
+        'id', 'slug', 'title', 'description', 'fullDescription', 'type', 'category',
+        'price', 'currency', 'ilce', 'ilceSlug', 'mahalle', 'mahalleSlug', 'address',
+        'netArea', 'grossArea', 'buildingAge', 'floor', 'heating', 'balcony', 'site',
+        'images', 'features', 'agent', 'createdAt', 'updatedAt', 'status', 'roomCount',
+        'totalFloors', 'siteName', 'featured', 'seoTitle', 'seoDescription',
+        'zoning', 'deedStatus', 'parcelInfo', 'kaks', 'gabari', 'occupancy'
+      ]) && data.id == listingId
+        && (!('zoning' in data) || (data.zoning is string && data.zoning.size() <= 100))
+        && (!('deedStatus' in data) || (data.deedStatus is string && data.deedStatus.size() <= 100))
+        && (!('parcelInfo' in data) || (data.parcelInfo is string && data.parcelInfo.size() <= 100))
+        && (!('kaks' in data) || (data.kaks is string && data.kaks.size() <= 30))
+        && (!('gabari' in data) || (data.gabari is string && data.gabari.size() <= 30))
+        && (!('occupancy' in data) || (data.occupancy is string && data.occupancy.size() <= 100))
+        && data.slug is string && data.slug.size() <= 220 && data.slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$')
+        && data.title is string && data.title.size() >= 3 && data.title.size() <= 180
+        && data.description is string && data.description.size() <= 500
+        && data.fullDescription is list && data.fullDescription.size() <= 30
+        && data.type in ['satilik', 'kiralik']
+        && data.category in ['daire', 'villa', 'arsa', 'isyeri', 'dukkan', 'ofis']
+        && data.status in ['published', 'draft', 'archived']
+        && data.price is number && data.price >= 0 && data.price <= 1000000000000
+        && data.currency is string && data.currency.size() <= 10
+        && data.ilce is string && data.ilce.size() > 0 && data.ilce.size() <= 80
+        && data.ilceSlug in ['aladag', 'ceyhan', 'cukurova', 'feke', 'imamoglu', 'karaisali', 'karatas', 'kozan', 'pozanti', 'saimbeyli', 'saricam', 'seyhan', 'tufanbeyli', 'yumurtalik', 'yuregir']
+        && data.mahalle is string && data.mahalle.size() <= 120
+        && data.mahalleSlug is string && (data.mahalleSlug == '' || data.mahalleSlug.matches('^[a-z0-9]+(-[a-z0-9]+)*$'))
+        && data.address is string && data.address.size() <= 500
+        && data.netArea is number && data.netArea >= 0 && data.netArea <= 100000000
+        && data.grossArea is number && data.grossArea >= data.netArea && data.grossArea <= 100000000
+        && data.buildingAge is string && data.buildingAge.size() <= 60
+        && data.floor is string && data.floor is string && data.floor.size() <= 60
+        && data.heating is string && data.heating.size() <= 100
+        && data.balcony is bool && data.site is bool
+        && data.images is list && data.images.size() <= 24
+        && data.features is list && data.features.size() <= 60
+        && data.agent is map && data.agent.keys().hasAll(['name', 'title', 'whatsapp'])
+        && data.agent.keys().hasOnly(['name', 'title', 'whatsapp', 'image'])
+        && data.agent.name is string && data.agent.name.size() > 0 && data.agent.name.size() <= 100
+        && data.agent.title is string && data.agent.title.size() > 0 && data.agent.title.size() <= 150
+        && data.agent.whatsapp == '905335487801'
+        && data.createdAt is string && data.updatedAt is string
+        && (data.status != 'published' || (
+          data.price > 0 && data.netArea > 0 && data.grossArea > 0
+          && data.title.size() >= 8 && data.mahalle.size() > 0 && data.mahalleSlug.size() > 0 && data.address.size() > 0
+          && data.description.size() >= 20 && data.fullDescription.size() > 0
+          && data.images.size() > 0 && data.images[0] is string
+          && data.images[0].matches('https?://.*')
+        ));
+    }
+
+    match /corner_property_listings/{listingId} {
+      allow read: if resource.data.status == 'published' || isCornerAdmin();
+      allow create: if isCornerAdmin() && validCornerListing(request.resource.data, listingId)
+        && getAfter(/databases/$(database)/documents/corner_property_listing_slugs/$(request.resource.data.slug)).data.listingId == listingId;
+      allow update: if isCornerAdmin() && validCornerListing(request.resource.data, listingId)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && getAfter(/databases/$(database)/documents/corner_property_listing_slugs/$(request.resource.data.slug)).data.listingId == listingId;
+      allow delete: if isCornerAdmin();
+    }
+
+    match /corner_property_listing_slugs/{slug} {
+      allow read, delete: if isCornerAdmin();
+      allow create, update: if isCornerAdmin()
+        && request.resource.data.keys().hasOnly(['listingId'])
+        && request.resource.data.listingId is string
+        && getAfter(/databases/$(database)/documents/corner_property_listings/$(request.resource.data.listingId)).data.slug == slug;
+    }
+
+    match /corner_contact_messages/{messageId} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'phone', 'message', 'source', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['name', 'email', 'phone', 'message', 'source', 'status', 'createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.email is string && request.resource.data.email.size() >= 5 && request.resource.data.email.size() <= 255
+        && request.resource.data.phone is string && request.resource.data.phone.size() >= 10 && request.resource.data.phone.size() <= 20
+        && request.resource.data.message is string && request.resource.data.message.size() >= 10 && request.resource.data.message.size() <= 2000
+        && request.resource.data.source is string && request.resource.data.source.size() <= 60
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if isCornerAdmin();
+      allow update: if isCornerAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['new', 'read', 'archived'];
+    }
+    // END Corner Gayrimenkul scoped rules
   }
 }

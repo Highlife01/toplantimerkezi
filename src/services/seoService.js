@@ -1,11 +1,13 @@
+import { SUPPORTED_LANGUAGES, LANGUAGE_MAP } from '../data/i18nData';
+
 export const DEFAULT_SEO_CONFIG = {
   domain: 'https://www.toplantimerkezi.com.tr',
   siteName: 'Toplantı Merkezi',
   legalName: 'Toplantı Merkezi Kurumsal Organizasyon A.Ş.',
   defaultTitle: 'Toplantı Merkezi | Kurumsal Organizasyon & Toplantı Çözümleri',
-  defaultDesc: 'Bayi toplantılarından şirket organizasyonlarına, kamu toplantılarından kurumsal pikniklere kadar tüm süreci profesyonel ekibimizle planlıyor, koordine ediyor ve yönetiyoruz. 81 ilde tek merkezden hizmet.',
+  defaultDesc: 'Bayi toplantılarından şirket organizasyonlarına, kamu toplantılarından kurumsal pikniklere kadar tüm süreci profesyonel ekibimizle planlıyor, koordine ediyor ve yönetiyoruz. 81 ilde ve 15 dilde tek merkezden kurumsal hizmet.',
   defaultOgImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
-  defaultKeywords: 'toplantı organizasyonu, bayi toplantısı, bayi toplantısı organizasyonu, şirket toplantısı, kurumsal organizasyon, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, şirket pikniği, lansman organizasyonu, kamu organizasyonu, protokol organizasyonu, 81 il organizasyon, MICE Türkiye',
+  defaultKeywords: 'toplantı organizasyonu, bayi toplantısı, bayi toplantısı organizasyonu, şirket toplantısı, kurumsal organizasyon, kurumsal etkinlik, kongre organizasyonu, kurumsal piknik, şirket pikniği, lansman organizasyonu, kamu organizasyonu, protokol organizasyonu, 81 il organizasyon, MICE Türkiye, 15 dilde simultane tercüme, ingilizce rusça almanca italyanca ispanyolca çince hintçe hindistanca arapça farsça fransızca azerbaycanca japonca korece felemenkçe kongre organizasyonu',
   geo: {
     region: 'TR-34',
     placename: 'Levent, Beşiktaş, İstanbul, Türkiye',
@@ -37,25 +39,57 @@ export const updatePageSeo = ({
   howTo,
   itemList,
   geo,
+  language = 'tr',
   speakableSelectors = ['h1', '[data-geo-answer="true"]', 'p.overview-text'],
   robots = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
 }) => {
-  if (typeof document === 'undefined') return;
-
-  const isNoIndex = robots.includes('noindex');
-
-  const resolvedCanonical = canonicalUrl || (
+  const currentPath =
     typeof window !== 'undefined'
-      ? `${DEFAULT_SEO_CONFIG.domain}${window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, '')}`
-      : DEFAULT_SEO_CONFIG.domain
+      ? (window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, ''))
+      : '/';
+
+  const activeLangMeta = LANGUAGE_MAP[language] || LANGUAGE_MAP.tr;
+
+  const cloudOverride =
+    typeof window !== 'undefined' && window.__TM_SEO_OVERRIDES__
+      ? window.__TM_SEO_OVERRIDES__[currentPath]
+      : null;
+
+  const effectiveRobots =
+    cloudOverride && cloudOverride.isIndexed === false
+      ? 'noindex, nofollow'
+      : robots;
+
+  const isNoIndex = effectiveRobots.includes('noindex');
+
+  let candidateCanonical = (cloudOverride && cloudOverride.canonicalUrl) || canonicalUrl || (
+    typeof window !== 'undefined'
+      ? `${DEFAULT_SEO_CONFIG.domain}${currentPath === '/' ? '/' : currentPath}`
+      : `${DEFAULT_SEO_CONFIG.domain}/`
   );
 
-  const finalTitle = title
-    ? (title.includes('Toplantı Merkezi') ? title : `${title} | Toplantı Merkezi`)
+  if (!candidateCanonical.startsWith('http')) {
+    candidateCanonical = `${DEFAULT_SEO_CONFIG.domain}${candidateCanonical.startsWith('/') ? '' : '/'}${candidateCanonical}`;
+  }
+
+  // Alt sayfalara yanlışlıkla ana sayfa canonical URL'si uygulanmasını kesin olarak engelle
+  if (
+    currentPath !== '/' &&
+    (candidateCanonical === DEFAULT_SEO_CONFIG.domain ||
+      candidateCanonical === `${DEFAULT_SEO_CONFIG.domain}/`)
+  ) {
+    candidateCanonical = `${DEFAULT_SEO_CONFIG.domain}${currentPath}`;
+  }
+
+  const resolvedCanonical = candidateCanonical;
+
+  const rawTitle = (cloudOverride && cloudOverride.title) || title;
+  const finalTitle = rawTitle
+    ? (rawTitle.includes('Toplantı Merkezi') ? rawTitle : `${rawTitle} | Toplantı Merkezi`)
     : DEFAULT_SEO_CONFIG.defaultTitle;
-  const finalDesc = description || DEFAULT_SEO_CONFIG.defaultDesc;
+  const finalDesc = (cloudOverride && cloudOverride.metaDesc) || description || DEFAULT_SEO_CONFIG.defaultDesc;
   const finalOgImage = ogImage || DEFAULT_SEO_CONFIG.defaultOgImage;
-  const finalKeywords = keywords || DEFAULT_SEO_CONFIG.defaultKeywords;
+  const finalKeywords = keywords || activeLangMeta.seoKeywords || DEFAULT_SEO_CONFIG.defaultKeywords;
 
   // 1. Document Title
   document.title = finalTitle;
@@ -76,9 +110,9 @@ export const updatePageSeo = ({
   setMeta('name', 'title', finalTitle);
   setMeta('name', 'description', finalDesc);
   setMeta('name', 'keywords', finalKeywords);
-  setMeta('name', 'robots', robots);
-  setMeta('name', 'googlebot', robots);
-  setMeta('name', 'bingbot', robots);
+  setMeta('name', 'robots', effectiveRobots);
+  setMeta('name', 'googlebot', effectiveRobots);
+  setMeta('name', 'bingbot', effectiveRobots);
   setMeta('name', 'author', DEFAULT_SEO_CONFIG.legalName);
   setMeta('name', 'rating', 'General');
   setMeta('name', 'revisit-after', '7 days');
@@ -87,14 +121,14 @@ export const updatePageSeo = ({
   setMeta('name', 'dc.title', finalTitle);
   setMeta('name', 'dc.description', finalDesc);
   setMeta('name', 'dc.publisher', DEFAULT_SEO_CONFIG.legalName);
-  setMeta('name', 'dc.language', 'tr');
+  setMeta('name', 'dc.language', activeLangMeta.code || 'tr');
   setMeta('name', 'citation_title', finalTitle);
   setMeta('name', 'citation_author', DEFAULT_SEO_CONFIG.siteName);
   setMeta('name', 'citation_publisher', DEFAULT_SEO_CONFIG.legalName);
   setMeta('name', 'citation_public_url', resolvedCanonical);
-  setMeta('name', 'citation_language', 'tr');
+  setMeta('name', 'citation_language', activeLangMeta.code || 'tr');
 
-  // 3. Canonical & Hreflang Links
+  // 3. Canonical & 15-Language Hreflang Matrix
   const setLinkTag = (rel, href, extraAttrs = {}) => {
     const selectorParts = [`link[rel="${rel}"]`];
     Object.entries(extraAttrs).forEach(([k, v]) => {
@@ -116,12 +150,26 @@ export const updatePageSeo = ({
   };
 
   setLinkTag('canonical', resolvedCanonical);
-  setLinkTag('alternate', resolvedCanonical, { hreflang: 'tr-TR' });
-  setLinkTag('alternate', resolvedCanonical, { hreflang: 'x-default' });
+
+  const isRootOrIntlHub =
+    currentPath === '/' ||
+    SUPPORTED_LANGUAGES.some((l) => l.path === currentPath);
+
+  if (isRootOrIntlHub) {
+    SUPPORTED_LANGUAGES.forEach((l) => {
+      const langHref = `${DEFAULT_SEO_CONFIG.domain}${l.path === '/' ? '/' : l.path}`;
+      setLinkTag('alternate', langHref, { hreflang: l.hreflang });
+      setLinkTag('alternate', langHref, { hreflang: l.code });
+    });
+    setLinkTag('alternate', `${DEFAULT_SEO_CONFIG.domain}/`, { hreflang: 'x-default' });
+  } else {
+    setLinkTag('alternate', resolvedCanonical, { hreflang: 'tr-TR' });
+    setLinkTag('alternate', resolvedCanonical, { hreflang: 'x-default' });
+  }
 
   // 4. OpenGraph & Social Tags
   setMeta('property', 'og:type', ogType);
-  setMeta('property', 'og:locale', 'tr_TR');
+  setMeta('property', 'og:locale', activeLangMeta.ogLocale || 'tr_TR');
   setMeta('property', 'og:site_name', DEFAULT_SEO_CONFIG.siteName);
   setMeta('property', 'og:url', resolvedCanonical);
   setMeta('property', 'og:title', finalTitle);
@@ -176,7 +224,7 @@ export const updatePageSeo = ({
     url: resolvedCanonical,
     name: finalTitle,
     description: finalDesc,
-    inLanguage: 'tr-TR',
+    inLanguage: activeLangMeta.hreflang || 'tr-TR',
     isPartOf: {
       '@type': 'WebSite',
       '@id': `${DEFAULT_SEO_CONFIG.domain}/#website`,
@@ -366,3 +414,29 @@ export const updatePageSeo = ({
     document.head.appendChild(script);
   });
 };
+
+export const updatePageMeta = ({
+  title,
+  description,
+  canonicalPath,
+  canonicalUrl,
+  noindex = false,
+  ...rest
+} = {}) => {
+  const resolvedCanonical =
+    canonicalUrl ||
+    (canonicalPath
+      ? `${DEFAULT_SEO_CONFIG.domain}${canonicalPath.startsWith('/') ? '' : '/'}${canonicalPath}`
+      : undefined);
+
+  return updatePageSeo({
+    title,
+    description,
+    canonicalUrl: resolvedCanonical,
+    robots: noindex
+      ? 'noindex, nofollow'
+      : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    ...rest
+  });
+};
+

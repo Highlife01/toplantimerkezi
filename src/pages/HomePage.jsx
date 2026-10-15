@@ -21,6 +21,10 @@ export default function HomePage({ onOpenQuoteModal }) {
         a: 'Toplantı Merkezi; B2B bayi toplantısı, şirket toplantısı, kongre ve konferans, kurumsal piknik, lansman ve kamu protokol organizasyonlarını tek merkezden, anahtar teslim olarak 81 ilde yönetir.'
       },
       {
+        q: 'Uluslararası organizasyonlarda hangi dillerde simultane tercüme ve MICE hizmeti sunuyorsunuz?',
+        a: 'Türkçe, İngilizce, Rusça, Almanca, İtalyanca, İspanyolca, Çince, Hintçe (Hindistanca), Arapça, Farsça, Fransızca, Azerbaycanca, Japonca, Korece ve Felemenkçe olmak üzere toplam 15 dilde özel B2B MICE masası, ISO 4043 ses yalıtımlı simultane tercüme kabini ve yeminli konferans tercümanı hizmeti sunuyoruz.'
+      },
+      {
         q: 'Kurumsal organizasyon için ne kadar sürede bütçe teklifi alabilirim?',
         a: 'Platformumuz üzerinden talebinizi ilettikten sonra 2 saat içinde detaylı salon alternatifleri, 3D sahne tasarımı ve kalem maliyet dökümünü içeren resmi PDF teklif dosyanız iletilir.'
       },
@@ -35,8 +39,8 @@ export default function HomePage({ onOpenQuoteModal }) {
     ];
 
     updatePageSeo({
-      title: "Türkiye'nin Her Yerinde Kurumsal Organizasyon Çözümleri",
-      description: "Bayi toplantılarından şirket organizasyonlarına, kamu toplantılarından kurumsal pikniklere kadar tüm süreci profesyonel ekibimizle planlıyor, koordine ediyor ve yönetiyoruz. 81 ilde tek merkezden kurumsal hizmet.",
+      title: "Türkiye'nin Her Yerinde Kurumsal Organizasyon Çözümleri | 81 İl & 15 Dil MICE",
+      description: "Bayi toplantılarından şirket organizasyonlarına, uluslararası kongrelerden kurumsal pikniklere kadar tüm süreci profesyonel ekibimizle planlıyor, koordine ediyor ve yönetiyoruz. 81 ilde ve 15 dilde tek merkezden kurumsal hizmet.",
       canonicalUrl: "https://www.toplantimerkezi.com.tr/",
       faqs: homeFaqs,
       schemaJson: {
@@ -44,6 +48,7 @@ export default function HomePage({ onOpenQuoteModal }) {
         "@type": "WebSite",
         "name": "Toplantı Merkezi",
         "url": "https://www.toplantimerkezi.com.tr",
+        "inLanguage": ["tr-TR", "en", "ru-RU", "de-DE", "it-IT", "es-ES", "zh-CN", "hi-IN", "ar-SA", "fa-IR", "fr-FR", "az-AZ", "ja-JP", "ko-KR", "nl-NL"],
         "potentialAction": {
           "@type": "SearchAction",
           "target": "https://www.toplantimerkezi.com.tr/mekanlar?q={search_term_string}",
