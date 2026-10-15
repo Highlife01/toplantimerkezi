@@ -21,6 +21,7 @@ import { storageService } from '../../services/storageService';
 import { SUPPLIER_CATEGORIES } from '../../data/suppliersData';
 import { VENUE_TYPES } from '../../data/venuesData';
 import { ALL_81_CITIES } from '../../data/citiesData';
+import { SUPPORTED_LANGUAGES } from '../../data/i18nData';
 
 export function SuppliersModule({
   suppliers = [],
@@ -626,6 +627,7 @@ export function VenuesModule({
     hallTheater: '',
     hallBanquet: '',
     hallClassroom: '',
+    interpretationLanguages: [],
     image: ''
   });
 
@@ -679,6 +681,7 @@ export function VenuesModule({
             .map((s) => s.trim())
             .filter(Boolean),
           halls,
+          interpretationLanguages: venueForm.interpretationLanguages,
           image: venueForm.image
         },
         userProfile
@@ -883,6 +886,15 @@ export function VenuesModule({
                     <strong>Erişilebilirlik:</strong> {venue.accessibility}
                   </div>
                 )}
+
+                <div className="mt-2 text-[11px] text-slate-600">
+                  <strong>Simultane Tercüme Dilleri:</strong>{' '}
+                  {Array.isArray(venue.interpretationLanguages) && venue.interpretationLanguages.length > 0
+                    ? venue.interpretationLanguages
+                        .map((c) => SUPPORTED_LANGUAGES.find((l) => l.code === c)?.name || c)
+                        .join(', ')
+                    : 'Teyit edilmedi'}
+                </div>
               </div>
 
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
@@ -1051,6 +1063,45 @@ export function VenuesModule({
                     onChange={(e) => setVenueForm({ ...venueForm, hallClassroom: e.target.value })}
                     className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300"
                   />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <label className="block font-bold text-slate-700 mb-1">
+                  Simultane Tercüme Verilebilen Diller (Yalnızca Tesisten Yazılı Teyit Varsa)
+                </label>
+                <p className="text-[11px] text-slate-500 mb-2">
+                  Teyit edilmeyen dilleri işaretlemeyin. Boş bırakılırsa mekân kartında tercüme bilgisi gösterilmez.
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {SUPPORTED_LANGUAGES.map((l) => {
+                    const checked = venueForm.interpretationLanguages.includes(l.code);
+                    return (
+                      <label
+                        key={l.code}
+                        className={`px-2.5 py-1 rounded-lg border cursor-pointer font-semibold select-none ${
+                          checked
+                            ? 'bg-emerald-50 border-emerald-400 text-emerald-900'
+                            : 'bg-white border-slate-300 text-slate-700'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="mr-1.5 align-middle"
+                          checked={checked}
+                          onChange={() =>
+                            setVenueForm({
+                              ...venueForm,
+                              interpretationLanguages: checked
+                                ? venueForm.interpretationLanguages.filter((c) => c !== l.code)
+                                : [...venueForm.interpretationLanguages, l.code]
+                            })
+                          }
+                        />
+                        {l.flag} {l.name}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 

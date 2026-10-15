@@ -1417,6 +1417,12 @@ export const storageService = {
       accessibility: String(venueData.accessibility || '').trim(),
       technicalGear: Array.isArray(venueData.technicalGear) ? venueData.technicalGear : [],
       halls: Array.isArray(venueData.halls) ? venueData.halls : [],
+      // Yalnızca tesisten teyit edilmiş ve desteklenen dil kodları saklanır
+      interpretationLanguages: Array.isArray(venueData.interpretationLanguages)
+        ? Array.from(new Set(
+            venueData.interpretationLanguages.filter(c => SUPPORTED_LANGUAGES.some(l => l.code === c))
+          ))
+        : [],
       images: Array.isArray(venueData.images) ? venueData.images : (venueData.image ? [venueData.image] : []),
       image: venueData.image || (Array.isArray(venueData.images) && venueData.images[0]) || '',
       availabilityRecords: Array.isArray(venueData.availabilityRecords) ? venueData.availabilityRecords : [],

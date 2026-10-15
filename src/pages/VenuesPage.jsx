@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { VENUES } from '../data/venuesData';
 import {
   SUPPORTED_LANGUAGES,
+  LANGUAGE_MAP,
   matchLanguageFromQuery,
   searchMultiLanguageCatalog,
   normalizeMultiLangText
@@ -10,6 +11,7 @@ import {
 import SectionTitle from '../components/common/SectionTitle';
 import UrgentEventBanner from '../components/common/UrgentEventBanner';
 import { updatePageSeo } from '../services/seoService';
+import { storageService } from '../services/storageService';
 import {
   Building, MapPin, Users, Filter, Search,
   Sparkles, ArrowRight, Star, CheckCircle2, ChevronDown, Bot, Globe, Languages
@@ -36,6 +38,29 @@ export default function VenuesPage({ onOpenQuoteModal }) {
   const [capacityFilter, setCapacityFilter] = useState('Tümü');
   const [selectedLang, setSelectedLang] = useState(initialLang);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [cloudVenues, setCloudVenues] = useState([]);
+
+  // Admin panelinde doğrulanarak girilen mekânlar (herkese açık okuma); hata olursa sabit liste ile devam edilir
+  useEffect(() => {
+    let cancelled = false;
+    storageService
+      .fetchVenuesFromCloud()
+      .then((list) => {
+        if (!cancelled && Array.isArray(list)) setCloudVenues(list);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const allVenues = useMemo(() => {
+    const cloudById = new Map(cloudVenues.map((v) => [v.id, v]));
+    const staticMerged = VENUES.map((v) => (cloudById.has(v.id) ? { ...v, ...cloudById.get(v.id) } : v));
+    const staticIds = new Set(VENUES.map((v) => v.id));
+    const cloudOnly = cloudVenues.filter((v) => !staticIds.has(v.id) && v.name && v.city);
+    return [...staticMerged, ...cloudOnly];
+  }, [cloudVenues]);
 
   useEffect(() => {
     const qParam = searchParams.get('q');
@@ -87,6 +112,11 @@ export default function VenuesPage({ onOpenQuoteModal }) {
     );
   }, [searchQuery, selectedLang]);
 
+  // Gerçek mekan verisinde en az bir kayıtta tercüme dili tanımlıysa dil filtresi mekanları eler
+  const hasVenueLanguageData = allVenues.some(
+    v => Array.isArray(v.interpretationLanguages) && v.interpretationLanguages.length > 0
+  );
+
   const filteredVenues = useMemo(() => {
     const qNorm = normalizeMultiLangText(searchQuery);
     const isLanguageOnlySearch = matchedLanguagesFromQuery.length > 0 && matchedLanguagesFromQuery.some(l =>
@@ -95,7 +125,7 @@ export default function VenuesPage({ onOpenQuoteModal }) {
       (l.searchAliases || []).some(a => normalizeMultiLangText(a) === qNorm)
     );
 
-    return VENUES.filter(venue => {
+    return allVenues.filter(venue => {
       const matchCity = selectedCity === 'Tümü' || venue.city.toLowerCase() === selectedCity.toLowerCase();
       const matchType = selectedType === 'Tümü' || venue.venueType === selectedType;
 
@@ -105,9 +135,12 @@ export default function VenuesPage({ onOpenQuoteModal }) {
       else if (capacityFilter === '500-1500') matchCap = venue.capacity > 500 && venue.capacity <= 1500;
       else if (capacityFilter === '1500+') matchCap = venue.capacity > 1500;
 
-      // Dil filtresi: Tüm 5 yıldızlı kongre merkezleri ve MICE otelleri 15 dil ISO 4043 simultane tercüme kabin desteğine sahiptir
-      const supportedVenueLangs = venue.supportedLanguages || SUPPORTED_LANGUAGES.map(l => l.code);
-      const matchLang = selectedLang === 'Tümü' || supportedVenueLangs.includes(selectedLang);
+      // Dil filtresi yalnızca mekan kaydında doğrulanmış tercüme dili (interpretationLanguages) varsa mekanları eler.
+      // Veri yoksa mekanlar uydurma bir dil bilgisiyle elenmez; dil seçimi portal ve çözüm sonuçlarını daraltır.
+      const matchLang =
+        selectedLang === 'Tümü' ||
+        !hasVenueLanguageData ||
+        (Array.isArray(venue.interpretationLanguages) && venue.interpretationLanguages.includes(selectedLang));
 
       if (!qNorm || isLanguageOnlySearch) {
         return matchCity && matchType && matchCap && matchLang;
@@ -135,9 +168,9 @@ export default function VenuesPage({ onOpenQuoteModal }) {
         normalizeMultiLangText(venue.description).includes(qNorm) ||
         (venue.technicalGear || []).some(g => normalizeMultiLangText(g).includes(qNorm));
 
-      return matchCity && matchType && matchCap && matchLang && (directTextHit || multiLangCityHit || matchedLanguagesFromQuery.length > 0);
+      return matchCity && matchType && matchCap && matchLang && (directTextHit || multiLangCityHit);
     });
-  }, [selectedCity, selectedType, capacityFilter, selectedLang, searchQuery, matchedLanguagesFromQuery]);
+  }, [allVenues, selectedCity, selectedType, capacityFilter, selectedLang, searchQuery, matchedLanguagesFromQuery, hasVenueLanguageData]);
 
   const handleLanguageChipClick = (code) => {
     const nextLang = selectedLang === code ? 'Tümü' : code;
@@ -300,6 +333,13 @@ export default function VenuesPage({ onOpenQuoteModal }) {
                   Aktif Dil Filtresi: {SUPPORTED_LANGUAGES.find(l => l.code === selectedLang)?.name} ({SUPPORTED_LANGUAGES.find(l => l.code === selectedLang)?.nativeName})
                 </span>
               )}
+              {selectedLang !== 'Tümü' && (
+                <span className="text-[11px] text-slate-500">
+                  {hasVenueLanguageData
+                    ? 'Yalnızca bu dilde simultane tercümesi tesisten teyit edilmiş mekânlar listelenir.'
+                    : 'Mekânlar için tercüme dili teyidi henüz girilmediği için mekân listesi dile göre daraltılmaz.'}
+                </span>
+              )}
             </div>
             {(selectedCity !== 'Tümü' || selectedType !== 'Tümü' || capacityFilter !== 'Tümü' || selectedLang !== 'Tümü' || searchQuery !== '') && (
               <button
@@ -410,11 +450,17 @@ export default function VenuesPage({ onOpenQuoteModal }) {
             >
               {/* Image & Capacity Badge */}
               <div className="relative h-56 overflow-hidden">
-                <img
-                  src={venue.image}
-                  alt={venue.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {venue.image ? (
+                  <img
+                    src={venue.image}
+                    alt={venue.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
+                    <Building size={40} />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent"></div>
 
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-amber-400 text-xs font-bold flex items-center gap-1.5 shadow-md">
@@ -422,10 +468,12 @@ export default function VenuesPage({ onOpenQuoteModal }) {
                   <span>{venue.city} / {venue.district}</span>
                 </div>
 
-                <div className="absolute bottom-3 right-4 px-3 py-1 rounded-lg bg-white/95 border border-slate-200 text-slate-900 text-xs font-bold flex items-center gap-1 shadow-sm">
-                  <Users size={13} className="text-amber-600" />
-                  <span>Maks. {venue.capacity.toLocaleString('tr-TR')} Kişi</span>
-                </div>
+                {venue.capacity ? (
+                  <div className="absolute bottom-3 right-4 px-3 py-1 rounded-lg bg-white/95 border border-slate-200 text-slate-900 text-xs font-bold flex items-center gap-1 shadow-sm">
+                    <Users size={13} className="text-amber-600" />
+                    <span>Maks. {Number(venue.capacity).toLocaleString('tr-TR')} Kişi</span>
+                  </div>
+                ) : null}
               </div>
 
               {/* Body */}
@@ -433,10 +481,17 @@ export default function VenuesPage({ onOpenQuoteModal }) {
                 <div>
                   <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
                     <span className="text-amber-700 font-bold">{venue.venueType}</span>
-                    <span className="flex items-center gap-1 text-amber-500 font-bold">
-                      <Star size={13} className="fill-current" />
-                      {venue.rating}
-                    </span>
+                    {venue.rating ? (
+                      <span className="flex items-center gap-1 text-amber-500 font-bold">
+                        <Star size={13} className="fill-current" />
+                        {venue.rating}
+                      </span>
+                    ) : venue.starRating ? (
+                      <span className="flex items-center gap-1 text-amber-500 font-bold">
+                        <Star size={13} className="fill-current" />
+                        {venue.starRating} Yıldız
+                      </span>
+                    ) : null}
                   </div>
 
                   <h3 className="text-lg font-bold text-slate-900 group-hover:text-amber-700 transition font-display mb-2">
@@ -448,22 +503,34 @@ export default function VenuesPage({ onOpenQuoteModal }) {
                   </p>
 
                   <div className="space-y-1.5 text-xs text-slate-500 border-t border-slate-100 pt-3">
-                    <div className="flex items-center justify-between">
-                      <span>Salon Sayısı:</span>
-                      <span className="text-slate-900 font-semibold">{venue.salonCount} Salon</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Otopark:</span>
-                      <span className="text-slate-900 font-semibold">{venue.parking}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Teknik Altyapı:</span>
-                      <span className="text-amber-700 font-semibold">{venue.technicalGear[0]}, {venue.technicalGear[1]}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Simultane Tercüme:</span>
-                      <span className="text-emerald-700 font-semibold">15 Dil ISO 4043 Kabin</span>
-                    </div>
+                    {venue.salonCount ? (
+                      <div className="flex items-center justify-between">
+                        <span>Salon Sayısı:</span>
+                        <span className="text-slate-900 font-semibold">{venue.salonCount} Salon</span>
+                      </div>
+                    ) : null}
+                    {venue.parking ? (
+                      <div className="flex items-center justify-between">
+                        <span>Otopark:</span>
+                        <span className="text-slate-900 font-semibold">{venue.parking}</span>
+                      </div>
+                    ) : null}
+                    {Array.isArray(venue.technicalGear) && venue.technicalGear.length > 0 ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="shrink-0">Teknik Altyapı:</span>
+                        <span className="text-amber-700 font-semibold text-right">
+                          {venue.technicalGear.slice(0, 2).join(', ')}
+                        </span>
+                      </div>
+                    ) : null}
+                    {Array.isArray(venue.interpretationLanguages) && venue.interpretationLanguages.length > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span>Simultane Tercüme:</span>
+                        <span className="text-emerald-700 font-semibold">
+                          {venue.interpretationLanguages.map(c => LANGUAGE_MAP[c]?.nativeName || c).join(', ')}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

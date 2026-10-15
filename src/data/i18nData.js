@@ -1690,21 +1690,21 @@ export function normalizeMultiLangText(str = '') {
  */
 export function matchLanguageFromQuery(rawQuery = '') {
   const q = normalizeMultiLangText(rawQuery);
-  if (!q) return [];
+  if (q.length < 2) return [];
   return SUPPORTED_LANGUAGES.filter((lang) => {
-    const haystack = [
-      lang.code,
-      lang.name,
-      lang.trName,
-      lang.nativeName,
-      lang.regionLabel,
-      lang.seoKeywords,
-      ...(lang.searchAliases || [])
-    ]
+    if (normalizeMultiLangText(lang.code) === q) return true;
+    const tokens = [lang.name, lang.trName, lang.nativeName, ...(lang.searchAliases || [])]
       .filter(Boolean)
       .map((s) => normalizeMultiLangText(s))
-      .join(' ');
-    return haystack.includes(q);
+      .filter((s) => s.length >= 2);
+    return tokens.some((tok) => {
+      if (tok === q) return true;
+      // Tek kelimelik ad/takma adlarda önek eşleşmesi (örn. "rus" -> "rusça"); çok kelimeli ifadelerde yalnızca ifade başı
+      if (q.length >= 3 && tok.startsWith(q)) return true;
+      // Sorgu, ad/takma adı tam olarak içeriyorsa (örn. "rusça kongre" -> "rusça")
+      if (tok.length >= 3 && !tok.includes(' ') && q.split(/\s+/).includes(tok)) return true;
+      return false;
+    });
   });
 }
 

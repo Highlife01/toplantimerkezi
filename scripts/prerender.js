@@ -431,6 +431,10 @@ async function runPrerender() {
       a: 'Toplantı Merkezi; B2B bayi toplantısı, şirket toplantısı, kongre ve konferans, kurumsal piknik, lansman ve kamu protokol organizasyonlarını tek merkezden, anahtar teslim olarak 81 ilde yönetir.'
     },
     {
+      q: 'Uluslararası organizasyonlarda hangi dillerde simultane tercüme ve MICE hizmeti sunuyorsunuz?',
+      a: 'Türkçe, İngilizce, Rusça, Almanca, İtalyanca, İspanyolca, Çince, Hintçe (Hindistanca), Arapça, Farsça, Fransızca, Azerbaycanca, Japonca, Korece ve Felemenkçe olmak üzere toplam 15 dilde özel B2B MICE masası, ISO 4043 ses yalıtımlı simultane tercüme kabini ve yeminli konferans tercümanı hizmeti sunuyoruz.'
+    },
+    {
       q: 'Kurumsal organizasyon için ne kadar sürede bütçe teklifi alabilirim?',
       a: 'Platformumuz üzerinden talebinizi ilettikten sonra 2 saat içinde detaylı salon alternatifleri, 3D sahne tasarımı ve kalem maliyet dökümünü içeren resmi PDF teklif dosyanız iletilir.'
     },
@@ -1076,7 +1080,7 @@ async function runPrerender() {
     { route: '/organizasyonlar', title: 'Kurumsal Organizasyon Kataloğu', desc: 'Bayi toplantısı, kongre, kurumsal piknik, lansman ve gala organizasyonları.' },
     { route: '/hizmetler', title: 'Teknik Hizmetler & Prodüksiyon Modülleri', desc: 'Ses-ışık, dev LED ekran, sahne dekor, mekân planlama ve catering çözümleri.' },
     { route: '/sehirler', title: '81 İl MICE ve Toplantı Rehberi', desc: 'Türkiye\'nin 81 ilindeki kongre otelleri ve toplantı salonları kataloğu.' },
-    { route: '/mekanlar', title: 'Toplantı ve Kongre Salonu Arama Motoru', desc: 'Kapasite, tavan yüksekliği ve teknik özelliklere göre toplantı salonu filtreleme.' },
+    { route: '/mekanlar', title: 'Toplantı ve Kongre Mekânları | 15 Dilde Salon & MICE Arama Motoru', desc: '5 yıldızlı kongre otelleri, toplantı salonları ve 15 dilde simultane tercüme altyapılı MICE alanları. Dile, şehre ve kapasiteye göre filtreleyin.' },
     { route: '/projeler', title: 'Gerçekleşen Kurumsal Projeler ve Referanslar', desc: 'Holdingler ve kurumsal şirketler için hayata geçirilen başarılı organizasyonlar.' },
     { route: '/blog', title: 'Kurumsal Organizasyon Bilgi Merkezi & Blog', desc: 'Bayi toplantısı rehberleri, maliyet tabloları ve kurumsal etkinlik planlama ipuçları.' },
     { route: '/teklif-al', title: '7 Adımda Kurumsal Organizasyon Teklifi Al', desc: 'Talebinizi iletin, 2 saat içinde salon alternatifleri ve kalem maliyetli resmi PDF teklifinizi alın.' },
@@ -1211,6 +1215,8 @@ async function runPrerender() {
       aiDirectAnswer: content.aiDirectAnswer,
       lang: langMeta.code,
       hreflangCode: langMeta.hreflang,
+      ogLocale: langMeta.ogLocale,
+      keywords: langMeta.seoKeywords,
       dir: langMeta.dir || 'ltr',
       includeGlobalHreflang: true,
       breadcrumbs: [
