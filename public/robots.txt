@@ -1,63 +1,92 @@
 # Toplantı Merkezi (www.toplantimerkezi.com.tr)
-# Türkiye Geneli Kurumsal Organizasyon & Toplantı Yönetim Platformu
+# Türkiye Geneli 15 Dilde Kurumsal Organizasyon & Toplantı Yönetim Platformu
 
 User-agent: *
 Allow: /
+Allow: /en
+Allow: /ru
+Allow: /de
+Allow: /it
+Allow: /es
+Allow: /zh
+Allow: /hi
+Allow: /ar
+Allow: /fa
+Allow: /fr
+Allow: /az
+Allow: /ja
+Allow: /ko
+Allow: /nl
 Disallow: /admin
 Disallow: /admin/*
+Disallow: /teklif-takip
+Disallow: /teklif-takip/*
 
 # AI Search & Retrieval Bots (GEO - Generative Engine Optimization)
 User-agent: GPTBot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: anthropic-ai
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: Applebot-Extended
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: Meta-ExternalAgent
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: Amazonbot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: DuckAssistBot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 User-agent: YouBot
 Allow: /
 Disallow: /admin
+Disallow: /teklif-takip
 
 # Host, Sitemaps & LLM Context Standards
 Host: https://www.toplantimerkezi.com.tr
@@ -73,3 +102,4 @@ Sitemap: https://www.toplantimerkezi.com.tr/sitemap-blog.xml
 # LLM Direct Knowledge Context
 # https://www.toplantimerkezi.com.tr/llms.txt
 # https://www.toplantimerkezi.com.tr/llms-full.txt
+

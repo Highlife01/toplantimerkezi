@@ -123,3 +123,21 @@ Toplantı Merkezi (Toplantı Merkezi Kurumsal Organizasyon A.Ş.), Türkiye gene
 - Sanayi, Fabrika & Üretim: https://www.toplantimerkezi.com.tr/sektorler/sanayi-ve-uretim
 - Bankacılık, Finans & Sigorta: https://www.toplantimerkezi.com.tr/sektorler/bankacilik-ve-finans
 - Teknoloji & Yazılım: https://www.toplantimerkezi.com.tr/sektorler/teknoloji-ve-yazilim
+
+### 15 Dilde Uluslararası Kurumsal MICE Portalları (Multi-Language Hreflang Portals)
+- Türkçe (TR - Merkez Portal): https://www.toplantimerkezi.com.tr/
+- English (EN): https://www.toplantimerkezi.com.tr/en
+- Русский / Rusça (RU): https://www.toplantimerkezi.com.tr/ru
+- Deutsch / Almanca (DE): https://www.toplantimerkezi.com.tr/de
+- Italiano / İtalyanca (IT): https://www.toplantimerkezi.com.tr/it
+- Español / İspanyolca (ES): https://www.toplantimerkezi.com.tr/es
+- 中文 / Çince (ZH): https://www.toplantimerkezi.com.tr/zh
+- हिन्दी / Hindistanca (HI): https://www.toplantimerkezi.com.tr/hi
+- العربية / Arapça (AR - RTL): https://www.toplantimerkezi.com.tr/ar
+- فارسی / Farsça (FA - RTL): https://www.toplantimerkezi.com.tr/fa
+- Français / Fransızca (FR): https://www.toplantimerkezi.com.tr/fr
+- Azərbaycan / Azerbaycan Türkçesi (AZ): https://www.toplantimerkezi.com.tr/az
+- 日本語 / Japonca (JA): https://www.toplantimerkezi.com.tr/ja
+- 한국어 / Korece (KO): https://www.toplantimerkezi.com.tr/ko
+- Nederlands / Felemenkçe (NL): https://www.toplantimerkezi.com.tr/nl
+

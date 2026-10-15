@@ -607,7 +607,8 @@ export function VenuesModule({
   const [availabilityModalVenue, setAvailabilityModalVenue] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const [venueForm, setVenueForm] = useState({
+  const initialVenueForm = {
+    id: '',
     name: '',
     city: 'İstanbul',
     district: '',
@@ -627,9 +628,53 @@ export function VenuesModule({
     hallTheater: '',
     hallBanquet: '',
     hallClassroom: '',
+    existingHalls: [],
+    availabilityRecords: [],
     interpretationLanguages: [],
     image: ''
-  });
+  };
+
+  const [venueForm, setVenueForm] = useState(initialVenueForm);
+
+  const openNewVenueModal = () => {
+    setVenueForm(initialVenueForm);
+    setShowVenueModal(true);
+  };
+
+  const openEditVenueModal = (venue) => {
+    const firstHall = Array.isArray(venue.halls) && venue.halls.length > 0 ? venue.halls[0] : null;
+    setVenueForm({
+      id: venue.id || '',
+      name: venue.name || '',
+      city: venue.city || 'İstanbul',
+      district: venue.district || '',
+      address: venue.address || '',
+      venueType: venue.venueType || VENUE_TYPES[0],
+      starRating: venue.starRating ? String(venue.starRating) : '',
+      verificationSource: venue.verificationSource || 'Resmi Kurum / Tesis Teknik Şartnamesi',
+      verifiedAt: venue.verifiedAt || new Date().toISOString().split('T')[0],
+      contactName: venue.contactName || '',
+      phone: venue.phone || '',
+      email: venue.email || '',
+      capacity: venue.capacity ? String(venue.capacity) : '',
+      salonCount: venue.salonCount ? String(venue.salonCount) : '',
+      accessibility: venue.accessibility || 'Engelli erişimine uygun asansör, rampa ve fuaye alanı',
+      technicalGearText: Array.isArray(venue.technicalGear)
+        ? venue.technicalGear.join(', ')
+        : 'Ana Sahne, Fuaye Alanı, Yük Asansörü, Jeneratör',
+      hallName: firstHall?.name || 'Ana Kongre Salonu',
+      hallTheater: firstHall?.theater ? String(firstHall.theater) : '',
+      hallBanquet: firstHall?.banquet ? String(firstHall.banquet) : '',
+      hallClassroom: firstHall?.classroom ? String(firstHall.classroom) : '',
+      existingHalls: Array.isArray(venue.halls) ? venue.halls : [],
+      availabilityRecords: Array.isArray(venue.availabilityRecords) ? venue.availabilityRecords : [],
+      interpretationLanguages: Array.isArray(venue.interpretationLanguages)
+        ? venue.interpretationLanguages
+        : [],
+      image: venue.image || ''
+    });
+    setShowVenueModal(true);
+  };
 
   const [availForm, setAvailForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -650,18 +695,20 @@ export function VenuesModule({
     if (!rolePerms?.canManageSuppliersVenues) return;
     setSaving(true);
     try {
-      const halls = venueForm.hallName
-        ? [
-            {
-              name: venueForm.hallName,
-              theater: venueForm.hallTheater ? Number(venueForm.hallTheater) : null,
-              banquet: venueForm.hallBanquet ? Number(venueForm.hallBanquet) : null,
-              classroom: venueForm.hallClassroom ? Number(venueForm.hallClassroom) : null
-            }
-          ]
-        : [];
+      const updatedFirstHall = venueForm.hallName
+        ? {
+            name: venueForm.hallName,
+            theater: venueForm.hallTheater ? Number(venueForm.hallTheater) : null,
+            banquet: venueForm.hallBanquet ? Number(venueForm.hallBanquet) : null,
+            classroom: venueForm.hallClassroom ? Number(venueForm.hallClassroom) : null
+          }
+        : null;
+      const halls = updatedFirstHall
+        ? [updatedFirstHall, ...(venueForm.existingHalls || []).slice(1)]
+        : venueForm.existingHalls || [];
       await storageService.saveVenueToCloud(
         {
+          id: venueForm.id || undefined,
           name: venueForm.name,
           city: venueForm.city,
           district: venueForm.district,
@@ -681,6 +728,7 @@ export function VenuesModule({
             .map((s) => s.trim())
             .filter(Boolean),
           halls,
+          availabilityRecords: venueForm.availabilityRecords || [],
           interpretationLanguages: venueForm.interpretationLanguages,
           image: venueForm.image
         },
@@ -688,7 +736,12 @@ export function VenuesModule({
       );
       setShowVenueModal(false);
       if (onVenuesMutated) onVenuesMutated();
-      onNotify('success', 'Doğrulanmış mekân/kongre merkezi kaydı Firestore üzerine eklendi.');
+      onNotify(
+        'success',
+        venueForm.id
+          ? 'Mekân ve teyitli tercüme dili bilgileri Firestore üzerine güncellendi.'
+          : 'Doğrulanmış mekân/kongre merkezi kaydı Firestore üzerine eklendi.'
+      );
     } catch (err) {
       onNotify('error', err?.message || 'Mekân kaydedilemedi.');
     } finally {
@@ -765,7 +818,7 @@ export function VenuesModule({
         {rolePerms?.canManageSuppliersVenues && (
           <button
             type="button"
-            onClick={() => setShowVenueModal(true)}
+            onClick={openNewVenueModal}
             className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4 text-amber-400" />
@@ -808,6 +861,15 @@ export function VenuesModule({
                       {venue.address ? ` — ${venue.address}` : ''}
                     </div>
                   </div>
+                  {rolePerms?.canManageSuppliersVenues && (
+                    <button
+                      type="button"
+                      onClick={() => openEditVenueModal(venue)}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-[11px] font-bold shrink-0"
+                    >
+                      Düzenle / Tercüme Dili
+                    </button>
+                  )}
                 </div>
 
                 {/* Müsaitlik Durumu (Teyit Kaydı Yoksa Asla "Müsait" Göstermez) */}
@@ -910,13 +972,15 @@ export function VenuesModule({
         })}
       </div>
 
-      {/* Yeni Mekân Ekleme Modalı */}
+      {/* Yeni / Düzenle Mekân Modalı */}
       {showVenueModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full p-6 text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
               <h3 className="text-base font-extrabold text-slate-900">
-                Doğrulanmış Mekân / Kongre Oteli Ekle
+                {venueForm.id
+                  ? `${venueForm.name} — Mekân & Tercüme Dili Düzenle`
+                  : 'Doğrulanmış Mekân / Kongre Oteli Ekle'}
               </h3>
               <button
                 type="button"
